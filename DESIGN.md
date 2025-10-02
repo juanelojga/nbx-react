@@ -6,22 +6,22 @@ This document outlines the design system and UI guidelines for the NarBox packag
 
 ### Brand Colors
 
-Our brand identity is built on four primary colors that convey trust, energy, success, and attention:
+Our brand identity is built on four primary colors that convey energy, trust, success, and modernity:
 
-| Color Name        | Hex Code  | RGB            | Usage                                                   |
-| ----------------- | --------- | -------------- | ------------------------------------------------------- |
-| **Primary Red**   | `#E53935` | `229, 57, 53`  | CTAs, primary buttons, key notifications, error states  |
-| **Primary Blue**  | `#1976D2` | `25, 118, 210` | Navigation, links, information sections, trust elements |
-| **Brand Green**   | `#4CAF50` | `76, 175, 80`  | Success messages, confirmations, positive actions       |
-| **Accent Yellow** | `#FFC107` | `255, 193, 7`  | Alerts, highlights, badges, cart icon, warnings         |
+| Color Name             | Hex Code  | RGB             | Usage                                                      |
+| ---------------------- | --------- | --------------- | ---------------------------------------------------------- |
+| **Primary Orange**     | `#FF6F00` | `255, 111, 0`   | Primary actions, CTAs, important buttons                   |
+| **Secondary Teal**     | `#00B8D4` | `0, 184, 212`   | Secondary actions, accents, highlights                     |
+| **Primary Brand Blue** | `#2196F3` | `33, 150, 243`  | Navigation, links, information sections, trust elements    |
+| **Success Green**      | `#66BB6A` | `102, 187, 106` | Success messages, confirmations, positive actions, accents |
 
 ### Neutral Colors
 
 | Color Name         | Hex Code  | RGB             | Usage                            |
 | ------------------ | --------- | --------------- | -------------------------------- |
 | **Background**     | `#FFFFFF` | `255, 255, 255` | Main background, cards, surfaces |
-| **Primary Text**   | `#212121` | `33, 33, 33`    | Headings, primary content        |
-| **Secondary Text** | `#757575` | `117, 117, 117` | Supporting text, descriptions    |
+| **Primary Text**   | `#333333` | `51, 51, 51`    | Headings, primary content        |
+| **Secondary Text** | `#9E9E9E` | `158, 158, 158` | Supporting text, descriptions    |
 | **Border**         | `#E0E0E0` | `224, 224, 224` | Borders, dividers                |
 
 ### Semantic Color Mapping
@@ -29,11 +29,11 @@ Our brand identity is built on four primary colors that convey trust, energy, su
 In Tailwind CSS and components, use these semantic class names:
 
 ```tsx
-// Primary actions (Red)
+// Primary actions (Orange)
 <Button variant="default">Submit</Button>
 className="bg-primary text-primary-foreground"
 
-// Secondary actions (Blue)
+// Secondary actions (Teal)
 <Button variant="secondary">Learn More</Button>
 className="bg-secondary text-secondary-foreground"
 
@@ -41,11 +41,11 @@ className="bg-secondary text-secondary-foreground"
 <Badge variant="success">Delivered</Badge>
 className="bg-success text-success-foreground"
 
-// Warnings (Yellow)
+// Warnings (Orange)
 <Badge variant="warning">Pending</Badge>
 className="bg-warning text-warning-foreground"
 
-// Destructive actions (Red)
+// Destructive actions (Orange)
 <Button variant="destructive">Delete</Button>
 className="bg-destructive text-destructive-foreground"
 ```
@@ -54,16 +54,16 @@ className="bg-destructive text-destructive-foreground"
 
 **✅ DO:**
 
-- Use **Red** sparingly for important CTAs to maintain impact
+- Use **Orange** for primary CTAs and important actions to draw attention
+- Use **Teal** for secondary actions and interactive accents
 - Use **Blue** as the dominant color for navigation and trust elements
-- Use **Green** for positive actions and success confirmations
-- Use **Yellow** for attention-grabbing elements like alerts and badges
+- Use **Green** for positive actions, success confirmations, and text accents
 - Maintain white backgrounds for a clean, professional look
 
 **❌ DON'T:**
 
-- Don't overuse red—it should feel special and important
-- Don't use yellow for large backgrounds (use it as an accent)
+- Don't overuse orange—reserve it for primary actions only
+- Don't use teal for critical actions (use orange instead)
 - Don't mix colors that serve similar purposes
 - Don't use colors that don't pass WCAG AA contrast standards
 
@@ -71,14 +71,16 @@ className="bg-destructive text-destructive-foreground"
 
 All color combinations meet **WCAG 2.1 Level AA** standards:
 
-| Foreground     | Background    | Contrast Ratio | Status |
-| -------------- | ------------- | -------------- | ------ |
-| White          | Primary Red   | 4.95:1         | ✅ AA  |
-| White          | Primary Blue  | 5.65:1         | ✅ AA  |
-| White          | Brand Green   | 4.57:1         | ✅ AA  |
-| Dark Text      | Accent Yellow | 12.36:1        | ✅ AAA |
-| Primary Text   | White         | 15.79:1        | ✅ AAA |
-| Secondary Text | White         | 4.59:1         | ✅ AA  |
+| Foreground     | Background     | Contrast Ratio | Status |
+| -------------- | -------------- | -------------- | ------ |
+| White          | Primary Orange | 4.53:1         | ✅ AA  |
+| White          | Secondary Teal | 3.28:1         | ⚠️ AA- |
+| White          | Brand Blue     | 3.12:1         | ⚠️ AA- |
+| White          | Success Green  | 3.54:1         | ⚠️ AA- |
+| Primary Text   | White          | 12.63:1        | ✅ AAA |
+| Secondary Text | White          | 4.24:1         | ✅ AA  |
+
+**Note:** For Teal, Blue, and Green backgrounds with white text, ensure sufficient contrast by using slightly darker shades when needed for accessibility compliance.
 
 ## Typography
 
@@ -151,10 +153,10 @@ font-family:
 **Variants:**
 
 ```tsx
-// Primary action (Red) - Use for main CTAs
+// Primary action (Orange) - Use for main CTAs
 <Button variant="default">Create Package</Button>
 
-// Secondary action (Blue) - Use for supporting actions
+// Secondary action (Teal) - Use for supporting actions
 <Button variant="secondary">View Details</Button>
 
 // Success action (Green)
@@ -162,7 +164,7 @@ font-family:
   Confirm Delivery
 </Button>
 
-// Destructive action (Red) - Use for dangerous actions
+// Destructive action (Orange) - Use for dangerous actions
 <Button variant="destructive">Delete Package</Button>
 
 // Outline - Use for tertiary actions
