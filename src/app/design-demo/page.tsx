@@ -37,41 +37,41 @@ export default function DesignDemo() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
-              <CardTitle className="text-sm">Primary Orange</CardTitle>
+              <CardTitle className="text-sm">Brand Green</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-20 bg-primary rounded-md"></div>
-              <p className="mt-2 text-xs text-muted-foreground">#FF6F00</p>
+              <p className="mt-2 text-xs text-muted-foreground">#4CAF50</p>
             </CardContent>
           </Card>
 
           <Card className="border-secondary/20 bg-secondary/5">
             <CardHeader>
-              <CardTitle className="text-sm">Secondary Teal</CardTitle>
+              <CardTitle className="text-sm">Sky Blue</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-20 bg-secondary rounded-md"></div>
-              <p className="mt-2 text-xs text-muted-foreground">#00B8D4</p>
+              <p className="mt-2 text-xs text-muted-foreground">#03A9F4</p>
             </CardContent>
           </Card>
 
-          <Card className="border-success/20 bg-success/5">
+          <Card className="border-warning/20 bg-warning/5">
             <CardHeader>
-              <CardTitle className="text-sm">Success Green</CardTitle>
+              <CardTitle className="text-sm">Soft Orange</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-20 bg-success rounded-md"></div>
-              <p className="mt-2 text-xs text-muted-foreground">#66BB6A</p>
+              <div className="h-20 bg-warning rounded-md"></div>
+              <p className="mt-2 text-xs text-muted-foreground">#FFB300</p>
             </CardContent>
           </Card>
 
-          <Card className="border-blue-500/20 bg-blue-500/5">
+          <Card className="border-blue-700/20 bg-blue-700/5">
             <CardHeader>
-              <CardTitle className="text-sm">Brand Blue</CardTitle>
+              <CardTitle className="text-sm">Deep Blue</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-20 bg-blue-500 rounded-md"></div>
-              <p className="mt-2 text-xs text-muted-foreground">#2196F3</p>
+              <div className="h-20 bg-blue-700 rounded-md"></div>
+              <p className="mt-2 text-xs text-muted-foreground">#1976D2</p>
             </CardContent>
           </Card>
         </div>
@@ -81,15 +81,15 @@ export default function DesignDemo() {
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold">Buttons</h2>
         <div className="flex flex-wrap gap-4">
-          <Button variant="default">Primary (Orange)</Button>
-          <Button variant="secondary">Secondary (Teal)</Button>
+          <Button variant="default">Primary (Green)</Button>
+          <Button variant="secondary">Secondary (Sky Blue)</Button>
           <Button className="bg-success hover:bg-success/90 text-success-foreground">
             Success (Green)
           </Button>
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-            Brand (Blue)
+          <Button className="bg-blue-700 hover:bg-blue-800 text-white">
+            Deep Blue
           </Button>
-          <Button variant="destructive">Destructive</Button>
+          <Button variant="destructive">Destructive (Orange)</Button>
           <Button variant="outline">Outline</Button>
           <Button variant="ghost">Ghost</Button>
         </div>

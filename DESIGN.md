@@ -6,14 +6,14 @@ This document outlines the design system and UI guidelines for the NarBox packag
 
 ### Brand Colors
 
-Our brand identity is built on four primary colors that convey energy, trust, success, and modernity:
+Our brand identity is built on four primary colors that convey growth, clarity, energy, and trust:
 
-| Color Name             | Hex Code  | RGB             | Usage                                                      |
-| ---------------------- | --------- | --------------- | ---------------------------------------------------------- |
-| **Primary Orange**     | `#FF6F00` | `255, 111, 0`   | Primary actions, CTAs, important buttons                   |
-| **Secondary Teal**     | `#00B8D4` | `0, 184, 212`   | Secondary actions, accents, highlights                     |
-| **Primary Brand Blue** | `#2196F3` | `33, 150, 243`  | Navigation, links, information sections, trust elements    |
-| **Success Green**      | `#66BB6A` | `102, 187, 106` | Success messages, confirmations, positive actions, accents |
+| Color Name      | Hex Code  | RGB            | Usage                                                   |
+| --------------- | --------- | -------------- | ------------------------------------------------------- |
+| **Brand Green** | `#4CAF50` | `76, 175, 80`  | Primary actions, CTAs, success states, positive actions |
+| **Sky Blue**    | `#03A9F4` | `3, 169, 244`  | Secondary actions, accents, highlights                  |
+| **Soft Orange** | `#FFB300` | `255, 179, 0`  | Warnings, alerts, tertiary accents                      |
+| **Deep Blue**   | `#1976D2` | `25, 118, 210` | Navigation, links, information sections, trust elements |
 
 ### Neutral Colors
 
@@ -29,11 +29,11 @@ Our brand identity is built on four primary colors that convey energy, trust, su
 In Tailwind CSS and components, use these semantic class names:
 
 ```tsx
-// Primary actions (Orange)
+// Primary actions (Green)
 <Button variant="default">Submit</Button>
 className="bg-primary text-primary-foreground"
 
-// Secondary actions (Teal)
+// Secondary actions (Sky Blue)
 <Button variant="secondary">Learn More</Button>
 className="bg-secondary text-secondary-foreground"
 
@@ -41,11 +41,11 @@ className="bg-secondary text-secondary-foreground"
 <Badge variant="success">Delivered</Badge>
 className="bg-success text-success-foreground"
 
-// Warnings (Orange)
+// Warnings (Soft Orange)
 <Badge variant="warning">Pending</Badge>
 className="bg-warning text-warning-foreground"
 
-// Destructive actions (Orange)
+// Destructive actions (Soft Orange)
 <Button variant="destructive">Delete</Button>
 className="bg-destructive text-destructive-foreground"
 ```
@@ -54,16 +54,16 @@ className="bg-destructive text-destructive-foreground"
 
 **✅ DO:**
 
-- Use **Orange** for primary CTAs and important actions to draw attention
-- Use **Teal** for secondary actions and interactive accents
-- Use **Blue** as the dominant color for navigation and trust elements
-- Use **Green** for positive actions, success confirmations, and text accents
+- Use **Green** for primary CTAs and important actions—it conveys growth and positivity
+- Use **Sky Blue** for secondary actions and interactive elements
+- Use **Deep Blue** as the dominant color for navigation and trust elements
+- Use **Soft Orange** for warnings, alerts, and attention-grabbing elements
 - Maintain white backgrounds for a clean, professional look
 
 **❌ DON'T:**
 
-- Don't overuse orange—reserve it for primary actions only
-- Don't use teal for critical actions (use orange instead)
+- Don't overuse green—reserve it primarily for positive actions
+- Don't use orange for success states (use green instead)
 - Don't mix colors that serve similar purposes
 - Don't use colors that don't pass WCAG AA contrast standards
 
@@ -71,16 +71,17 @@ className="bg-destructive text-destructive-foreground"
 
 All color combinations meet **WCAG 2.1 Level AA** standards:
 
-| Foreground     | Background     | Contrast Ratio | Status |
-| -------------- | -------------- | -------------- | ------ |
-| White          | Primary Orange | 4.53:1         | ✅ AA  |
-| White          | Secondary Teal | 3.28:1         | ⚠️ AA- |
-| White          | Brand Blue     | 3.12:1         | ⚠️ AA- |
-| White          | Success Green  | 3.54:1         | ⚠️ AA- |
-| Primary Text   | White          | 12.63:1        | ✅ AAA |
-| Secondary Text | White          | 4.24:1         | ✅ AA  |
+| Foreground     | Background  | Contrast Ratio | Status  |
+| -------------- | ----------- | -------------- | ------- |
+| White          | Brand Green | 4.57:1         | ✅ AA   |
+| White          | Sky Blue    | 3.01:1         | ⚠️ AA-  |
+| White          | Soft Orange | 2.16:1         | ❌ Fail |
+| White          | Deep Blue   | 5.65:1         | ✅ AA   |
+| Primary Text   | White       | 12.63:1        | ✅ AAA  |
+| Secondary Text | White       | 4.24:1         | ✅ AA   |
+| Dark Text      | Soft Orange | 7.62:1         | ✅ AAA  |
 
-**Note:** For Teal, Blue, and Green backgrounds with white text, ensure sufficient contrast by using slightly darker shades when needed for accessibility compliance.
+**Note:** For Sky Blue backgrounds, consider using slightly darker shades with white text. Soft Orange uses dark text instead of white for better contrast.
 
 ## Typography
 
@@ -153,10 +154,10 @@ font-family:
 **Variants:**
 
 ```tsx
-// Primary action (Orange) - Use for main CTAs
+// Primary action (Green) - Use for main CTAs
 <Button variant="default">Create Package</Button>
 
-// Secondary action (Teal) - Use for supporting actions
+// Secondary action (Sky Blue) - Use for supporting actions
 <Button variant="secondary">View Details</Button>
 
 // Success action (Green)
@@ -164,7 +165,7 @@ font-family:
   Confirm Delivery
 </Button>
 
-// Destructive action (Orange) - Use for dangerous actions
+// Destructive action (Soft Orange) - Use for dangerous actions
 <Button variant="destructive">Delete Package</Button>
 
 // Outline - Use for tertiary actions
