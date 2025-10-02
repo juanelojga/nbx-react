@@ -35,7 +35,9 @@ const authLink = setContext((_, { headers }) => {
 });
 
 // Error Link - global error handling
-const errorLink = onError(({ graphQLErrors, networkError }) => {
+const errorLink = onError((errorResponse) => {
+  const { graphQLErrors, networkError } = errorResponse;
+
   if (graphQLErrors) {
     graphQLErrors.forEach((error) => {
       console.error(
@@ -107,6 +109,3 @@ export function getApolloClient(): ApolloClient<NormalizedCacheObject> {
 
   return apolloClient;
 }
-
-// Export for direct use
-export const client = getApolloClient();
