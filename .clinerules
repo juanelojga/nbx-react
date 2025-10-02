@@ -1,0 +1,34 @@
+# Project Rules for Claude Code
+
+## Code Quality Workflow
+
+After making any code changes, always run these commands in order:
+
+1. `npm run format` - Format code with Prettier
+2. `npm run lint:fix` - Auto-fix ESLint issues
+3. `npm run lint` - Check for remaining lint errors
+
+Report any linting errors or warnings that cannot be auto-fixed.
+
+## Development Standards
+
+- Follow Next.js 15 App Router conventions
+- Use TypeScript strict mode - always type your code properly
+- Follow existing code patterns and conventions in the codebase
+- Use the `@/*` path alias for imports from `src/`
+- Place components in `src/app/` following App Router structure
+- Use Tailwind CSS v4 for styling
+- Prefer server components by default; use "use client" only when necessary
+
+## Code Style
+
+- Double quotes for strings
+- Semicolons required
+- 2-space indentation
+- 80 character line width
+- ES5 trailing commas
+
+## Git Commits
+
+- Pre-commit hooks will automatically format and lint staged files
+- Ensure all changes pass linting before committing
