@@ -9,6 +9,7 @@ export interface User {
   firstName: string;
   lastName: string;
   role: UserRole;
+  isSuperuser: boolean;
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;

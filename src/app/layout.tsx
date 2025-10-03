@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NarBox - Package Management System",
-  description: "Manage and track your packages with NarBox",
+  title: "NarBox - Servicio de Courier",
+  description:
+    "Servicio de courier profesional para el manejo y seguimiento de paquetes",
   icons: {
     icon: "/favicon.ico",
   },

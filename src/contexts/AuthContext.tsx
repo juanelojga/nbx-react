@@ -1,175 +1,249 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { User } from "@/types/user";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useLazyQuery, useMutation } from "@apollo/client";
+import { User, UserRole } from "@/types/user";
+import {
+  LOGIN_MUTATION,
+  type LoginResponse,
+  LOGOUT_MUTATION,
+  REFRESH_TOKEN_MUTATION,
+  type RefreshTokenResponse,
+} from "@/graphql/mutations/auth";
+import {
+  GET_CURRENT_USER,
+  type GetCurrentUserResponse,
+} from "@/graphql/queries/auth";
+import {
+  clearTokens,
+  getAccessToken,
+  isTokenExpired,
+  saveTokens,
+} from "@/lib/auth/tokens";
+import { apolloClient } from "@/lib/apollo/client";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  error: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  refreshToken: () => Promise<void>;
-  getCurrentUser: () => Promise<User | null>;
-  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Token storage utilities
-const TOKEN_KEY = "token";
-const REFRESH_TOKEN_KEY = "refreshToken";
-
-export const getToken = (): string | null => {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
-};
-
-export const setToken = (token: string): void => {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(TOKEN_KEY, token);
-};
-
-export const getRefreshToken = (): string | null => {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
-};
-
-export const setRefreshToken = (token: string): void => {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(REFRESH_TOKEN_KEY, token);
-};
-
-export const clearTokens = (): void => {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
-};
 
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [loginMutation] = useMutation<LoginResponse>(LOGIN_MUTATION);
+  const [refreshTokenMutation] = useMutation<RefreshTokenResponse>(
+    REFRESH_TOKEN_MUTATION
+  );
+  const [logoutMutation] = useMutation(LOGOUT_MUTATION);
+  const [getCurrentUser] =
+    useLazyQuery<GetCurrentUserResponse>(GET_CURRENT_USER);
 
   const isAuthenticated = !!user;
 
-  // Check for existing session on mount
-  useEffect(() => {
-    const initAuth = async () => {
-      const token = getToken();
-      if (token) {
-        await getCurrentUser();
-      } else {
-        setLoading(false);
-      }
+  /**
+   * Map backend user to frontend user type
+   */
+  const mapBackendUserToUser = (
+    backendUser: GetCurrentUserResponse["me"]
+  ): User => {
+    return {
+      id: backendUser.id,
+      email: backendUser.email,
+      firstName: backendUser.firstName,
+      lastName: backendUser.lastName,
+      role: backendUser.isSuperuser ? UserRole.ADMIN : UserRole.CLIENT,
+      isSuperuser: backendUser.isSuperuser,
     };
-
-    initAuth();
-  }, []);
-
-  // Login function - stub implementation
-  const login = async (email: string, password: string): Promise<void> => {
-    setLoading(true);
-    try {
-      // TODO: Implement GraphQL mutation for login
-      console.log("Login called with:", { email, password });
-
-      // Stub implementation - replace with actual GraphQL call
-      // Example response structure:
-      // const response = await loginMutation({ variables: { email, password } });
-      // const { token, refreshToken, user } = response.data.login;
-
-      // For now, just throw an error to indicate not implemented
-      throw new Error("Login not implemented yet");
-
-      // When implemented, should:
-      // setToken(token);
-      // setRefreshToken(refreshToken);
-      // setUser(user);
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
   };
 
-  // Logout function
-  const logout = (): void => {
-    clearTokens();
-    setUser(null);
-    // Redirect to login page
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
-    }
-  };
-
-  // Refresh token function - stub implementation
-  const refreshToken = async (): Promise<void> => {
+  /**
+   * Refresh the access token using the refresh token
+   */
+  const refreshAccessToken = async (): Promise<string | null> => {
     try {
-      const refresh = getRefreshToken();
-      if (!refresh) {
+      const token = getAccessToken();
+      if (!token) {
         throw new Error("No refresh token available");
       }
 
-      // TODO: Implement GraphQL mutation for token refresh
-      console.log("Refresh token called");
+      const { data } = await refreshTokenMutation({
+        variables: { token },
+      });
 
-      // Stub implementation - replace with actual GraphQL call
-      // const response = await refreshTokenMutation({ variables: { refreshToken: refresh } });
-      // const { token } = response.data.refreshToken;
-      // setToken(token);
-
-      throw new Error("Refresh token not implemented yet");
-    } catch (error) {
-      console.error("Refresh token error:", error);
-      logout();
-      throw error;
-    }
-  };
-
-  // Get current user function - stub implementation
-  const getCurrentUser = async (): Promise<User | null> => {
-    setLoading(true);
-    try {
-      const token = getToken();
-      if (!token) {
-        setUser(null);
-        return null;
+      if (data?.refreshToken) {
+        const newAccessToken = data.refreshToken.token;
+        saveTokens(newAccessToken);
+        return newAccessToken;
       }
 
-      // TODO: Implement GraphQL query to fetch current user
-      console.log("Get current user called");
-
-      // Stub implementation - replace with actual GraphQL call
-      // const response = await meQuery();
-      // const currentUser = response.data.me;
-      // setUser(currentUser);
-      // return currentUser;
-
-      throw new Error("Get current user not implemented yet");
-    } catch (error) {
-      console.error("Get current user error:", error);
+      return null;
+    } catch (err) {
+      console.error("Failed to refresh token:", err);
       clearTokens();
       setUser(null);
       return null;
+    }
+  };
+
+  /**
+   * Load user data from the server
+   */
+  const loadUser = async (): Promise<void> => {
+    try {
+      let token = getAccessToken();
+
+      // Check if token exists
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        router.push("/login");
+        return;
+      }
+
+      // Check if token is expired
+      if (isTokenExpired(token)) {
+        // Try to refresh
+        token = await refreshAccessToken();
+        if (!token) {
+          setUser(null);
+          setLoading(false);
+          router.push("/login");
+          return;
+        }
+      }
+
+      // Fetch current user
+      const { data, error: queryError } = await getCurrentUser();
+
+      if (queryError) {
+        throw queryError;
+      }
+
+      if (data?.me) {
+        const user = mapBackendUserToUser(data.me);
+        setUser(user);
+        setError(null);
+      } else {
+        setUser(null);
+        router.push("/login");
+      }
+    } catch (err) {
+      console.error("Failed to load user:", err);
+      clearTokens();
+      setUser(null);
+      setError("Failed to load user session");
+      router.push("/login");
     } finally {
       setLoading(false);
     }
   };
+
+  /**
+   * Login with email and password
+   */
+  const login = async (email: string, password: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data } = await loginMutation({
+        variables: { email, password },
+      });
+
+      if (!data?.tokenAuth) {
+        throw new Error("Invalid response from server");
+      }
+
+      const { token } = data.tokenAuth;
+
+      // Save tokens (using token for both access and refresh for now)
+      saveTokens(token);
+
+      // Fetch current user data
+      const { data: currentUserData } = await getCurrentUser();
+
+      if (!currentUserData?.me) {
+        throw new Error("Failed to fetch user data");
+      }
+
+      const user = mapBackendUserToUser(currentUserData.me);
+
+      // Set user
+      setUser(user);
+
+      // Redirect based on isSuperuser
+      const redirectPath = currentUserData.me.isSuperuser
+        ? "/admin/dashboard"
+        : "/client/dashboard";
+
+      router.push(redirectPath);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Login failed. Please check your credentials.";
+
+      setError(errorMessage);
+      console.error("Login error:", err);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Logout user
+   */
+  const logout = async (): Promise<void> => {
+    try {
+      // Try to revoke token on backend (if supported)
+      await logoutMutation();
+    } catch (err) {
+      console.error("Logout mutation error:", err);
+      // Continue with local logout even if backend fails
+    }
+
+    // Clear local state
+    clearTokens();
+    setUser(null);
+    setError(null);
+
+    if (apolloClient) {
+      // Clear Apollo cache
+      await apolloClient.clearStore();
+    }
+
+    // Redirect to login
+    router.push("/login");
+  };
+
+  // Initialize auth on mount
+  useEffect(() => {
+    loadUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const value: AuthContextType = {
     user,
     loading,
+    error,
     isAuthenticated,
     login,
     logout,
-    refreshToken,
-    getCurrentUser,
-    setUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -2,13 +2,21 @@
 
 import {
   ApolloClient,
-  InMemoryCache,
-  HttpLink,
   from,
+  HttpLink,
+  InMemoryCache,
   NormalizedCacheObject,
+  Observable,
 } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
 import { setContext } from "@apollo/client/link/context";
+import {
+  clearTokens,
+  getAccessToken,
+  isTokenExpired,
+  saveTokens,
+} from "@/lib/auth/tokens";
+import { REFRESH_TOKEN_MUTATION } from "@/graphql/mutations/auth";
 
 // Get the GraphQL API URL from environment variables
 const GRAPHQL_API_URL =
@@ -21,10 +29,38 @@ const httpLink = new HttpLink({
 });
 
 // Auth Link - adds JWT token to headers if available
-const authLink = setContext((_, { headers }) => {
-  // Get token from localStorage (only available on client side)
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+const authLink = setContext(async (_, { headers }) => {
+  let token = getAccessToken();
+
+  // Check if token is expired and refresh if needed
+  if (token && isTokenExpired(token)) {
+    const refreshToken = getAccessToken();
+    if (refreshToken) {
+      try {
+        const response = await fetch(GRAPHQL_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: REFRESH_TOKEN_MUTATION.loc?.source.body,
+            variables: { refreshToken },
+          }),
+        });
+
+        const result = await response.json();
+        if (result.data?.refreshToken) {
+          const newToken = result.data.refreshToken.token;
+          saveTokens(newToken);
+          token = newToken;
+        }
+      } catch (error) {
+        console.error("Token refresh failed:", error);
+        clearTokens();
+        token = null;
+      }
+    }
+  }
 
   return {
     headers: {
@@ -34,34 +70,80 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-// Error Link - global error handling
-const errorLink = onError((errorResponse) => {
-  const { graphQLErrors, networkError } = errorResponse;
+// Error Link - global error handling with retry logic
+const errorLink = onError(
+  ({ graphQLErrors, networkError, operation, forward }) => {
+    if (graphQLErrors) {
+      for (const error of graphQLErrors) {
+        console.error(
+          `[GraphQL error]: Message: ${error.message}, Location: ${JSON.stringify(error.locations)}, Path: ${error.path}`
+        );
 
-  if (graphQLErrors) {
-    graphQLErrors.forEach((error) => {
-      console.error(
-        `[GraphQL error]: Message: ${error.message}, Location: ${JSON.stringify(error.locations)}, Path: ${error.path}`
-      );
+        // Handle authentication errors (401, token expired)
+        if (
+          error.extensions?.code === "UNAUTHENTICATED" ||
+          error.message.includes("Authentication") ||
+          error.message.includes("Signature has expired")
+        ) {
+          // Try to refresh the token
+          const refreshToken = getAccessToken();
+          if (
+            refreshToken &&
+            !operation.operationName?.includes("RefreshToken")
+          ) {
+            return new Observable((observer) => {
+              fetch(GRAPHQL_API_URL, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  query: REFRESH_TOKEN_MUTATION.loc?.source.body,
+                  variables: { refreshToken },
+                }),
+              })
+                .then((response) => response.json())
+                .then((result) => {
+                  if (result.data?.refreshToken) {
+                    const newToken = result.data.refreshToken.token;
+                    saveTokens(newToken);
 
-      // Handle authentication errors
-      if (
-        error.extensions?.code === "UNAUTHENTICATED" ||
-        error.message.includes("Authentication")
-      ) {
-        // Clear token and redirect to login
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("token");
-          window.location.href = "/login";
+                    // Retry the failed request with new token
+                    const subscriber = {
+                      next: observer.next.bind(observer),
+                      error: observer.error.bind(observer),
+                      complete: observer.complete.bind(observer),
+                    };
+
+                    forward(operation).subscribe(subscriber);
+                  } else {
+                    throw new Error("Refresh failed");
+                  }
+                })
+                .catch(() => {
+                  clearTokens();
+                  if (typeof window !== "undefined") {
+                    window.location.href = "/login";
+                  }
+                  observer.error(error);
+                });
+            });
+          } else {
+            // No refresh token available or already trying to refresh
+            clearTokens();
+            if (typeof window !== "undefined") {
+              window.location.href = "/login";
+            }
+          }
         }
       }
-    });
-  }
+    }
 
-  if (networkError) {
-    console.error(`[Network error]: ${networkError}`);
+    if (networkError) {
+      console.error(`[Network error]: ${networkError}`);
+    }
   }
-});
+);
 
 // Create Apollo Client instance
 let apolloClient: ApolloClient<NormalizedCacheObject> | null = null;
@@ -109,3 +191,6 @@ export function getApolloClient(): ApolloClient<NormalizedCacheObject> {
 
   return apolloClient;
 }
+
+// Export the client instance for use in AuthContext
+export { apolloClient };

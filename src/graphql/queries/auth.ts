@@ -1,0 +1,32 @@
+import { gql } from "@apollo/client";
+
+/**
+ * Get current authenticated user query
+ * Note: Verify the query name with backend (me, currentUser, viewer, etc.)
+ */
+export const GET_CURRENT_USER = gql`
+  query GetCurrentUser {
+    me {
+      id
+      email
+      firstName
+      lastName
+      isSuperuser
+    }
+  }
+`;
+
+/**
+ * TypeScript types for query responses
+ */
+export interface BackendUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isSuperuser: boolean;
+}
+
+export interface GetCurrentUserResponse {
+  me: BackendUser;
+}
