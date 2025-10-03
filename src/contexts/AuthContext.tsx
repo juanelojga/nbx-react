@@ -166,17 +166,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error("Invalid response from server");
       }
 
-      const { token, refreshToken, user: userData } = data.tokenAuth;
+      const { token } = data.tokenAuth;
 
-      // Save tokens
-      saveTokens(token, refreshToken);
+      // Save tokens (using token for both access and refresh for now)
+      saveTokens(token, token);
+
+      // Fetch current user data
+      const { data: currentUserData } = await getCurrentUser();
+
+      if (!currentUserData?.me) {
+        throw new Error("Failed to fetch user data");
+      }
+
+      const user = mapBackendUserToUser(currentUserData.me);
 
       // Set user
-      setUser(userData);
+      setUser(user);
 
-      // Redirect based on role
-      const redirectPath =
-        userData.role === "admin" ? "/admin/dashboard" : "/client/dashboard";
+      // Redirect based on isSuperuser
+      const redirectPath = currentUserData.me.isSuperuser
+        ? "/admin/dashboard"
+        : "/client/dashboard";
 
       router.push(redirectPath);
     } catch (err: unknown) {
@@ -210,8 +220,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
     setError(null);
 
-    // Clear Apollo cache
-    await apolloClient.clearStore();
+    if (apolloClient) {
+      // Clear Apollo cache
+      await apolloClient.clearStore();
+    }
 
     // Redirect to login
     router.push("/login");
