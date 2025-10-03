@@ -80,10 +80,12 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
-        <CardDescription>
+    <Card className="w-full shadow-2xl border-border/50 backdrop-blur-sm bg-card/95">
+      <CardHeader className="space-y-2 pb-6">
+        <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          Welcome Back
+        </CardTitle>
+        <CardDescription className="text-center text-base">
           Enter your credentials to access your account
         </CardDescription>
       </CardHeader>
@@ -94,7 +96,7 @@ export default function LoginPage() {
             onClose={() => setFormError(null)}
           />
         )}
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+        <form onSubmit={handleSubmit} className="space-y-5 mt-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -113,7 +115,11 @@ export default function LoginPage() {
               }
             />
             {validationErrors.email && (
-              <p id="email-error" className="text-sm text-red-600">
+              <p
+                id="email-error"
+                className="text-sm text-destructive font-medium flex items-center gap-1 animate-shake"
+              >
+                <span className="text-base">⚠</span>
                 {validationErrors.email}
               </p>
             )}
@@ -123,7 +129,7 @@ export default function LoginPage() {
               <Label htmlFor="password">Password</Label>
               <Link
                 href="/forgot-password"
-                className="text-sm text-[#1976D2] hover:underline"
+                className="text-sm text-secondary hover:text-secondary/80 transition-colors font-medium"
               >
                 Forgot password?
               </Link>
@@ -147,7 +153,11 @@ export default function LoginPage() {
               }
             />
             {validationErrors.password && (
-              <p id="password-error" className="text-sm text-red-600">
+              <p
+                id="password-error"
+                className="text-sm text-destructive font-medium flex items-center gap-1 animate-shake"
+              >
+                <span className="text-base">⚠</span>
                 {validationErrors.password}
               </p>
             )}
@@ -168,15 +178,43 @@ export default function LoginPage() {
           </div>
           <Button
             type="submit"
-            className="w-full bg-[#E53935] hover:bg-[#C62828]"
+            className="w-full relative group overflow-hidden"
             disabled={loading}
+            size="lg"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              {loading ? (
+                <>
+                  <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <span className="group-hover:translate-x-1 transition-transform">
+                    →
+                  </span>
+                </>
+              )}
+            </span>
           </Button>
-          <div className="text-center text-sm text-gray-600">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-[#1976D2] hover:underline">
-              Register
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border/50" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
+          <div className="text-center text-sm">
+            <span className="text-muted-foreground">
+              Don&apos;t have an account?
+            </span>{" "}
+            <Link
+              href="/register"
+              className="text-primary hover:text-primary/80 font-semibold transition-colors"
+            >
+              Create account
             </Link>
           </div>
         </form>

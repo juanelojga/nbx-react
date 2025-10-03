@@ -16,7 +16,7 @@ export function MainLayout({ children, userRole }: MainLayoutProps) {
   const closeSidebar = () => setIsSidebarOpen(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header onMenuClick={toggleSidebar} />
       <div className="flex">
         <Sidebar
@@ -24,7 +24,7 @@ export function MainLayout({ children, userRole }: MainLayoutProps) {
           isOpen={isSidebarOpen}
           onClose={closeSidebar}
         />
-        <main className="flex-1 p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
+        <main className="flex-1 p-6 lg:p-8 max-w-[1600px] mx-auto w-full transition-all duration-200">
           {children}
         </main>
       </div>
