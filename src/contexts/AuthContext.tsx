@@ -211,7 +211,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = async (): Promise<void> => {
     try {
       // Try to revoke token on backend (if supported)
-      await logoutMutation();
+      const refreshToken = getAccessToken();
+      if (refreshToken) {
+        await logoutMutation({
+          variables: { refreshToken },
+        });
+      }
     } catch (err) {
       console.error("Logout mutation error:", err);
       // Continue with local logout even if backend fails
