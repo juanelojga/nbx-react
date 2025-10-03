@@ -23,11 +23,11 @@ const variantStyles = {
 };
 
 const iconVariantStyles = {
-  default: "text-muted-foreground",
-  primary: "text-primary",
-  success: "text-success",
-  warning: "text-warning",
-  destructive: "text-destructive",
+  default: "text-muted-foreground/70",
+  primary: "text-primary/80",
+  success: "text-success/80",
+  warning: "text-warning/80",
+  destructive: "text-destructive/80",
 };
 
 export function StatCard({
@@ -39,26 +39,32 @@ export function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <Card className={cn(variantStyles[variant], className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <Card
+      className={cn(
+        variantStyles[variant],
+        "transition-all duration-200 hover:shadow-xl",
+        className
+      )}
+    >
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+        <CardTitle className="text-sm font-semibold text-muted-foreground">
           {label}
         </CardTitle>
-        {Icon && <Icon className={cn("h-4 w-4", iconVariantStyles[variant])} />}
+        {Icon && <Icon className={cn("h-5 w-5", iconVariantStyles[variant])} />}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-3xl font-bold tracking-tight">{value}</div>
         {trend && (
           <div
             className={cn(
-              "flex items-center gap-1 text-xs",
+              "flex items-center gap-1.5 text-xs font-semibold mt-2",
               trend.isPositive ? "text-success" : "text-destructive"
             )}
           >
             {trend.isPositive ? (
-              <ArrowUp className="h-3 w-3" />
+              <ArrowUp className="h-3.5 w-3.5" />
             ) : (
-              <ArrowDown className="h-3 w-3" />
+              <ArrowDown className="h-3.5 w-3.5" />
             )}
             <span>{Math.abs(trend.value)}%</span>
           </div>
