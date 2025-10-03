@@ -112,6 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (!token) {
         setUser(null);
         setLoading(false);
+        router.push("/login");
         return;
       }
 
@@ -122,6 +123,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (!token) {
           setUser(null);
           setLoading(false);
+          router.push("/login");
           return;
         }
       }
@@ -139,12 +141,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setError(null);
       } else {
         setUser(null);
+        router.push("/login");
       }
     } catch (err) {
       console.error("Failed to load user:", err);
       clearTokens();
       setUser(null);
       setError("Failed to load user session");
+      router.push("/login");
     } finally {
       setLoading(false);
     }

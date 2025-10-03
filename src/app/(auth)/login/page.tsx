@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ErrorAlert } from "@/components/common/ErrorAlert";
 
 export default function LoginPage() {
-  const { login, loading, error } = useAuth();
+  const router = useRouter();
+  const { login, loading, error, user, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -26,6 +28,16 @@ export default function LoginPage() {
     email?: string;
     password?: string;
   }>({});
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const redirectPath = user.isSuperuser
+        ? "/admin/dashboard"
+        : "/client/dashboard";
+      router.push(redirectPath);
+    }
+  }, [isAuthenticated, user, router]);
 
   const validateForm = (): boolean => {
     const errors: { email?: string; password?: string } = {};
