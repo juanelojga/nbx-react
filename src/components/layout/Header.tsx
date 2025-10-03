@@ -63,11 +63,15 @@ export function Header({ onMenuClick }: HeaderProps) {
             >
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-white/20 text-white">
-                  {user ? getInitials(user.name) : "U"}
+                  {user
+                    ? getInitials(`${user.firstName} ${user.lastName}`)
+                    : "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start">
-                <span className="text-sm font-medium">{user?.name}</span>
+                <span className="text-sm font-medium">
+                  {user ? `${user.firstName} ${user.lastName}` : "User"}
+                </span>
                 <Badge
                   variant={user?.role === "admin" ? "destructive" : "secondary"}
                   className="text-xs h-4 px-1"
@@ -80,7 +84,9 @@ export function Header({ onMenuClick }: HeaderProps) {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name}</p>
+                <p className="text-sm font-medium leading-none">
+                  {user ? `${user.firstName} ${user.lastName}` : "User"}
+                </p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email}
                 </p>
@@ -89,7 +95,10 @@ export function Header({ onMenuClick }: HeaderProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem>Account Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className="text-red-600">
+            <DropdownMenuItem
+              onClick={() => logout()}
+              className="text-red-600 cursor-pointer"
+            >
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
