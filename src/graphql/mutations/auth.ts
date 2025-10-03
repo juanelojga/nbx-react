@@ -34,8 +34,8 @@ export const REFRESH_TOKEN_MUTATION = gql`
  * Note: Some backends handle logout client-side only
  */
 export const LOGOUT_MUTATION = gql`
-  mutation Logout($refreshToken: String) {
-    revokeToken(refreshToken: $refreshToken) {
+  mutation Logout {
+    revokeToken {
       revoked
     }
   }
