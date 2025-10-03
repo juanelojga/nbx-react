@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useLazyQuery } from "@apollo/client";
-import { User } from "@/types/user";
+import { User, UserRole } from "@/types/user";
 import {
   LOGIN_MUTATION,
   REFRESH_TOKEN_MUTATION,
@@ -54,6 +54,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     useLazyQuery<GetCurrentUserResponse>(GET_CURRENT_USER);
 
   const isAuthenticated = !!user;
+
+  /**
+   * Map backend user to frontend user type
+   */
+  const mapBackendUserToUser = (
+    backendUser: GetCurrentUserResponse["me"]
+  ): User => {
+    return {
+      id: backendUser.id,
+      email: backendUser.email,
+      firstName: backendUser.firstName,
+      lastName: backendUser.lastName,
+      role: backendUser.isSuperuser ? UserRole.ADMIN : UserRole.CLIENT,
+      isSuperuser: backendUser.isSuperuser,
+    };
+  };
 
   /**
    * Refresh the access token using the refresh token
@@ -118,7 +134,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       if (data?.me) {
-        setUser(data.me);
+        const user = mapBackendUserToUser(data.me);
+        setUser(user);
         setError(null);
       } else {
         setUser(null);

@@ -11,7 +11,7 @@ export const GET_CURRENT_USER = gql`
       email
       firstName
       lastName
-      role
+      isSuperuser
     }
   }
 `;
@@ -19,14 +19,14 @@ export const GET_CURRENT_USER = gql`
 /**
  * TypeScript types for query responses
  */
-export interface User {
+export interface BackendUser {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  role: "admin" | "client";
+  isSuperuser: boolean;
 }
 
 export interface GetCurrentUserResponse {
-  me: User;
+  me: BackendUser;
 }
