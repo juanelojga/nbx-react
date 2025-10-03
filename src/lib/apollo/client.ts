@@ -2,21 +2,19 @@
 
 import {
   ApolloClient,
-  InMemoryCache,
-  HttpLink,
   from,
+  HttpLink,
+  InMemoryCache,
   NormalizedCacheObject,
-  ApolloLink,
   Observable,
 } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
 import { setContext } from "@apollo/client/link/context";
 import {
-  getAccessToken,
-  getRefreshToken,
-  saveTokens,
   clearTokens,
+  getAccessToken,
   isTokenExpired,
+  saveTokens,
 } from "@/lib/auth/tokens";
 import { REFRESH_TOKEN_MUTATION } from "@/graphql/mutations/auth";
 
@@ -36,7 +34,7 @@ const authLink = setContext(async (_, { headers }) => {
 
   // Check if token is expired and refresh if needed
   if (token && isTokenExpired(token)) {
-    const refreshToken = getRefreshToken();
+    const refreshToken = getAccessToken();
     if (refreshToken) {
       try {
         const response = await fetch(GRAPHQL_API_URL, {
@@ -53,8 +51,7 @@ const authLink = setContext(async (_, { headers }) => {
         const result = await response.json();
         if (result.data?.refreshToken) {
           const newToken = result.data.refreshToken.token;
-          const newRefreshToken = result.data.refreshToken.refreshToken;
-          saveTokens(newToken, newRefreshToken);
+          saveTokens(newToken);
           token = newToken;
         }
       } catch (error) {
@@ -89,7 +86,7 @@ const errorLink = onError(
           error.message.includes("Signature has expired")
         ) {
           // Try to refresh the token
-          const refreshToken = getRefreshToken();
+          const refreshToken = getAccessToken();
           if (
             refreshToken &&
             !operation.operationName?.includes("RefreshToken")
@@ -109,9 +106,7 @@ const errorLink = onError(
                 .then((result) => {
                   if (result.data?.refreshToken) {
                     const newToken = result.data.refreshToken.token;
-                    const newRefreshToken =
-                      result.data.refreshToken.refreshToken;
-                    saveTokens(newToken, newRefreshToken);
+                    saveTokens(newToken);
 
                     // Retry the failed request with new token
                     const subscriber = {

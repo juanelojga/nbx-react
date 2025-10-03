@@ -1,10 +1,10 @@
 import { jwtDecode } from "jwt-decode";
 
 const ACCESS_TOKEN_KEY = "narbox_access_token";
-const REFRESH_TOKEN_KEY = "narbox_refresh_token";
 
 interface DecodedToken {
   exp: number;
+
   [key: string]: unknown;
 }
 
@@ -16,12 +16,11 @@ const isBrowser = typeof window !== "undefined";
 /**
  * Save authentication tokens to localStorage
  */
-export function saveTokens(accessToken: string, refreshToken: string): void {
+export function saveTokens(accessToken: string): void {
   if (!isBrowser) return;
 
   try {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   } catch (error) {
     console.error("Failed to save tokens:", error);
   }
@@ -42,20 +41,6 @@ export function getAccessToken(): string | null {
 }
 
 /**
- * Get refresh token from localStorage
- */
-export function getRefreshToken(): string | null {
-  if (!isBrowser) return null;
-
-  try {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
-  } catch (error) {
-    console.error("Failed to get refresh token:", error);
-    return null;
-  }
-}
-
-/**
  * Clear all authentication tokens from localStorage
  */
 export function clearTokens(): void {
@@ -63,7 +48,6 @@ export function clearTokens(): void {
 
   try {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
   } catch (error) {
     console.error("Failed to clear tokens:", error);
   }

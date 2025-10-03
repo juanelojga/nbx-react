@@ -1,14 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { User, UserRole } from "@/types/user";
 import {
   LOGIN_MUTATION,
-  REFRESH_TOKEN_MUTATION,
-  LOGOUT_MUTATION,
   type LoginResponse,
+  LOGOUT_MUTATION,
+  REFRESH_TOKEN_MUTATION,
   type RefreshTokenResponse,
 } from "@/graphql/mutations/auth";
 import {
@@ -16,11 +16,10 @@ import {
   type GetCurrentUserResponse,
 } from "@/graphql/queries/auth";
 import {
-  saveTokens,
-  getAccessToken,
-  getRefreshToken as getStoredRefreshToken,
   clearTokens,
+  getAccessToken,
   isTokenExpired,
+  saveTokens,
 } from "@/lib/auth/tokens";
 import { apolloClient } from "@/lib/apollo/client";
 
@@ -76,19 +75,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const refreshAccessToken = async (): Promise<string | null> => {
     try {
-      const refreshToken = getStoredRefreshToken();
-      if (!refreshToken) {
+      const token = getAccessToken();
+      if (!token) {
         throw new Error("No refresh token available");
       }
 
       const { data } = await refreshTokenMutation({
-        variables: { refreshToken },
+        variables: { token },
       });
 
       if (data?.refreshToken) {
         const newAccessToken = data.refreshToken.token;
-        const newRefreshToken = data.refreshToken.refreshToken;
-        saveTokens(newAccessToken, newRefreshToken);
+        saveTokens(newAccessToken);
         return newAccessToken;
       }
 
@@ -173,7 +171,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { token } = data.tokenAuth;
 
       // Save tokens (using token for both access and refresh for now)
-      saveTokens(token, token);
+      saveTokens(token);
 
       // Fetch current user data
       const { data: currentUserData } = await getCurrentUser();

@@ -20,8 +20,8 @@ export const LOGIN_MUTATION = gql`
  * Note: Verify the mutation name with backend (refreshToken, refreshJwtToken, etc.)
  */
 export const REFRESH_TOKEN_MUTATION = gql`
-  mutation RefreshToken($refreshToken: String!) {
-    refreshToken(refreshToken: $refreshToken) {
+  mutation RefreshToken($token: String!) {
+    refreshToken(token: $token) {
       token
       refreshToken
       payload
@@ -59,7 +59,12 @@ export interface LoginResponse {
 export interface RefreshTokenResponse {
   refreshToken: {
     token: string;
-    refreshToken: string;
+    refreshExpiresIn: number;
+    user: {
+      email: string;
+      exp: number;
+      origIat: number;
+    };
   };
 }
 
