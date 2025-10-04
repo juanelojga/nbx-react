@@ -34,31 +34,28 @@ const authLink = setContext(async (_, { headers }) => {
 
   // Check if token is expired and refresh if needed
   if (token && isTokenExpired(token)) {
-    const refreshToken = getAccessToken();
-    if (refreshToken) {
-      try {
-        const response = await fetch(GRAPHQL_API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            query: REFRESH_TOKEN_MUTATION.loc?.source.body,
-            variables: { refreshToken },
-          }),
-        });
+    try {
+      const response = await fetch(GRAPHQL_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: REFRESH_TOKEN_MUTATION.loc?.source.body,
+          variables: { token },
+        }),
+      });
 
-        const result = await response.json();
-        if (result.data?.refreshToken) {
-          const newToken = result.data.refreshToken.token;
-          saveTokens(newToken);
-          token = newToken;
-        }
-      } catch (error) {
-        console.error("Token refresh failed:", error);
-        clearTokens();
-        token = null;
+      const result = await response.json();
+      if (result.data?.refreshToken) {
+        const newToken = result.data.refreshToken.token;
+        saveTokens(newToken);
+        token = newToken;
       }
+    } catch (error) {
+      console.error("Token refresh failed:", error);
+      clearTokens();
+      token = null;
     }
   }
 
