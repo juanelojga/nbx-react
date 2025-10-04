@@ -1,0 +1,11 @@
+{
+  "common": {
+    "language": "Language",
+    "spanish": "Spanish",
+    "english": "English"
+  },
+  "home": {
+    "title": "Welcome",
+    "description": "This is a Next.js application with multi-language support using next-intl"
+  }
+}

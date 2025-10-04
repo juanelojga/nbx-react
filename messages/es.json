@@ -1,0 +1,11 @@
+{
+  "common": {
+    "language": "Idioma",
+    "spanish": "Español",
+    "english": "Inglés"
+  },
+  "home": {
+    "title": "Bienvenido",
+    "description": "Esta es una aplicación Next.js con soporte multiidioma usando next-intl"
+  }
+}
