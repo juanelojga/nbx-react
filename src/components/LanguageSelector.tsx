@@ -15,19 +15,10 @@ export default function LanguageSelector() {
     if (newLocale === locale) return;
 
     startTransition(() => {
-      // Remove current locale from pathname if it exists
-      const pathnameWithoutLocale = pathname.replace(/^\/(es|en)/, "") || "/";
-
-      // Build new path with new locale
-      const newPath =
-        newLocale === "es"
-          ? pathnameWithoutLocale
-          : `/${newLocale}${pathnameWithoutLocale}`;
-
       // Set cookie for locale preference
       document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
 
-      router.push(newPath);
+      // Refresh to apply new locale
       router.refresh();
     });
   };

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,8 +17,10 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { ErrorAlert } from "@/components/common/ErrorAlert";
+import LanguageSelector from "@/components/LanguageSelector";
 
 export default function LoginPage() {
+  const t = useTranslations("login");
   const router = useRouter();
   const { login, loading, error, user, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
@@ -44,16 +47,16 @@ export default function LoginPage() {
 
     // Email validation
     if (!email) {
-      errors.email = "Email is required";
+      errors.email = t("emailRequired");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = "Please enter a valid email address";
+      errors.email = t("emailInvalid");
     }
 
     // Password validation
     if (!password) {
-      errors.password = "Password is required";
+      errors.password = t("passwordRequired");
     } else if (password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
+      errors.password = t("passwordMinLength");
     }
 
     setValidationErrors(errors);
@@ -73,20 +76,21 @@ export default function LoginPage() {
       await login(email, password);
       // Redirect is handled in AuthContext
     } catch (err) {
-      setFormError(
-        err instanceof Error ? err.message : "Login failed. Please try again."
-      );
+      setFormError(err instanceof Error ? err.message : t("loginFailed"));
     }
   };
 
   return (
     <Card className="w-full shadow-2xl border-border/50 backdrop-blur-sm bg-card/95">
       <CardHeader className="space-y-2 pb-6">
+        <div className="flex justify-end mb-2">
+          <LanguageSelector />
+        </div>
         <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Welcome Back
+          {t("title")}
         </CardTitle>
         <CardDescription className="text-center text-base">
-          Enter your credentials to access your account
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -98,11 +102,11 @@ export default function LoginPage() {
         )}
         <form onSubmit={handleSubmit} className="space-y-5 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="your.email@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -126,18 +130,18 @@ export default function LoginPage() {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("password")}</Label>
               <Link
                 href="/forgot-password"
                 className="text-sm text-secondary hover:text-secondary/80 transition-colors font-medium"
               >
-                Forgot password?
+                {t("forgotPassword")}
               </Link>
             </div>
             <Input
               id="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder={t("passwordPlaceholder")}
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -173,7 +177,7 @@ export default function LoginPage() {
               htmlFor="remember"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              Remember me
+              {t("rememberMe")}
             </label>
           </div>
           <Button
@@ -186,11 +190,11 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-                  Signing in...
+                  {t("signingIn")}
                 </>
               ) : (
                 <>
-                  Sign In
+                  {t("signIn")}
                   <span className="group-hover:translate-x-1 transition-transform">
                     →
                   </span>
@@ -203,18 +207,18 @@ export default function LoginPage() {
               <span className="w-full border-t border-border/50" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or</span>
+              <span className="bg-card px-2 text-muted-foreground">
+                {t("or")}
+              </span>
             </div>
           </div>
           <div className="text-center text-sm">
-            <span className="text-muted-foreground">
-              Don&apos;t have an account?
-            </span>{" "}
+            <span className="text-muted-foreground">{t("noAccount")}</span>{" "}
             <Link
               href="/register"
               className="text-primary hover:text-primary/80 font-semibold transition-colors"
             >
-              Create account
+              {t("createAccount")}
             </Link>
           </div>
         </form>

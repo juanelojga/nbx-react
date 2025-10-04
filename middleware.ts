@@ -1,10 +1,9 @@
-import createMiddleware from "next-intl/middleware";
+import { NextRequest, NextResponse } from "next/server";
 
-export default createMiddleware({
-  locales: ["es", "en"],
-  defaultLocale: "es",
-  localePrefix: "as-needed",
-});
+export function middleware(request: NextRequest) {
+  // Just pass through - locale detection handled by cookies/headers in client
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
