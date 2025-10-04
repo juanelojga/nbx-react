@@ -1,0 +1,31 @@
+{
+  "common": {
+    "language": "Language",
+    "spanish": "Spanish",
+    "english": "English"
+  },
+  "home": {
+    "title": "Welcome",
+    "description": "This is a Next.js application with multi-language support using next-intl"
+  },
+  "login": {
+    "title": "Welcome Back",
+    "description": "Enter your credentials to access your account",
+    "email": "Email",
+    "emailPlaceholder": "your.email@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "forgotPassword": "Forgot password?",
+    "rememberMe": "Remember me",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "or": "Or",
+    "noAccount": "Don't have an account?",
+    "createAccount": "Create account",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "loginFailed": "Login failed. Please try again."
+  }
+}

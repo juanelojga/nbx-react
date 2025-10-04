@@ -1,0 +1,31 @@
+{
+  "common": {
+    "language": "Idioma",
+    "spanish": "Español",
+    "english": "Inglés"
+  },
+  "home": {
+    "title": "Bienvenido",
+    "description": "Esta es una aplicación Next.js con soporte multiidioma usando next-intl"
+  },
+  "login": {
+    "title": "Bienvenido de Nuevo",
+    "description": "Ingresa tus credenciales para acceder a tu cuenta",
+    "email": "Correo Electrónico",
+    "emailPlaceholder": "tu.correo@ejemplo.com",
+    "password": "Contraseña",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "rememberMe": "Recuérdame",
+    "signIn": "Iniciar Sesión",
+    "signingIn": "Iniciando sesión...",
+    "or": "O",
+    "noAccount": "¿No tienes una cuenta?",
+    "createAccount": "Crear cuenta",
+    "emailRequired": "El correo electrónico es obligatorio",
+    "emailInvalid": "Por favor ingresa un correo electrónico válido",
+    "passwordRequired": "La contraseña es obligatoria",
+    "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
+    "loginFailed": "Inicio de sesión fallido. Por favor intenta de nuevo."
+  }
+}
