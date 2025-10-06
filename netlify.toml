@@ -6,6 +6,9 @@
   NODE_VERSION = "22"
   NPM_VERSION = "10"
 
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
@@ -18,15 +21,12 @@
 
 [context.production]
   command = "npm run build"
-  environment = { NEXT_PUBLIC_GRAPHQL_ENDPOINT = "https://nbx-django-production.up.railway.app/graphql", NEXT_PUBLIC_API_URL = "https://nbx-django-production.up.railway.app" }
 
 [context.deploy-preview]
   command = "npm run build"
-  environment = { NEXT_PUBLIC_GRAPHQL_ENDPOINT = "https://nbx-django-production.up.railway.app/graphql", NEXT_PUBLIC_API_URL = "https://nbx-django-production.up.railway.app" }
 
 [context.branch-deploy]
   command = "npm run build"
-  environment = { NEXT_PUBLIC_GRAPHQL_ENDPOINT = "https://nbx-django-production.up.railway.app/graphql", NEXT_PUBLIC_API_URL = "https://nbx-django-production.up.railway.app" }
 
 [[headers]]
   for = "/*"
