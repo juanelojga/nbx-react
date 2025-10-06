@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -17,8 +17,8 @@
     "docs:generate": "node scripts/generate-docs.js",
     "docs:update": "node scripts/generate-docs.js",
     "docs": "node scripts/generate-docs.js",
-    "deploy:netlify": "npm run build && netlify deploy --prod --dir=.next",
-    "deploy:preview": "npm run build && netlify deploy --dir=.next"
+    "deploy:netlify": "npm run build && netlify deploy --prod",
+    "deploy:preview": "npm run build && netlify deploy"
   },
   "dependencies": {
     "@apollo/client": "^3.14.0",
