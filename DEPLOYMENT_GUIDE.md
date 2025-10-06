@@ -62,12 +62,12 @@ The workflow (`.github/workflows/deploy.yml`) includes:
    - Runs tests (when implemented)
 
 2. **Build and Deploy Job**
-   - Runs only on push to main/develop
+   - Runs only on push to main branch (CD enabled)
    - Builds the application
    - Deploys to Netlify production
 
 3. **Build Preview Job**
-   - Runs only on pull requests
+   - Runs only on pull requests targeting main branch
    - Creates preview deployments
    - Comments on PR with preview URL
 
@@ -75,9 +75,10 @@ The workflow (`.github/workflows/deploy.yml`) includes:
 
 ### Automatic Deployment
 
-1. Push to `main` branch → Automatic production deployment
-2. Push to `develop` branch → Automatic staging deployment
-3. Create PR → Automatic preview deployment
+1. Push to `main` branch → Automatic production deployment (CD enabled)
+2. Push to `develop` branch → CI only (linting, type checking, tests)
+3. Create PR targeting `main` → Automatic preview deployment
+4. Create PR targeting `develop` → CI only (no deployment)
 
 ### Manual Deployment (Optional)
 
