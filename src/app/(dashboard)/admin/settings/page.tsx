@@ -5,8 +5,8 @@ export default function AdminSettings() {
   return (
     <div className="space-y-6">
       <PageHeader
-        heading="Settings"
-        text="Configure system settings and preferences"
+        title="Settings"
+        description="Configure system settings and preferences"
       />
       <Card>
         <CardHeader>

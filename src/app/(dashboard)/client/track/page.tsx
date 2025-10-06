@@ -5,8 +5,8 @@ export default function TrackPackage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        heading="Track Package"
-        text="Track your package in real-time"
+        title="Track Package"
+        description="Enter tracking number to find your package"
       />
       <Card>
         <CardHeader>

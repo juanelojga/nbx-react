@@ -5,8 +5,8 @@ export default function AdminUsers() {
   return (
     <div className="space-y-6">
       <PageHeader
-        heading="Users Management"
-        text="Manage user accounts and permissions"
+        title="Users Management"
+        description="Manage system users and permissions"
       />
       <Card>
         <CardHeader>
