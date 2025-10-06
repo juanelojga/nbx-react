@@ -20,7 +20,7 @@ import { REFRESH_TOKEN_MUTATION } from "@/graphql/mutations/auth";
 
 // Get the GraphQL API URL from environment variables
 const GRAPHQL_API_URL =
-  process.env.NEXT_PUBLIC_GRAPHQL_API_URL || "http://localhost:8000/graphql";
+  process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || "http://localhost:8000/graphql";
 
 // HTTP Link - connects to the GraphQL endpoint
 const httpLink = new HttpLink({
