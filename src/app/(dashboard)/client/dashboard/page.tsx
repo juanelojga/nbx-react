@@ -4,7 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function ClientDashboard() {
   return (
     <div className="space-y-6">
-      <PageHeader heading="Dashboard" text="Welcome to your NarBox dashboard" />
+      <PageHeader
+        title="Dashboard"
+        description="Welcome to your NarBox dashboard"
+      />
       <Card>
         <CardHeader>
           <CardTitle>Coming Soon</CardTitle>

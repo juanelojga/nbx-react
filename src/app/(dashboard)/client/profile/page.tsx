@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function ClientProfile() {
   return (
     <div className="space-y-6">
-      <PageHeader heading="Profile" text="Manage your account settings" />
+      <PageHeader title="Profile" description="Manage your account settings" />
       <Card>
         <CardHeader>
           <CardTitle>Coming Soon</CardTitle>

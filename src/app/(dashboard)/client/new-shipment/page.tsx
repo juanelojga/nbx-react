@@ -4,7 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function NewShipment() {
   return (
     <div className="space-y-6">
-      <PageHeader heading="New Shipment" text="Create a new package shipment" />
+      <PageHeader
+        title="New Shipment"
+        description="Create a new package shipment"
+      />
       <Card>
         <CardHeader>
           <CardTitle>Coming Soon</CardTitle>

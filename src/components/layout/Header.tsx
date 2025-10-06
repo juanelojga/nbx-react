@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { getUserRoleString } from "@/lib/utils/user-role";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -75,10 +76,16 @@ export function Header({ onMenuClick }: HeaderProps) {
                   {user ? `${user.firstName} ${user.lastName}` : "User"}
                 </span>
                 <Badge
-                  variant={user?.role === "admin" ? "destructive" : "secondary"}
+                  variant={
+                    user?.role && getUserRoleString(user.role) === "admin"
+                      ? "destructive"
+                      : "secondary"
+                  }
                   className="text-xs h-5 px-2"
                 >
-                  {user?.role === "admin" ? "Admin" : "Client"}
+                  {user?.role && getUserRoleString(user.role) === "admin"
+                    ? "Admin"
+                    : "Client"}
                 </Badge>
               </div>
             </Button>

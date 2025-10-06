@@ -5,8 +5,8 @@ export default function AdminReports() {
   return (
     <div className="space-y-6">
       <PageHeader
-        heading="Reports"
-        text="View analytics and generate reports"
+        title="Reports"
+        description="View analytics and generate reports"
       />
       <Card>
         <CardHeader>

@@ -4,7 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function ClientPackages() {
   return (
     <div className="space-y-6">
-      <PageHeader heading="My Packages" text="View and manage your packages" />
+      <PageHeader
+        title="My Packages"
+        description="View and manage your packages"
+      />
       <Card>
         <CardHeader>
           <CardTitle>Coming Soon</CardTitle>

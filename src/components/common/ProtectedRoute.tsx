@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageLoading } from "./PageLoading";
 import { canAccessRoute, getDefaultRoute } from "@/lib/auth/redirects";
+import { getUserRoleString } from "@/lib/utils/user-role";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -27,9 +28,12 @@ export default function ProtectedRoute({
       }
 
       // Check role-based access
-      if (allowedRoles && !canAccessRoute(user.role, allowedRoles)) {
+      if (
+        allowedRoles &&
+        !canAccessRoute(getUserRoleString(user.role), allowedRoles)
+      ) {
         // Redirect to user's default dashboard
-        router.push(getDefaultRoute(user.role));
+        router.push(getDefaultRoute(getUserRoleString(user.role)));
       }
     }
   }, [user, loading, isAuthenticated, allowedRoles, router]);
@@ -45,7 +49,10 @@ export default function ProtectedRoute({
   }
 
   // Not authorized for this route
-  if (allowedRoles && !canAccessRoute(user.role, allowedRoles)) {
+  if (
+    allowedRoles &&
+    !canAccessRoute(getUserRoleString(user.role), allowedRoles)
+  ) {
     return null;
   }
 

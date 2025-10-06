@@ -5,8 +5,8 @@ export default function AdminPackages() {
   return (
     <div className="space-y-6">
       <PageHeader
-        heading="All Packages"
-        text="Manage and track all packages in the system"
+        title="All Packages"
+        description="Manage and track all packages in the system"
       />
       <Card>
         <CardHeader>
