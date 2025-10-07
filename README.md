@@ -1,4 +1,32 @@
+# NBX React Application
+
+[![codecov](https://codecov.io/gh/juanelojga/nbx-react/branch/main/graph/badge.svg)](https://codecov.io/gh/juanelojga/nbx-react)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Testing & Coverage
+
+This project includes comprehensive unit tests with coverage reporting via Codecov.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests for CI (with coverage)
+npm run test:ci
+```
+
+### Coverage Reports
+
+Coverage reports are generated in the `coverage/` directory and uploaded to Codecov on every push to main/develop branches.
 
 ## Getting Started
 
