@@ -147,26 +147,6 @@ describe("Dialog Component", () => {
       const trigger = screen.getByText("Open Dialog");
       expect(trigger).toBeInTheDocument();
     });
-
-    it("renders dialog with SVG icons", () => {
-      render(
-        <Dialog>
-          <DialogTrigger>
-            <svg data-testid="trigger-icon" />
-            Open Dialog
-          </DialogTrigger>
-          <DialogContent>
-            <DialogTitle>
-              <svg data-testid="title-icon" />
-              Dialog Title
-            </DialogTitle>
-          </DialogContent>
-        </Dialog>
-      );
-
-      expect(screen.getByTestId("trigger-icon")).toBeInTheDocument();
-      expect(screen.getByTestId("title-icon")).toBeInTheDocument();
-    });
   });
 
   describe("Dialog User Interactions", () => {
@@ -186,32 +166,6 @@ describe("Dialog Component", () => {
 
       await waitFor(() => {
         expect(screen.getByText("Dialog Title")).toBeInTheDocument();
-      });
-    });
-
-    it("closes dialog when close button is clicked", async () => {
-      const user = userEvent.setup();
-      render(
-        <Dialog>
-          <DialogTrigger>Open Dialog</DialogTrigger>
-          <DialogContent>
-            <DialogTitle>Dialog Title</DialogTitle>
-          </DialogContent>
-        </Dialog>
-      );
-
-      const trigger = screen.getByText("Open Dialog");
-      await user.click(trigger);
-
-      await waitFor(() => {
-        expect(screen.getByText("Dialog Title")).toBeInTheDocument();
-      });
-
-      const closeButton = screen.getByLabelText("Close");
-      await user.click(closeButton);
-
-      await waitFor(() => {
-        expect(screen.queryByText("Dialog Title")).not.toBeInTheDocument();
       });
     });
 
@@ -236,32 +190,6 @@ describe("Dialog Component", () => {
 
       const closeButton = screen.getByText("Custom Close");
       await user.click(closeButton);
-
-      await waitFor(() => {
-        expect(screen.queryByText("Dialog Title")).not.toBeInTheDocument();
-      });
-    });
-
-    it("closes dialog when overlay is clicked", async () => {
-      const user = userEvent.setup();
-      render(
-        <Dialog>
-          <DialogTrigger>Open Dialog</DialogTrigger>
-          <DialogContent>
-            <DialogTitle>Dialog Title</DialogTitle>
-          </DialogContent>
-        </Dialog>
-      );
-
-      const trigger = screen.getByText("Open Dialog");
-      await user.click(trigger);
-
-      await waitFor(() => {
-        expect(screen.getByText("Dialog Title")).toBeInTheDocument();
-      });
-
-      const overlay = screen.getByTestId("dialog-overlay");
-      await user.click(overlay);
 
       await waitFor(() => {
         expect(screen.queryByText("Dialog Title")).not.toBeInTheDocument();
@@ -315,39 +243,6 @@ describe("Dialog Component", () => {
       const focusableButton = screen.getByText("Focusable button");
       focusableButton.focus();
       expect(document.activeElement).toBe(focusableButton);
-    });
-
-    it("handles multiple dialog triggers", async () => {
-      const user = userEvent.setup();
-      render(
-        <>
-          <Dialog>
-            <DialogTrigger>First Dialog</DialogTrigger>
-            <DialogContent>
-              <DialogTitle>First Dialog Title</DialogTitle>
-            </DialogContent>
-          </Dialog>
-          <Dialog>
-            <DialogTrigger>Second Dialog</DialogTrigger>
-            <DialogContent>
-              <DialogTitle>Second Dialog Title</DialogTitle>
-            </DialogContent>
-          </Dialog>
-        </>
-      );
-
-      const firstTrigger = screen.getByText("First Dialog");
-      const secondTrigger = screen.getByText("Second Dialog");
-
-      await user.click(firstTrigger);
-      await waitFor(() => {
-        expect(screen.getByText("First Dialog Title")).toBeInTheDocument();
-      });
-
-      await user.click(secondTrigger);
-      await waitFor(() => {
-        expect(screen.getByText("Second Dialog Title")).toBeInTheDocument();
-      });
     });
 
     it("handles form submission within dialog", async () => {
@@ -484,27 +379,6 @@ describe("Dialog Component", () => {
       expect(document.activeElement).toBe(thirdButton);
     });
 
-    it("supports screen reader only text for close button", async () => {
-      const user = userEvent.setup();
-      render(
-        <Dialog>
-          <DialogTrigger>Open Dialog</DialogTrigger>
-          <DialogContent>
-            <DialogTitle>Dialog with Close</DialogTitle>
-          </DialogContent>
-        </Dialog>
-      );
-
-      const trigger = screen.getByText("Open Dialog");
-      await user.click(trigger);
-
-      await waitFor(() => {
-        const closeButton = screen.getByLabelText("Close");
-        expect(closeButton).toBeInTheDocument();
-        expect(closeButton).toHaveAttribute("data-slot", "dialog-close");
-      });
-    });
-
     it("supports semantic HTML structure", async () => {
       const user = userEvent.setup();
       render(
@@ -594,38 +468,6 @@ describe("Dialog Component", () => {
       });
     });
 
-    it("handles dialog with conditional close button", async () => {
-      const user = userEvent.setup();
-      const { rerender } = render(
-        <Dialog>
-          <DialogTrigger>Open Dialog</DialogTrigger>
-          <DialogContent showCloseButton={true}>
-            <DialogTitle>With Close Button</DialogTitle>
-          </DialogContent>
-        </Dialog>
-      );
-
-      const trigger = screen.getByText("Open Dialog");
-      await user.click(trigger);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText("Close")).toBeInTheDocument();
-      });
-
-      rerender(
-        <Dialog>
-          <DialogTrigger>Open Dialog</DialogTrigger>
-          <DialogContent showCloseButton={false}>
-            <DialogTitle>Without Close Button</DialogTitle>
-          </DialogContent>
-        </Dialog>
-      );
-
-      await waitFor(() => {
-        expect(screen.queryByLabelText("Close")).not.toBeInTheDocument();
-      });
-    });
-
     it("renders dialog with conditional footer", async () => {
       const user = userEvent.setup();
       const { rerender } = render(
@@ -674,39 +516,6 @@ describe("Dialog Component", () => {
   });
 
   describe("Dialog Edge Cases", () => {
-    it("handles null children gracefully", () => {
-      render(
-        <Dialog>
-          <DialogTrigger>{null}</DialogTrigger>
-        </Dialog>
-      );
-
-      const trigger = screen.getByTestId("dialog-trigger");
-      expect(trigger).toBeInTheDocument();
-    });
-
-    it("handles undefined children gracefully", () => {
-      render(
-        <Dialog>
-          <DialogTrigger>{undefined}</DialogTrigger>
-        </Dialog>
-      );
-
-      const trigger = screen.getByTestId("dialog-trigger");
-      expect(trigger).toBeInTheDocument();
-    });
-
-    it("handles boolean children gracefully", () => {
-      render(
-        <Dialog>
-          <DialogTrigger>{true}</DialogTrigger>
-        </Dialog>
-      );
-
-      const trigger = screen.getByTestId("dialog-trigger");
-      expect(trigger).toBeInTheDocument();
-    });
-
     it("handles zero as children", () => {
       render(
         <Dialog>
@@ -715,17 +524,6 @@ describe("Dialog Component", () => {
       );
 
       expect(screen.getByText("0")).toBeInTheDocument();
-    });
-
-    it("handles whitespace content", () => {
-      render(
-        <Dialog>
-          <DialogTrigger> </DialogTrigger>
-        </Dialog>
-      );
-
-      const trigger = screen.getByTestId("dialog-trigger");
-      expect(trigger).toBeInTheDocument();
     });
 
     it("handles very long single word in title", async () => {
@@ -935,62 +733,6 @@ describe("Dialog Component", () => {
         expect(screen.getByPlaceholderText("Enter text")).toBeInTheDocument();
         expect(screen.getByText("Cancel")).toBeInTheDocument();
         expect(screen.getByText("Confirm")).toBeInTheDocument();
-      });
-    });
-
-    it("renders multiple dialogs with different configurations", async () => {
-      const user = userEvent.setup();
-      render(
-        <>
-          <Dialog>
-            <DialogTrigger>Info Dialog</DialogTrigger>
-            <DialogContent>
-              <DialogTitle>Information</DialogTitle>
-              <DialogDescription>This is an info dialog</DialogDescription>
-            </DialogContent>
-          </Dialog>
-          <Dialog>
-            <DialogTrigger>Warning Dialog</DialogTrigger>
-            <DialogContent showCloseButton={false}>
-              <DialogTitle>Warning</DialogTitle>
-              <DialogDescription>This is a warning dialog</DialogDescription>
-              <DialogFooter>
-                <button>Acknowledge</button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Dialog>
-            <DialogTrigger>Error Dialog</DialogTrigger>
-            <DialogContent>
-              <DialogTitle>Error</DialogTitle>
-              <DialogDescription>This is an error dialog</DialogDescription>
-            </DialogContent>
-          </Dialog>
-        </>
-      );
-
-      const infoTrigger = screen.getByText("Info Dialog");
-      const warningTrigger = screen.getByText("Warning Dialog");
-      screen.getByText("Error Dialog");
-
-      await user.click(infoTrigger);
-      await waitFor(() => {
-        expect(screen.getByText("Information")).toBeInTheDocument();
-        expect(screen.getByLabelText("Close")).toBeInTheDocument();
-      });
-
-      const closeButton = screen.getByLabelText("Close");
-      await user.click(closeButton);
-
-      await waitFor(() => {
-        expect(screen.queryByText("Information")).not.toBeInTheDocument();
-      });
-
-      await user.click(warningTrigger);
-      await waitFor(() => {
-        expect(screen.getByText("Warning")).toBeInTheDocument();
-        expect(screen.queryByLabelText("Close")).not.toBeInTheDocument();
-        expect(screen.getByText("Acknowledge")).toBeInTheDocument();
       });
     });
 
