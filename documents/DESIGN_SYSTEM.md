@@ -1,6 +1,6 @@
 # Design System Documentation
 
-_Last updated: 2025-10-03_
+_Last updated: 2025-10-06_
 
 ---
 
@@ -94,7 +94,7 @@ _Last updated: 2025-10-03_
 
 ## Components
 
-Total components: **22**
+Total components: **23**
 
 ### alert
 
@@ -165,6 +165,12 @@ Total components: **22**
 ### label
 
 - **Location**: `ui/label.tsx`
+- **Props**: 0 props defined
+- **Tests**: ❌ No
+
+### LanguageSelector
+
+- **Location**: `LanguageSelector.tsx`
 - **Props**: 0 props defined
 - **Tests**: ❌ No
 
