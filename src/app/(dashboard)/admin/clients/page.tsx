@@ -14,6 +14,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   GET_ALL_CLIENTS,
   GetAllClientsResponse,
   GetAllClientsVariables,
@@ -71,22 +78,6 @@ export default function AdminClients() {
 
       <Card>
         <CardContent className="p-6">
-          {/* Page Size Selector */}
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Show:</span>
-            {[10, 20, 50, 100].map((size) => (
-              <Button
-                key={size}
-                variant={pageSize === size ? "default" : "outline"}
-                size="sm"
-                onClick={() => handlePageSizeChange(size)}
-              >
-                {size}
-              </Button>
-            ))}
-            <span className="ml-2 text-sm text-muted-foreground">entries</span>
-          </div>
-
           {/* Error State */}
           {error && (
             <Alert variant="destructive">
@@ -198,14 +189,41 @@ export default function AdminClients() {
                 </Table>
               </div>
 
-              {/* Pagination Controls */}
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  Showing {(page - 1) * pageSize + 1} to{" "}
-                  {Math.min(page * pageSize, totalCount)} of {totalCount}{" "}
-                  entries
-                </div>
+              {/* Pagination and Page Size Controls */}
+              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3 md:items-center">
+                {/* Left: Page Size Selector */}
                 <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Rows per page
+                  </span>
+                  <Select
+                    value={pageSize.toString()}
+                    onValueChange={(value) =>
+                      handlePageSizeChange(parseInt(value))
+                    }
+                  >
+                    <SelectTrigger className="w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Center: Showing Entries */}
+                <div className="flex justify-center">
+                  <span className="text-sm text-muted-foreground">
+                    Showing {(page - 1) * pageSize + 1}–
+                    {Math.min(page * pageSize, totalCount)} of {totalCount}
+                  </span>
+                </div>
+
+                {/* Right: Pagination Buttons */}
+                <div className="flex items-center justify-end gap-2">
                   <Button
                     variant="outline"
                     size="sm"
