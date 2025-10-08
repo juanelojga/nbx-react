@@ -7,6 +7,7 @@ import {
   Search,
   Plus,
   User,
+  UserCog,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ export interface NavItem {
 export const adminNavItems: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: Home },
   { label: "All Packages", href: "/admin/packages", icon: Package },
+  { label: "Clients", href: "/admin/clients", icon: UserCog },
   { label: "Users Management", href: "/admin/users", icon: Users },
   { label: "Reports", href: "/admin/reports", icon: BarChart3 },
   { label: "Settings", href: "/admin/settings", icon: Settings },
