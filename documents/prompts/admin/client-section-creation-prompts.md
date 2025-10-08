@@ -222,3 +222,201 @@ Arrange the elements in a **single horizontal container** below the table with p
 
 - Updated bottom table section with improved distribution.
 - Layout and visual hierarchy consistent with admin UI patterns.
+
+---
+
+### Prompt: Redesign Pagination Component (Admin Clients Page)
+
+**Context:**  
+This project is a **Next.js + TypeScript + GraphQL** admin application using **shadcn/ui** and **Playwright**.  
+The file to update is `src/app/admin/clients/page.tsx`.  
+All UI modifications must follow the visual refinement and component standards defined in **`UI_REFINEMENT_GUIDE.md`**.
+
+---
+
+**Task:**  
+Redesign the pagination section below the Clients table to improve usability and visual consistency.
+
+The new pagination design should:
+
+- Display **page numbers** (e.g., `1 2 3 4 5 … 10`) for direct navigation.
+- Include **Previous** and **Next** controls **using only icons**:
+  - Use `<` for Previous and `>` for Next (no text labels).
+  - Align icon sizes and padding with other button components.
+- Highlight the **current page** (active state) with a filled or emphasized button style.
+- Disable the Previous icon when on the first page and the Next icon when on the last page.
+- Ensure accessible navigation:
+  - Add `aria-label="Previous page"` and `aria-label="Next page"` to the buttons.
+  - Maintain keyboard accessibility.
+
+---
+
+**Implementation Details:**
+
+- Use **shadcn/ui** components (`Button`, `Pagination`, or custom button composition).
+- Maintain existing pagination logic (`page`, `hasNext`, `hasPrevious`, `totalCount`).
+- Support clicking a specific page number to navigate directly.
+- Keep consistent alignment with the new bottom table layout:
+  - Left: “Rows per page” selector
+  - Center: “Showing X–Y of Z entries”
+  - Right: pagination controls (icon + page numbers)
+- Apply spacing and typography tokens as described in the refinement guide.
+- On small screens, collapse into a minimal version with just the `<` and `>` icons centered.
+
+---
+
+**Follow the UI Refinement Process:**
+
+- Validate visual balance and spacing.
+- Ensure proper focus, hover, and disabled states.
+- Check color contrast and component alignment.
+- Test responsiveness and behavior consistency.
+
+---
+
+**Testing Notes:**
+
+- Do **not** add or modify any unit test files.
+- Ensure Playwright tests verify:
+  - Pagination renders with icon-only controls.
+  - Clicking icons and page numbers updates the data.
+  - Active page and disabled states render correctly.
+
+---
+
+**Deliverables:**
+
+- Updated pagination section with icon-only navigation.
+- Functional numbered pagination with accessible `<` and `>` controls.
+- Visual and behavioral consistency with other admin pages and `UI_REFINEMENT_GUIDE.md`.
+
+---
+
+### Prompt: Add Visual Sorting Indicator to Table Headers (Admin Clients Page)
+
+**Context:**  
+This project is a **Next.js + TypeScript + GraphQL** admin application using **shadcn/ui** and **Playwright**.  
+The file to modify is `src/app/admin/clients/page.tsx`.  
+All UI improvements must follow the layout, spacing, and state guidelines defined in **`UI_REFINEMENT_GUIDE.md`**.
+
+---
+
+**Task:**  
+Enhance the **sortable table headers** in the Clients table to provide a clear **visual indicator** showing:
+
+1. Which column is currently being used for sorting (`orderBy`).
+2. The **sort direction** (ascending or descending).
+
+Currently, the sort icon (`<ArrowUpDown />`) is static and does not indicate the active sort field or direction.  
+The logic for sorting already exists (`sortField` and `sortOrder` states, with `orderBy` values such as `"email"` or
+`"-email"`).
+
+---
+
+**Expected Behavior:**
+
+- When a column is actively sorted:
+  - The column header should appear **highlighted** (e.g., bold text, accent color, or background tint as per design
+    system).
+  - The icon should **change** to visually indicate direction:
+    - **Ascending (A → Z / ↑)** — up arrow.
+    - **Descending (Z → A / ↓)** — down arrow.
+- When a column is **not** sorted:
+  - The default icon (`<ArrowUpDown />`) remains neutral and less prominent.
+
+---
+
+**Implementation Details:**
+
+- Update the table header buttons for sortable fields (`full_name`, `email`, `created_at`):
+  - Conditionally render an icon based on `sortField` and `sortOrder`:
+    - `ArrowUp` for ascending.
+    - `ArrowDown` for descending.
+    - `ArrowUpDown` (default) for unsorted.
+  - Apply a highlighted style (e.g., `text-primary font-semibold`) when the column matches the active `sortField`.
+- Use shadcn/ui styling conventions for color and typography tokens.
+- Follow accessibility best practices:
+  - Add `aria-sort="ascending"` or `aria-sort="descending"` for the active header.
+- Maintain existing functionality for toggling sort order when clicking the header.
+
+---
+
+**Follow the UI Refinement Process:**
+
+- Ensure color contrast meets accessibility standards.
+- Validate active/hover/focus states visually.
+- Check icon alignment and spacing consistency.
+- Confirm typography and layout follow admin design tokens.
+
+---
+
+**Testing Notes:**
+
+- Do **not** add or modify any unit test cases.
+- Playwright E2E tests should verify:
+  - Clicking column headers changes sorting and visual indicator.
+  - The correct column is highlighted.
+  - The icon direction matches the applied order (`orderBy` value).
+
+---
+
+**Deliverables:**
+
+- Updated sortable table headers with active highlighting and directional icons.
+- Consistent, accessible design aligned with `UI_REFINEMENT_GUIDE.md`.
+- Verified with Playwright visual checks or manual validation.
+
+---
+
+### Prompt: Add Search Input for Filtering Clients (Admin Clients Page)
+
+**Context:**  
+This project is a **Next.js + TypeScript + GraphQL** admin application using **shadcn/ui** and **Playwright**.  
+The file to update is `src/app/admin/clients/page.tsx`.  
+All UI elements and interactions must follow the visual and behavioral rules from **`UI_REFINEMENT_GUIDE.md`**.
+
+---
+
+**Task:**  
+Add a **search input** above the Clients table to allow admins to filter the list of clients by name or email.  
+This input must include **input sanitization**, **trimming**, and a **clear button (icon)** for deleting the term.  
+The search should integrate with the existing GraphQL query and only trigger when the value is valid.
+
+---
+
+**Expected Behavior:**
+
+1. **Search Bar Placement**
+   - Place the search input **above the table** and below the page header (`PageHeader`).
+   - Maintain consistent spacing and alignment using spacing tokens from the design system.
+
+2. **Functional Behavior**
+   - On user input, **trim** leading and trailing spaces.
+   - Do **not send a GraphQL request** if the trimmed value is empty.
+   - Sanitize the input to prevent risky terms (e.g., remove special characters such as `<`, `>`, `{`, `}`, `;`, etc.).
+   - Allow search by **full name** or **email**.
+   - Use a **debounced update** (e.g., 300–500ms) before triggering the query variable change.
+
+3. **Clear (Delete) Icon**
+   - Display a small **clear icon (✕ or Lucide’s `X` icon)** inside the input when there is text.
+   - Clicking the icon clears the text and triggers the query again with no search term.
+   - The icon must only clear the term when explicitly clicked, not when typing or losing focus.
+
+4. **GraphQL Integration**
+   - Extend the existing `GET_ALL_CLIENTS` query variable set to include a `search` argument.
+   - When the sanitized and trimmed input is valid, pass it as `search`.
+   - When cleared or empty, omit `search` from the query variables.
+
+---
+
+**UI & UX Requirements:**
+
+- Use **shadcn/ui’s** `Input` component for styling.
+- Add a search icon (`<Search />`) to the left inside the input field.
+- Use subtle border and muted text styles consistent with other admin forms.
+- Follow spacing and responsive rules defined in `UI_REFINEMENT_GUIDE.md`.
+- Ensure keyboard and screen reader accessibility (use `aria-label="Search clients"`).
+
+---
+
+**Example Layout:**
