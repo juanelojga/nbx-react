@@ -15,7 +15,7 @@ const CONFIG = {
   componentsDir: "./src/components",
   pagesDir: "./src/app",
   colorsFile: "./src/app/globals.css", // or wherever your colors are defined
-  outputFile: "./DESIGN_SYSTEM.md",
+  outputFile: "./documents/DESIGN_SYSTEM.md",
   // Add other paths as needed
   configFiles: [], // './tailwind.config.ts'
 };
@@ -117,12 +117,32 @@ function analyzeComponent(filePath, basePath, fileName) {
     ? [...new Set(variantMatch.map((v) => v.match(/['"]([^'"]+)['"]/)[1]))]
     : [];
 
+  // Check for test files in multiple locations
+  const testPatterns = [
+    // Test file next to component: alert.test.tsx
+    filePath.replace(/\.(tsx|jsx)$/, ".test.$1"),
+    // Test file in __tests__ folder in same directory: ui/__tests__/alert.test.tsx
+    path.join(
+      path.dirname(filePath),
+      "__tests__",
+      fileName.replace(/\.(tsx|jsx)$/, ".test.$1")
+    ),
+    // Test file in parent __tests__ folder: __tests__/alert.test.tsx
+    path.join(
+      path.dirname(path.dirname(filePath)),
+      "__tests__",
+      fileName.replace(/\.(tsx|jsx)$/, ".test.$1")
+    ),
+  ];
+
+  const hasTests = testPatterns.some((testPath) => fs.existsSync(testPath));
+
   return {
     name: componentName,
     path: path.join(basePath, fileName).replace(/\\/g, "/"),
     props: props.length,
     variants,
-    hasTests: fs.existsSync(filePath.replace(/\.(tsx|jsx)$/, ".test.$1")),
+    hasTests,
   };
 }
 
