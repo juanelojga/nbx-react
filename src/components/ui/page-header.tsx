@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils";
 import { Separator } from "./separator";
 
 interface PageHeaderProps {
-  title: string;
-  description?: string;
+  title: ReactNode;
+  description?: ReactNode;
   actions?: ReactNode;
   className?: string;
 }

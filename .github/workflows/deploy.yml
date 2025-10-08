@@ -1,4 +1,4 @@
-name: CI - Lint and Test
+name: CI - Lint, Test, and Coverage
 
 on:
   push:
@@ -11,7 +11,7 @@ env:
 
 jobs:
   lint-and-test:
-    name: Lint and Test
+    name: Lint, Test, and Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -32,5 +32,15 @@ jobs:
       - name: Run type checking
         run: npm run type-check || true
 
-      - name: Run tests
-        run: npm run test || true
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true

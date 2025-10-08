@@ -1,6 +1,6 @@
 # Design System Documentation
 
-_Last updated: 2025-10-03_
+_Last updated: 2025-10-08_
 
 ---
 
@@ -94,29 +94,35 @@ _Last updated: 2025-10-03_
 
 ## Components
 
-Total components: **22**
+Total components: **24**
 
 ### alert
 
 - **Location**: `ui/alert.tsx`
 - **Props**: 0 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### avatar
 
 - **Location**: `ui/avatar.tsx`
 - **Props**: 0 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### badge
 
 - **Location**: `ui/badge.tsx`
 - **Props**: 0 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### button
 
 - **Location**: `ui/button.tsx`
+- **Props**: 0 props defined
+- **Tests**: ✅ Yes
+
+### button.test
+
+- **Location**: `ui/__tests__/button.test.tsx`
 - **Props**: 0 props defined
 - **Tests**: ❌ No
 
@@ -124,25 +130,25 @@ Total components: **22**
 
 - **Location**: `ui/card.tsx`
 - **Props**: 0 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### checkbox
 
 - **Location**: `ui/checkbox.tsx`
 - **Props**: 0 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### dialog
 
 - **Location**: `ui/dialog.tsx`
 - **Props**: 0 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### dropdown-menu
 
 - **Location**: `ui/dropdown-menu.tsx`
 - **Props**: 0 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### ErrorAlert
 
@@ -160,11 +166,17 @@ Total components: **22**
 
 - **Location**: `ui/input.tsx`
 - **Props**: 0 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### label
 
 - **Location**: `ui/label.tsx`
+- **Props**: 0 props defined
+- **Tests**: ✅ Yes
+
+### LanguageSelector
+
+- **Location**: `LanguageSelector.tsx`
 - **Props**: 0 props defined
 - **Tests**: ❌ No
 
@@ -178,7 +190,7 @@ Total components: **22**
 
 - **Location**: `ui/logo.tsx`
 - **Props**: 2 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### MainLayout
 
@@ -190,7 +202,7 @@ Total components: **22**
 
 - **Location**: `ui/page-header.tsx`
 - **Props**: 4 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### PageLoading
 
@@ -208,7 +220,7 @@ Total components: **22**
 
 - **Location**: `ui/separator.tsx`
 - **Props**: 0 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### Sidebar
 
@@ -220,7 +232,7 @@ Total components: **22**
 
 - **Location**: `ui/sonner.tsx`
 - **Props**: 0 props defined
-- **Tests**: ❌ No
+- **Tests**: ✅ Yes
 
 ### stat-card
 
