@@ -420,3 +420,92 @@ The search should integrate with the existing GraphQL query and only trigger whe
 ---
 
 **Example Layout:**
+
+---
+
+# Claude Code Prompt
+
+## Context
+
+This project is a **Next.js + TypeScript + GraphQL** admin application using **shadcn/ui** and **Playwright**.  
+The file to modify is:  
+`src/app/admin/clients/page.tsx`
+
+All code must follow the interaction and performance guidelines described in `UI_REFINEMENT_GUIDE.md`.  
+Do **not** add or execute any unit test or e2e test cases.
+
+## Task
+
+Add an **“Add Client”** button at the top of the page.  
+When this button is clicked, a **dialog** (modal) should open.  
+Inside the dialog, display a **form with two columns** containing fields for the GraphQL mutation `createClient`.
+
+### Requirements
+
+- Use **shadcn/ui components** for the dialog, form, inputs, buttons, and layout.
+- The form must include **client-side validation** consistent with the GraphQL schema:
+  - `firstName`, `lastName`, and `email` are **required**.
+  - Other fields are optional.
+  - `email` must be a valid email format.
+  - `mobilePhoneNumber` and `phoneNumber` should allow only numeric values.
+- The form layout must be **two-column responsive** (adjust for smaller screens).
+- On submit, call the GraphQL mutation `createClient`.
+- When the mutation succeeds:
+  - Close the dialog.
+  - Update the client list on the page (according to the project’s preferred pattern in `UI_REFINEMENT_GUIDE.md`).
+- Handle and display user feedback for validation and mutation errors.
+- Keep the interaction performant, following the optimization recommendations in `UI_REFINEMENT_GUIDE.md`.
+
+### GraphQL Mutation
+
+```graphql
+mutation CreateClient(
+  $buildingNumber: String
+  $city: String
+  $email: String!
+  $firstName: String!
+  $identificationNumber: String
+  $lastName: String!
+  $mainStreet: String
+  $mobilePhoneNumber: String
+  $phoneNumber: String
+  $secondaryStreet: String
+  $state: String
+) {
+  createClient(
+    buildingNumber: $buildingNumber
+    city: $city
+    email: $email
+    firstName: $firstName
+    identificationNumber: $identificationNumber
+    lastName: $lastName
+    mainStreet: $mainStreet
+    mobilePhoneNumber: $mobilePhoneNumber
+    phoneNumber: $phoneNumber
+    secondaryStreet: $secondaryStreet
+    state: $state
+  ) {
+    client {
+      id
+      fullName
+      email
+      identificationNumber
+      state
+      city
+      mainStreet
+      secondaryStreet
+      buildingNumber
+      mobilePhoneNumber
+      phoneNumber
+      createdAt
+      updatedAt
+    }
+  }
+}
+```
+
+Rules
+• Do not create, modify, or run any test cases (unit or e2e).
+• Follow the component creation, structure, and styling conventions defined in UI_REFINEMENT_GUIDE.md.
+• Write clean, typed, and accessible code.
+• Use idiomatic Next.js + TypeScript + GraphQL practices.

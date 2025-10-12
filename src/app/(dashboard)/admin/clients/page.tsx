@@ -38,9 +38,12 @@ import {
   Eye,
   Pencil,
   Trash2,
-  MoreHorizontal,
+  UserPlus,
+  RefreshCw,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AddClientDialog } from "@/components/admin/AddClientDialog";
+import { DeleteClientDialog } from "@/components/admin/DeleteClientDialog";
 
 type SortField = "full_name" | "email" | "created_at";
 type SortOrder = "asc" | "desc";
@@ -55,6 +58,14 @@ export default function AdminClients() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isDebouncing, setIsDebouncing] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState<{
+    id: string;
+    userId: string;
+    fullName: string;
+    email: string;
+  } | null>(null);
 
   const orderBy = `${sortOrder === "desc" ? "-" : ""}${sortField}`;
 
@@ -92,11 +103,12 @@ export default function AdminClients() {
     queryVariables.search = debouncedSearch;
   }
 
-  const { data, loading, error } = useQuery<
+  const { data, loading, error, refetch } = useQuery<
     GetAllClientsResponse,
     GetAllClientsVariables
   >(GET_ALL_CLIENTS, {
     variables: queryVariables,
+    notifyOnNetworkStatusChange: true, // Show loading state on refetch
   });
 
   const handleSort = (field: SortField) => {
@@ -116,6 +128,10 @@ export default function AdminClients() {
   const handleClearSearch = () => {
     setSearchInput("");
     setDebouncedSearch("");
+  };
+
+  const handleRefresh = async () => {
+    await refetch();
   };
 
   const clients = data?.allClients.results || [];
@@ -200,16 +216,61 @@ export default function AdminClients() {
     // TODO: Implement edit client logic
   };
 
-  const handleDeleteClient = (clientId: string) => {
-    console.log("Delete client:", clientId);
-    // TODO: Implement delete client logic
+  const handleDeleteClient = (client: {
+    id: string;
+    user: { id: string };
+    fullName: string;
+    email: string;
+  }) => {
+    setClientToDelete({
+      id: client.id,
+      userId: client.user.id,
+      fullName: client.fullName,
+      email: client.email,
+    });
+    setIsDeleteDialogOpen(true);
   };
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Clients Management"
-        description="View and manage all client accounts"
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <PageHeader
+          title="Clients Management"
+          description="View and manage all client accounts"
+        />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={loading}
+            className="sm:w-auto"
+          >
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+          <Button
+            onClick={() => setIsAddDialogOpen(true)}
+            className="sm:w-auto"
+          >
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add Client
+          </Button>
+        </div>
+      </div>
+
+      <AddClientDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onClientCreated={handleRefresh}
+      />
+
+      <DeleteClientDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        client={clientToDelete}
+        onClientDeleted={handleRefresh}
       />
 
       <Card>
@@ -483,7 +544,7 @@ export default function AdminClients() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => handleDeleteClient(client.id)}
+                              onClick={() => handleDeleteClient(client)}
                               aria-label={`Delete ${client.fullName || client.email}`}
                             >
                               <Trash2 className="h-4 w-4" />
