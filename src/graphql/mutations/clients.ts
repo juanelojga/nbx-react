@@ -87,6 +87,91 @@ export interface CreateClientResponse {
 }
 
 /**
+ * Update client mutation
+ * This mutation is restricted to superusers
+ */
+export const UPDATE_CLIENT = gql`
+  mutation UpdateClient(
+    $id: ID!
+    $firstName: String
+    $lastName: String
+    $identificationNumber: String
+    $state: String
+    $city: String
+    $mainStreet: String
+    $secondaryStreet: String
+    $buildingNumber: String
+    $mobilePhoneNumber: String
+    $phoneNumber: String
+  ) {
+    updateClient(
+      id: $id
+      firstName: $firstName
+      lastName: $lastName
+      identificationNumber: $identificationNumber
+      state: $state
+      city: $city
+      mainStreet: $mainStreet
+      secondaryStreet: $secondaryStreet
+      buildingNumber: $buildingNumber
+      mobilePhoneNumber: $mobilePhoneNumber
+      phoneNumber: $phoneNumber
+    ) {
+      client {
+        id
+        fullName
+        email
+        city
+        state
+        mobilePhoneNumber
+        phoneNumber
+        identificationNumber
+        mainStreet
+        secondaryStreet
+        buildingNumber
+        updatedAt
+      }
+    }
+  }
+`;
+
+/**
+ * TypeScript types for update client mutation
+ */
+export interface UpdateClientVariables {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  identificationNumber?: string;
+  state?: string;
+  city?: string;
+  mainStreet?: string;
+  secondaryStreet?: string;
+  buildingNumber?: string;
+  mobilePhoneNumber?: string;
+  phoneNumber?: string;
+}
+
+export interface UpdateClientResponse {
+  updateClient: {
+    client: {
+      id: string;
+      fullName: string;
+      email: string;
+      city: string | null;
+      state: string | null;
+      mobilePhoneNumber: string | null;
+      phoneNumber: string | null;
+      identificationNumber: string | null;
+      mainStreet: string | null;
+      secondaryStreet: string | null;
+      buildingNumber: string | null;
+      updatedAt: string;
+    };
+  };
+}
+
+/**
  * Delete user mutation
  * This mutation is restricted to superusers
  */

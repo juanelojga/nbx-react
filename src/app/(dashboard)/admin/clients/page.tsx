@@ -44,6 +44,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AddClientDialog } from "@/components/admin/AddClientDialog";
 import { DeleteClientDialog } from "@/components/admin/DeleteClientDialog";
+import { EditClientDialog } from "@/components/admin/EditClientDialog";
 
 type SortField = "full_name" | "email" | "created_at";
 type SortOrder = "asc" | "desc";
@@ -60,11 +61,26 @@ export default function AdminClients() {
   const [isDebouncing, setIsDebouncing] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<{
     id: string;
     userId: string;
     fullName: string;
     email: string;
+  } | null>(null);
+  const [clientToEdit, setClientToEdit] = useState<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    identificationNumber: string | null;
+    mobilePhoneNumber: string | null;
+    phoneNumber: string | null;
+    state: string | null;
+    city: string | null;
+    mainStreet: string | null;
+    secondaryStreet: string | null;
+    buildingNumber: string | null;
   } | null>(null);
 
   const orderBy = `${sortOrder === "desc" ? "-" : ""}${sortField}`;
@@ -211,9 +227,38 @@ export default function AdminClients() {
     // TODO: Implement view client logic
   };
 
-  const handleEditClient = (clientId: string) => {
-    console.log("Edit client:", clientId);
-    // TODO: Implement edit client logic
+  const handleEditClient = (client: {
+    id: string;
+    user: {
+      firstName: string | null;
+      lastName: string | null;
+      email: string;
+    };
+    email: string;
+    identificationNumber: string | null;
+    mobilePhoneNumber: string | null;
+    phoneNumber: string | null;
+    state: string | null;
+    city: string | null;
+    mainStreet: string | null;
+    secondaryStreet: string | null;
+    buildingNumber: string | null;
+  }) => {
+    setClientToEdit({
+      id: client.id,
+      firstName: client.user.firstName || "",
+      lastName: client.user.lastName || "",
+      email: client.email,
+      identificationNumber: client.identificationNumber,
+      mobilePhoneNumber: client.mobilePhoneNumber,
+      phoneNumber: client.phoneNumber,
+      state: client.state,
+      city: client.city,
+      mainStreet: client.mainStreet,
+      secondaryStreet: client.secondaryStreet,
+      buildingNumber: client.buildingNumber,
+    });
+    setIsEditDialogOpen(true);
   };
 
   const handleDeleteClient = (client: {
@@ -271,6 +316,13 @@ export default function AdminClients() {
         onOpenChange={setIsDeleteDialogOpen}
         client={clientToDelete}
         onClientDeleted={handleRefresh}
+      />
+
+      <EditClientDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        client={clientToEdit}
+        onClientUpdated={handleRefresh}
       />
 
       <Card>
@@ -535,7 +587,7 @@ export default function AdminClients() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                              onClick={() => handleEditClient(client.id)}
+                              onClick={() => handleEditClient(client)}
                               aria-label={`Edit ${client.fullName || client.email}`}
                             >
                               <Pencil className="h-4 w-4" />
