@@ -6,16 +6,16 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import {
   DELETE_USER,
-  DeleteUserVariables,
   DeleteUserResponse,
+  DeleteUserVariables,
 } from "@/graphql/mutations/clients";
 import { toast } from "sonner";
 
@@ -46,7 +46,7 @@ export function DeleteClientDialog({
     onCompleted: async () => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
-          name: client?.fullName || client?.email,
+          name: client?.fullName || client?.email || "",
         }),
       });
       onOpenChange(false);

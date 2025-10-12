@@ -1,14 +1,13 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
 export default function LanguageSelector() {
   const t = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
-  const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
   const handleLocaleChange = (newLocale: string) => {
