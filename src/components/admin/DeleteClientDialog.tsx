@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@apollo/client";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -36,13 +37,17 @@ export function DeleteClientDialog({
   client,
   onClientDeleted,
 }: DeleteClientDialogProps) {
+  const t = useTranslations("adminClients.deleteDialog");
+  const tParent = useTranslations("adminClients");
   const [deleteUser, { loading }] = useMutation<
     DeleteUserResponse,
     DeleteUserVariables
   >(DELETE_USER, {
     onCompleted: async () => {
-      toast.success("Client deleted successfully", {
-        description: `${client?.fullName || client?.email} has been removed from the system.`,
+      toast.success(t("successTitle"), {
+        description: t("successDescription", {
+          name: client?.fullName || client?.email,
+        }),
       });
       onOpenChange(false);
       // Trigger table refresh
@@ -51,8 +56,8 @@ export function DeleteClientDialog({
       }
     },
     onError: (error) => {
-      toast.error("Failed to delete client", {
-        description: error.message,
+      toast.error(t("errorTitle"), {
+        description: t("errorDescription", { error: error.message }),
       });
       onOpenChange(false);
     },
@@ -86,10 +91,10 @@ export function DeleteClientDialog({
             </div>
             <div className="flex-1">
               <DialogTitle className="text-xl text-left">
-                Delete Client
+                {t("title")}
               </DialogTitle>
               <DialogDescription className="text-left mt-2">
-                Are you sure you want to delete this client?
+                {t("description")}
               </DialogDescription>
             </div>
           </div>
@@ -100,7 +105,7 @@ export function DeleteClientDialog({
           <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-2">
             <div className="flex justify-between items-start">
               <span className="text-sm font-medium text-muted-foreground">
-                Client Name
+                {t("clientName")}
               </span>
               <span className="text-sm font-semibold text-foreground text-right">
                 {client.fullName || "-"}
@@ -108,7 +113,7 @@ export function DeleteClientDialog({
             </div>
             <div className="flex justify-between items-start">
               <span className="text-sm font-medium text-muted-foreground">
-                Email
+                {tParent("email")}
               </span>
               <span className="text-sm font-semibold text-foreground text-right">
                 {client.email}
@@ -119,9 +124,7 @@ export function DeleteClientDialog({
           {/* Warning Message */}
           <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
             <p className="text-sm text-destructive font-medium">
-              <strong>Warning:</strong> Deleting this client will permanently
-              remove all data associated with them. This action cannot be
-              undone.
+              <strong>{t("warningTitle")}</strong> {t("warningDescription")}
             </p>
           </div>
         </div>
@@ -133,7 +136,7 @@ export function DeleteClientDialog({
             onClick={handleCancel}
             disabled={loading}
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             type="button"
@@ -144,10 +147,10 @@ export function DeleteClientDialog({
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deleting...
+                {t("deleting")}
               </>
             ) : (
-              "Delete Client"
+              t("deleteClient")
             )}
           </Button>
         </DialogFooter>

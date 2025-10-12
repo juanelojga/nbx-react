@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useMutation } from "@apollo/client";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -64,6 +65,7 @@ export function EditClientDialog({
   client,
   onClientUpdated,
 }: EditClientDialogProps) {
+  const t = useTranslations("adminClients.editDialog");
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -105,8 +107,10 @@ export function EditClientDialog({
     UpdateClientVariables
   >(UPDATE_CLIENT, {
     onCompleted: async (data) => {
-      toast.success("Client updated successfully", {
-        description: `${data.updateClient.client.fullName}'s information has been updated.`,
+      toast.success(t("successTitle"), {
+        description: t("successDescription", {
+          fullName: data.updateClient.client.fullName,
+        }),
       });
       handleClose();
       // Trigger refresh with current filters/sort/pagination
@@ -115,8 +119,8 @@ export function EditClientDialog({
       }
     },
     onError: (error) => {
-      toast.error("Failed to update client", {
-        description: error.message,
+      toast.error(t("errorTitle"), {
+        description: t("errorDescription", { error: error.message }),
       });
     },
   });
@@ -145,10 +149,10 @@ export function EditClientDialog({
 
     // Required fields
     if (!formData.firstName.trim()) {
-      errors.firstName = "First name is required";
+      errors.firstName = t("firstNameRequired");
     }
     if (!formData.lastName.trim()) {
-      errors.lastName = "Last name is required";
+      errors.lastName = t("lastNameRequired");
     }
 
     // Phone number validation (numeric only if provided)
@@ -156,10 +160,10 @@ export function EditClientDialog({
       formData.mobilePhoneNumber &&
       !/^\d+$/.test(formData.mobilePhoneNumber)
     ) {
-      errors.mobilePhoneNumber = "Mobile phone must contain only numbers";
+      errors.mobilePhoneNumber = t("mobilePhoneInvalid");
     }
     if (formData.phoneNumber && !/^\d+$/.test(formData.phoneNumber)) {
-      errors.phoneNumber = "Phone number must contain only numbers";
+      errors.phoneNumber = t("phoneNumberInvalid");
     }
 
     setValidationErrors(errors);
@@ -221,25 +225,22 @@ export function EditClientDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <Pencil className="h-6 w-6" />
-            Edit Client
+            {t("title")}
           </DialogTitle>
-          <DialogDescription>
-            Update the client information below. Fields marked with * are
-            required.
-          </DialogDescription>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information Section */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Personal Information
+              {t("personalInfo")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* First Name */}
               <div className="space-y-2">
                 <Label htmlFor="firstName">
-                  First Name <span className="text-destructive">*</span>
+                  {t("firstName")} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="firstName"
@@ -252,7 +253,7 @@ export function EditClientDialog({
                   aria-describedby={
                     validationErrors.firstName ? "firstName-error" : undefined
                   }
-                  placeholder="Enter first name"
+                  placeholder={t("firstNamePlaceholder")}
                 />
                 {validationErrors.firstName && (
                   <p
@@ -268,7 +269,7 @@ export function EditClientDialog({
               {/* Last Name */}
               <div className="space-y-2">
                 <Label htmlFor="lastName">
-                  Last Name <span className="text-destructive">*</span>
+                  {t("lastName")} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="lastName"
@@ -281,7 +282,7 @@ export function EditClientDialog({
                   aria-describedby={
                     validationErrors.lastName ? "lastName-error" : undefined
                   }
-                  placeholder="Enter last name"
+                  placeholder={t("lastNamePlaceholder")}
                 />
                 {validationErrors.lastName && (
                   <p
@@ -296,7 +297,7 @@ export function EditClientDialog({
 
               {/* Email (Read-only) */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -304,17 +305,17 @@ export function EditClientDialog({
                   disabled
                   readOnly
                   className="bg-muted cursor-not-allowed"
-                  placeholder="example@email.com"
+                  placeholder={t("emailPlaceholder")}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Email cannot be changed
+                  {t("emailReadOnly")}
                 </p>
               </div>
 
               {/* Identification Number */}
               <div className="space-y-2">
                 <Label htmlFor="identificationNumber">
-                  Identification Number
+                  {t("identificationNumber")}
                 </Label>
                 <Input
                   id="identificationNumber"
@@ -323,7 +324,7 @@ export function EditClientDialog({
                     handleInputChange("identificationNumber", e.target.value)
                   }
                   disabled={loading}
-                  placeholder="Enter ID number"
+                  placeholder={t("identificationNumberPlaceholder")}
                 />
               </div>
             </div>
@@ -332,12 +333,12 @@ export function EditClientDialog({
           {/* Contact Information Section */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Contact Information
+              {t("contactInfo")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Mobile Phone */}
               <div className="space-y-2">
-                <Label htmlFor="mobilePhoneNumber">Mobile Phone</Label>
+                <Label htmlFor="mobilePhoneNumber">{t("mobilePhone")}</Label>
                 <Input
                   id="mobilePhoneNumber"
                   type="tel"
@@ -352,7 +353,7 @@ export function EditClientDialog({
                       ? "mobilePhoneNumber-error"
                       : undefined
                   }
-                  placeholder="Enter mobile number"
+                  placeholder={t("mobilePhonePlaceholder")}
                 />
                 {validationErrors.mobilePhoneNumber && (
                   <p
@@ -367,7 +368,7 @@ export function EditClientDialog({
 
               {/* Phone Number */}
               <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Label htmlFor="phoneNumber">{t("phoneNumber")}</Label>
                 <Input
                   id="phoneNumber"
                   type="tel"
@@ -382,7 +383,7 @@ export function EditClientDialog({
                       ? "phoneNumber-error"
                       : undefined
                   }
-                  placeholder="Enter phone number"
+                  placeholder={t("phoneNumberPlaceholder")}
                 />
                 {validationErrors.phoneNumber && (
                   <p
@@ -400,36 +401,36 @@ export function EditClientDialog({
           {/* Address Information Section */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Address Information
+              {t("addressInfo")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* State */}
               <div className="space-y-2">
-                <Label htmlFor="state">State</Label>
+                <Label htmlFor="state">{t("state")}</Label>
                 <Input
                   id="state"
                   value={formData.state}
                   onChange={(e) => handleInputChange("state", e.target.value)}
                   disabled={loading}
-                  placeholder="Enter state"
+                  placeholder={t("statePlaceholder")}
                 />
               </div>
 
               {/* City */}
               <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="city">{t("city")}</Label>
                 <Input
                   id="city"
                   value={formData.city}
                   onChange={(e) => handleInputChange("city", e.target.value)}
                   disabled={loading}
-                  placeholder="Enter city"
+                  placeholder={t("cityPlaceholder")}
                 />
               </div>
 
               {/* Main Street */}
               <div className="space-y-2">
-                <Label htmlFor="mainStreet">Main Street</Label>
+                <Label htmlFor="mainStreet">{t("mainStreet")}</Label>
                 <Input
                   id="mainStreet"
                   value={formData.mainStreet}
@@ -437,13 +438,13 @@ export function EditClientDialog({
                     handleInputChange("mainStreet", e.target.value)
                   }
                   disabled={loading}
-                  placeholder="Enter main street"
+                  placeholder={t("mainStreetPlaceholder")}
                 />
               </div>
 
               {/* Secondary Street */}
               <div className="space-y-2">
-                <Label htmlFor="secondaryStreet">Secondary Street</Label>
+                <Label htmlFor="secondaryStreet">{t("secondaryStreet")}</Label>
                 <Input
                   id="secondaryStreet"
                   value={formData.secondaryStreet}
@@ -451,13 +452,13 @@ export function EditClientDialog({
                     handleInputChange("secondaryStreet", e.target.value)
                   }
                   disabled={loading}
-                  placeholder="Enter secondary street"
+                  placeholder={t("secondaryStreetPlaceholder")}
                 />
               </div>
 
               {/* Building Number */}
               <div className="space-y-2">
-                <Label htmlFor="buildingNumber">Building Number</Label>
+                <Label htmlFor="buildingNumber">{t("buildingNumber")}</Label>
                 <Input
                   id="buildingNumber"
                   value={formData.buildingNumber}
@@ -465,7 +466,7 @@ export function EditClientDialog({
                     handleInputChange("buildingNumber", e.target.value)
                   }
                   disabled={loading}
-                  placeholder="Enter building number"
+                  placeholder={t("buildingNumberPlaceholder")}
                 />
               </div>
             </div>
@@ -478,18 +479,18 @@ export function EditClientDialog({
               onClick={handleClose}
               disabled={loading}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
+                  {t("updating")}
                 </>
               ) : (
                 <>
                   <Pencil className="mr-2 h-4 w-4" />
-                  Update Client
+                  {t("updateClient")}
                 </>
               )}
             </Button>
