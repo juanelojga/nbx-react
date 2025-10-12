@@ -45,6 +45,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AddClientDialog } from "@/components/admin/AddClientDialog";
 import { DeleteClientDialog } from "@/components/admin/DeleteClientDialog";
 import { EditClientDialog } from "@/components/admin/EditClientDialog";
+import { ViewClientDialog } from "@/components/admin/ViewClientDialog";
 
 type SortField = "full_name" | "email" | "created_at";
 type SortOrder = "asc" | "desc";
@@ -62,6 +63,7 @@ export default function AdminClients() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<{
     id: string;
     userId: string;
@@ -82,6 +84,7 @@ export default function AdminClients() {
     secondaryStreet: string | null;
     buildingNumber: string | null;
   } | null>(null);
+  const [clientIdToView, setClientIdToView] = useState<string | null>(null);
 
   const orderBy = `${sortOrder === "desc" ? "-" : ""}${sortField}`;
 
@@ -223,8 +226,8 @@ export default function AdminClients() {
 
   // Action handlers
   const handleViewClient = (clientId: string) => {
-    console.log("View client:", clientId);
-    // TODO: Implement view client logic
+    setClientIdToView(clientId);
+    setIsViewDialogOpen(true);
   };
 
   const handleEditClient = (client: {
@@ -323,6 +326,12 @@ export default function AdminClients() {
         onOpenChange={setIsEditDialogOpen}
         client={clientToEdit}
         onClientUpdated={handleRefresh}
+      />
+
+      <ViewClientDialog
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
+        clientId={clientIdToView}
       />
 
       <Card>

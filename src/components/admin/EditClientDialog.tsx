@@ -106,7 +106,7 @@ export function EditClientDialog({
   >(UPDATE_CLIENT, {
     onCompleted: async (data) => {
       toast.success("Client updated successfully", {
-        description: `${data.updateClient.client.firstName} ${data.updateClient.client.lastName}'s information has been updated.`,
+        description: `${data.updateClient.client.fullName}'s information has been updated.`,
       });
       handleClose();
       // Trigger refresh with current filters/sort/pagination

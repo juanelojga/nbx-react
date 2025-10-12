@@ -94,3 +94,54 @@ export interface GetAllClientsVariables {
   pageSize?: number;
   orderBy?: string;
 }
+
+/**
+ * Get single client query
+ * This query is restricted to superusers
+ */
+export const GET_CLIENT = gql`
+  query GetClient($id: Int!) {
+    client(id: $id) {
+      id
+      email
+      identificationNumber
+      state
+      city
+      mainStreet
+      secondaryStreet
+      buildingNumber
+      mobilePhoneNumber
+      phoneNumber
+      createdAt
+      updatedAt
+      fullName
+    }
+  }
+`;
+
+/**
+ * TypeScript types for single client query
+ */
+export interface ClientDetailType {
+  id: string;
+  email: string;
+  identificationNumber: string | null;
+  state: string | null;
+  city: string | null;
+  mainStreet: string | null;
+  secondaryStreet: string | null;
+  buildingNumber: string | null;
+  mobilePhoneNumber: string | null;
+  phoneNumber: string | null;
+  createdAt: string;
+  updatedAt: string;
+  fullName: string;
+}
+
+export interface GetClientResponse {
+  client: ClientDetailType;
+}
+
+export interface GetClientVariables {
+  id: number;
+}
