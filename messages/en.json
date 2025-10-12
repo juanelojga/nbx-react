@@ -27,5 +27,32 @@
     "passwordRequired": "Password is required",
     "passwordMinLength": "Password must be at least 6 characters",
     "loginFailed": "Login failed. Please try again."
+  },
+  "adminClients": {
+    "title": "Clients Management",
+    "description": "View and manage all client accounts",
+    "refresh": "Refresh",
+    "addClient": "Add Client",
+    "searchPlaceholder": "Search by name or email...",
+    "clearSearch": "Clear search",
+    "loadingError": "Failed to load clients: {error}",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "location": "Location",
+    "createdAt": "Created At",
+    "actions": "Actions",
+    "viewClient": "View client",
+    "editClient": "Edit client",
+    "deleteClient": "Delete client",
+    "noMatchingClients": "No matching clients",
+    "noMatchingClientsDescription": "We couldn't find any clients matching \"{search}\". Try adjusting your search terms.",
+    "noClientsFound": "No clients found",
+    "noClientsFoundDescription": "There are currently no clients in the system. Clients will appear here once they are added.",
+    "rowsPerPage": "Rows per page",
+    "showing": "Showing {start}–{end} of {total}",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "goToPage": "Go to page {page}"
   }
 }

@@ -27,5 +27,32 @@
     "passwordRequired": "La contraseña es obligatoria",
     "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
     "loginFailed": "Inicio de sesión fallido. Por favor intenta de nuevo."
+  },
+  "adminClients": {
+    "title": "Gestión de Clientes",
+    "description": "Ver y gestionar todas las cuentas de clientes",
+    "refresh": "Actualizar",
+    "addClient": "Agregar Cliente",
+    "searchPlaceholder": "Buscar por nombre o correo...",
+    "clearSearch": "Limpiar búsqueda",
+    "loadingError": "Error al cargar clientes: {error}",
+    "fullName": "Nombre Completo",
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "location": "Ubicación",
+    "createdAt": "Creado el",
+    "actions": "Acciones",
+    "viewClient": "Ver cliente",
+    "editClient": "Editar cliente",
+    "deleteClient": "Eliminar cliente",
+    "noMatchingClients": "No se encontraron clientes",
+    "noMatchingClientsDescription": "No pudimos encontrar ningún cliente que coincida con \"{search}\". Intenta ajustar tus términos de búsqueda.",
+    "noClientsFound": "No se encontraron clientes",
+    "noClientsFoundDescription": "Actualmente no hay clientes en el sistema. Los clientes aparecerán aquí una vez que se agreguen.",
+    "rowsPerPage": "Filas por página",
+    "showing": "Mostrando {start}–{end} de {total}",
+    "previousPage": "Página anterior",
+    "nextPage": "Página siguiente",
+    "goToPage": "Ir a la página {page}"
   }
 }

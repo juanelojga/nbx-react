@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
+import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -59,6 +60,7 @@ type SortOrder = "asc" | "desc";
 const DEBOUNCE_DELAY = 400; // milliseconds
 
 export default function AdminClients() {
+  const t = useTranslations("adminClients");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<SortField>("created_at");
@@ -289,10 +291,7 @@ export default function AdminClients() {
     <TooltipProvider>
       <div className="space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <PageHeader
-            title="Clients Management"
-            description="View and manage all client accounts"
-          />
+          <PageHeader title={t("title")} description={t("description")} />
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -303,14 +302,14 @@ export default function AdminClients() {
               <RefreshCw
                 className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
               />
-              Refresh
+              {t("refresh")}
             </Button>
             <Button
               onClick={() => setIsAddDialogOpen(true)}
               className="sm:w-auto"
             >
               <UserPlus className="mr-2 h-4 w-4" />
-              Add Client
+              {t("addClient")}
             </Button>
           </div>
         </div>
@@ -353,11 +352,11 @@ export default function AdminClients() {
                 )}
                 <Input
                   type="text"
-                  placeholder="Search by name or email..."
+                  placeholder={t("searchPlaceholder")}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   className="pl-9 pr-9"
-                  aria-label="Search clients"
+                  aria-label={t("searchPlaceholder")}
                 />
                 {searchInput && (
                   <Button
@@ -365,7 +364,7 @@ export default function AdminClients() {
                     size="icon"
                     onClick={handleClearSearch}
                     className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                    aria-label="Clear search"
+                    aria-label={t("clearSearch")}
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -377,7 +376,7 @@ export default function AdminClients() {
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>
-                  Failed to load clients: {error.message}
+                  {t("loadingError", { error: error.message })}
                 </AlertDescription>
               </Alert>
             )}
@@ -389,12 +388,14 @@ export default function AdminClients() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Full Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Phone</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead>Created At</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t("fullName")}</TableHead>
+                        <TableHead>{t("email")}</TableHead>
+                        <TableHead>{t("phone")}</TableHead>
+                        <TableHead>{t("location")}</TableHead>
+                        <TableHead>{t("createdAt")}</TableHead>
+                        <TableHead className="text-right">
+                          {t("actions")}
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -458,12 +459,16 @@ export default function AdminClients() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold text-foreground">
-                  {debouncedSearch ? "No matching clients" : "No clients found"}
+                  {debouncedSearch
+                    ? t("noMatchingClients")
+                    : t("noClientsFound")}
                 </h3>
                 <p className="mt-2 max-w-md text-sm text-muted-foreground">
                   {debouncedSearch
-                    ? `We couldn't find any clients matching "${debouncedSearch}". Try adjusting your search terms.`
-                    : "There are currently no clients in the system. Clients will appear here once they are added."}
+                    ? t("noMatchingClientsDescription", {
+                        search: debouncedSearch,
+                      })
+                    : t("noClientsFoundDescription")}
                 </p>
                 {debouncedSearch && (
                   <Button
@@ -473,7 +478,7 @@ export default function AdminClients() {
                     className="mt-4"
                   >
                     <X className="mr-2 h-4 w-4" />
-                    Clear search
+                    {t("clearSearch")}
                   </Button>
                 )}
               </div>
@@ -497,7 +502,7 @@ export default function AdminClients() {
                                 : ""
                             }`}
                           >
-                            Full Name
+                            {t("fullName")}
                             {getSortIcon("full_name")}
                           </Button>
                         </TableHead>
@@ -512,12 +517,12 @@ export default function AdminClients() {
                                 : ""
                             }`}
                           >
-                            Email
+                            {t("email")}
                             {getSortIcon("email")}
                           </Button>
                         </TableHead>
-                        <TableHead>Phone</TableHead>
-                        <TableHead>Location</TableHead>
+                        <TableHead>{t("phone")}</TableHead>
+                        <TableHead>{t("location")}</TableHead>
                         <TableHead aria-sort={getAriaSort("created_at")}>
                           <Button
                             variant="ghost"
@@ -529,11 +534,13 @@ export default function AdminClients() {
                                 : ""
                             }`}
                           >
-                            Created At
+                            {t("createdAt")}
                             {getSortIcon("created_at")}
                           </Button>
                         </TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead className="text-right">
+                          {t("actions")}
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -603,7 +610,7 @@ export default function AdminClients() {
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>View client</p>
+                                  <p>{t("viewClient")}</p>
                                 </TooltipContent>
                               </Tooltip>
                               <Tooltip>
@@ -619,7 +626,7 @@ export default function AdminClients() {
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>Edit client</p>
+                                  <p>{t("editClient")}</p>
                                 </TooltipContent>
                               </Tooltip>
                               <Tooltip>
@@ -635,7 +642,7 @@ export default function AdminClients() {
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>Delete client</p>
+                                  <p>{t("deleteClient")}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </div>
@@ -651,7 +658,7 @@ export default function AdminClients() {
                   {/* Left: Page Size Selector */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">
-                      Rows per page
+                      {t("rowsPerPage")}
                     </span>
                     <Select
                       value={pageSize.toString()}
@@ -674,8 +681,11 @@ export default function AdminClients() {
                   {/* Center: Showing Entries */}
                   <div className="flex justify-center">
                     <span className="text-sm text-muted-foreground">
-                      Showing {(page - 1) * pageSize + 1}–
-                      {Math.min(page * pageSize, totalCount)} of {totalCount}
+                      {t("showing", {
+                        start: (page - 1) * pageSize + 1,
+                        end: Math.min(page * pageSize, totalCount),
+                        total: totalCount,
+                      })}
                     </span>
                   </div>
 
@@ -688,7 +698,7 @@ export default function AdminClients() {
                       className="h-8 w-8"
                       onClick={() => setPage(page - 1)}
                       disabled={!hasPrevious}
-                      aria-label="Previous page"
+                      aria-label={t("previousPage")}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -717,7 +727,7 @@ export default function AdminClients() {
                             size="sm"
                             onClick={() => setPage(pageNumber)}
                             className="h-8 w-8 p-0"
-                            aria-label={`Go to page ${pageNumber}`}
+                            aria-label={t("goToPage", { page: pageNumber })}
                             aria-current={isActive ? "page" : undefined}
                           >
                             {pageNumber}
@@ -740,7 +750,7 @@ export default function AdminClients() {
                       className="h-8 w-8"
                       onClick={() => setPage(page + 1)}
                       disabled={!hasNext}
-                      aria-label="Next page"
+                      aria-label={t("nextPage")}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
