@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { Menu, PanelLeft, PanelLeftClose } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,9 +17,15 @@ import { getUserRoleString } from "@/lib/utils/user-role";
 
 interface HeaderProps {
   onMenuClick: () => void;
+  onDesktopSidebarToggle: () => void;
+  isDesktopSidebarCollapsed: boolean;
 }
 
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header({
+  onMenuClick,
+  onDesktopSidebarToggle,
+  isDesktopSidebarCollapsed,
+}: HeaderProps) {
   const { user, logout } = useAuth();
 
   const getInitials = (name: string) => {
@@ -43,6 +49,25 @@ export function Header({ onMenuClick }: HeaderProps) {
           aria-label="Toggle menu"
         >
           <Menu className="h-6 w-6" />
+        </Button>
+
+        {/* Desktop sidebar toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="mr-2 hidden lg:flex hover:bg-white/20 text-white transition-all duration-200 active:scale-95"
+          onClick={onDesktopSidebarToggle}
+          aria-label={
+            isDesktopSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+          }
+          aria-expanded={!isDesktopSidebarCollapsed}
+          aria-controls="desktop-sidebar"
+        >
+          {isDesktopSidebarCollapsed ? (
+            <PanelLeft className="h-5 w-5" />
+          ) : (
+            <PanelLeftClose className="h-5 w-5" />
+          )}
         </Button>
 
         {/* Logo */}

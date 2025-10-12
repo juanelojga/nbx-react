@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 
@@ -9,22 +9,49 @@ interface MainLayoutProps {
   userRole: "admin" | "client";
 }
 
-export function MainLayout({ children, userRole }: MainLayoutProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const closeSidebar = () => setIsSidebarOpen(false);
+export function MainLayout({ children, userRole }: MainLayoutProps) {
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] =
+    useState(false);
+
+  // Load sidebar state from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    if (stored !== null) {
+      setIsDesktopSidebarCollapsed(stored === "true");
+    }
+  }, []);
+
+  // Persist sidebar state to localStorage
+  const toggleDesktopSidebar = () => {
+    setIsDesktopSidebarCollapsed((prev) => {
+      const newValue = !prev;
+      localStorage.setItem(SIDEBAR_STORAGE_KEY, String(newValue));
+      return newValue;
+    });
+  };
+
+  const toggleMobileSidebar = () =>
+    setIsMobileSidebarOpen(!isMobileSidebarOpen);
+  const closeMobileSidebar = () => setIsMobileSidebarOpen(false);
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onMenuClick={toggleSidebar} />
+      <Header
+        onMenuClick={toggleMobileSidebar}
+        onDesktopSidebarToggle={toggleDesktopSidebar}
+        isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
+      />
       <div className="flex">
         <Sidebar
           userRole={userRole}
-          isOpen={isSidebarOpen}
-          onClose={closeSidebar}
+          isMobileOpen={isMobileSidebarOpen}
+          isDesktopCollapsed={isDesktopSidebarCollapsed}
+          onMobileClose={closeMobileSidebar}
         />
-        <main className="flex-1 p-6 lg:p-8 max-w-[1600px] mx-auto w-full transition-all duration-200">
+        <main className="flex-1 p-6 lg:p-8 w-full transition-all duration-300">
           {children}
         </main>
       </div>
