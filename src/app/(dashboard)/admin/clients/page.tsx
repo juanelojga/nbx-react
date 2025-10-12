@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { useTranslations } from "next-intl";
+import { useClientTableState } from "@/hooks/useClientTableState";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -34,19 +35,19 @@ import {
   GetAllClientsVariables,
 } from "@/graphql/queries/clients";
 import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Search,
-  X,
-  Loader2,
   Eye,
+  Loader2,
   Pencil,
+  RefreshCw,
+  Search,
   Trash2,
   UserPlus,
-  RefreshCw,
+  X,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AddClientDialog } from "@/components/admin/AddClientDialog";
@@ -55,19 +56,30 @@ import { EditClientDialog } from "@/components/admin/EditClientDialog";
 import { ViewClientDialog } from "@/components/admin/ViewClientDialog";
 
 type SortField = "full_name" | "email" | "created_at";
-type SortOrder = "asc" | "desc";
 
 const DEBOUNCE_DELAY = 400; // milliseconds
 
 export default function AdminClients() {
   const t = useTranslations("adminClients");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<SortField>("created_at");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-  const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // URL state synchronization
+  const {
+    state: urlState,
+    updateURL,
+    getOrderBy,
+  } = useClientTableState({
+    defaultPageSize: 10,
+    defaultSortField: "created_at",
+    defaultSortOrder: "desc",
+  });
+
+  // Local state for search input (not synced to URL until debounced)
+  const [searchInput, setSearchInput] = useState(urlState.search);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlState.search);
   const [isDebouncing, setIsDebouncing] = useState(false);
+
+  // Destructure URL state for easier access
+  const { page, pageSize, sortField, sortOrder } = urlState;
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -94,7 +106,7 @@ export default function AdminClients() {
   } | null>(null);
   const [clientIdToView, setClientIdToView] = useState<string | null>(null);
 
-  const orderBy = `${sortOrder === "desc" ? "-" : ""}${sortField}`;
+  const orderBy = getOrderBy();
 
   // Input sanitization function
   const sanitizeInput = (input: string): string => {
@@ -102,7 +114,15 @@ export default function AdminClients() {
     return input.replace(/[<>{};\\\[\]]/g, "").trim();
   };
 
-  // Debounce search input
+  // Sync search input from URL when it changes (e.g., browser back/forward)
+  useEffect(() => {
+    if (urlState.search !== searchInput && !isDebouncing) {
+      setSearchInput(urlState.search);
+      setDebouncedSearch(urlState.search);
+    }
+  }, [urlState.search, searchInput, isDebouncing]);
+
+  // Debounce search input and update URL
   useEffect(() => {
     if (searchInput !== debouncedSearch) {
       setIsDebouncing(true);
@@ -111,12 +131,14 @@ export default function AdminClients() {
     const timer = setTimeout(() => {
       const sanitized = sanitizeInput(searchInput);
       setDebouncedSearch(sanitized);
-      setPage(1); // Reset to first page on search
+      // Update URL with new search and reset to page 1
+      updateURL({ search: sanitized, page: 1 });
       setIsDebouncing(false);
     }, DEBOUNCE_DELAY);
 
     return () => clearTimeout(timer);
-  }, [searchInput, debouncedSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput]);
 
   // Build GraphQL variables
   const queryVariables: GetAllClientsVariables = {
@@ -140,21 +162,24 @@ export default function AdminClients() {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      // Toggle sort order
+      const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
+      updateURL({ sortOrder: newSortOrder });
     } else {
-      setSortField(field);
-      setSortOrder("asc");
+      // Change sort field, default to ascending
+      updateURL({ sortField: field, sortOrder: "asc" });
     }
   };
 
   const handlePageSizeChange = (newSize: number) => {
-    setPageSize(newSize);
-    setPage(1); // Reset to first page when changing page size
+    // Update page size and reset to page 1
+    updateURL({ pageSize: newSize, page: 1 });
   };
 
   const handleClearSearch = () => {
     setSearchInput("");
     setDebouncedSearch("");
+    updateURL({ search: "", page: 1 });
   };
 
   const handleRefresh = async () => {
@@ -696,7 +721,7 @@ export default function AdminClients() {
                       variant="outline"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => setPage(page - 1)}
+                      onClick={() => updateURL({ page: page - 1 })}
                       disabled={!hasPrevious}
                       aria-label={t("previousPage")}
                     >
@@ -725,7 +750,7 @@ export default function AdminClients() {
                             key={pageNumber}
                             variant={isActive ? "default" : "outline"}
                             size="sm"
-                            onClick={() => setPage(pageNumber)}
+                            onClick={() => updateURL({ page: pageNumber })}
                             className="h-8 w-8 p-0"
                             aria-label={t("goToPage", { page: pageNumber })}
                             aria-current={isActive ? "page" : undefined}
@@ -748,7 +773,7 @@ export default function AdminClients() {
                       variant="outline"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => setPage(page + 1)}
+                      onClick={() => updateURL({ page: page + 1 })}
                       disabled={!hasNext}
                       aria-label={t("nextPage")}
                     >
