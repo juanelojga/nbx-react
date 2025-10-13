@@ -21,10 +21,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
+  ClientType,
   GET_ALL_CLIENTS,
   GetAllClientsResponse,
   GetAllClientsVariables,
-  ClientType,
 } from "@/graphql/queries/clients";
 
 interface ClientSelectProps {
@@ -81,11 +81,13 @@ export function ClientSelect({
           role="combobox"
           aria-expanded={open}
           aria-label="Select a client"
-          className="w-full justify-between h-auto min-h-[2.5rem] px-3 py-2 hover:bg-primary/5 hover:border-primary/30 transition-colors"
+          className="w-full justify-between h-auto min-h-[2.5rem] px-3 py-2 hover:bg-primary/5 hover:border-primary/30 transition-colors "
         >
           {selectedClient ? (
             <div className="flex flex-col items-start gap-0.5 text-left">
-              <span className="font-medium">{selectedClient.fullName}</span>
+              <span className="font-medium text-primary">
+                {selectedClient.fullName}
+              </span>
               <span className="text-xs text-muted-foreground">
                 {selectedClient.email}
               </span>
