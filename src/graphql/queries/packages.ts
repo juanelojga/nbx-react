@@ -34,6 +34,39 @@ export const RESOLVE_ALL_PACKAGES = gql`
 `;
 
 /**
+ * Get single package by ID with full details
+ */
+export const GET_PACKAGE = gql`
+  query GetPackage($id: Int!) {
+    package(id: $id) {
+      id
+      barcode
+      courier
+      otherCourier
+      length
+      width
+      height
+      dimensionUnit
+      weight
+      weightUnit
+      description
+      purchaseLink
+      realPrice
+      servicePrice
+      arrivalDate
+      comments
+      client {
+        id
+        fullName
+        email
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+/**
  * TypeScript types for query responses
  */
 export interface PackageType {
@@ -41,6 +74,32 @@ export interface PackageType {
   barcode: string;
   description: string | null;
   createdAt: string;
+}
+
+export interface PackageDetailType {
+  id: string;
+  barcode: string;
+  courier: string | null;
+  otherCourier: string | null;
+  length: number | null;
+  width: number | null;
+  height: number | null;
+  dimensionUnit: string | null;
+  weight: number | null;
+  weightUnit: string | null;
+  description: string | null;
+  purchaseLink: string | null;
+  realPrice: number | null;
+  servicePrice: number | null;
+  arrivalDate: string | null;
+  comments: string | null;
+  client: {
+    id: string;
+    fullName: string;
+    email: string;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PackageConnection {
@@ -62,4 +121,12 @@ export interface ResolveAllPackagesVariables {
   page_size?: number;
   order_by?: string;
   search?: string;
+}
+
+export interface GetPackageResponse {
+  package: PackageDetailType;
+}
+
+export interface GetPackageVariables {
+  id: number;
 }

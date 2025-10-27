@@ -215,6 +215,7 @@ export default function AdminPackages() {
                   selectedPackages={selectedPackages}
                   onSelectionChange={handleSelectionChange}
                   isLoading={loading}
+                  onRefetch={refetch}
                 />
               </CardContent>
             </Card>
