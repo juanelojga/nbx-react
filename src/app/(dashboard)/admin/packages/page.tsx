@@ -1,11 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@apollo/client";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { StepHeader } from "./components/StepHeader";
 import { ClientSelect } from "./components/ClientSelect";
+import { PackagesTable } from "./components/PackagesTable";
+import { CurrentConsolidatePanel } from "./components/CurrentConsolidatePanel";
 import { ClientType } from "@/graphql/queries/clients";
+import {
+  RESOLVE_ALL_PACKAGES,
+  ResolveAllPackagesResponse,
+  ResolveAllPackagesVariables,
+} from "@/graphql/queries/packages";
 
 const CONSOLIDATION_STEPS = [
   { number: 1, label: "Select Client" },
@@ -17,10 +28,59 @@ export default function AdminPackages() {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedClient, setSelectedClient] = useState<ClientType | null>(null);
 
+  // Step 2 state
+  const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
+
+  // GraphQL query for packages - only execute when on step 2 and client is selected
+  const { data, loading, error, refetch } = useQuery<
+    ResolveAllPackagesResponse,
+    ResolveAllPackagesVariables
+  >(RESOLVE_ALL_PACKAGES, {
+    variables: {
+      client_id: selectedClient ? parseInt(selectedClient.id) : 0,
+      page: 1,
+      page_size: 20,
+      order_by: "created_at",
+      search: "",
+    },
+    skip: currentStep !== 2 || !selectedClient,
+    fetchPolicy: "network-only",
+  });
+
+  const packages = data?.allPackages.results || [];
+  const hasError = !!error;
+
   const handleClientSelect = (client: ClientType | null) => {
     setSelectedClient(client);
-    // Future: When a client is selected, we'll move to step 2
-    // setCurrentStep(2);
+  };
+
+  const handleContinueToStep2 = () => {
+    if (selectedClient) {
+      setCurrentStep(2);
+    }
+  };
+
+  const handleBackToStep1 = () => {
+    setCurrentStep(1);
+    setSelectedPackages([]);
+  };
+
+  const handleSelectionChange = (packageIds: string[]) => {
+    setSelectedPackages(packageIds);
+  };
+
+  const handleRemovePackage = (packageId: string) => {
+    setSelectedPackages(selectedPackages.filter((id) => id !== packageId));
+  };
+
+  const handleClearAll = () => {
+    setSelectedPackages([]);
+  };
+
+  const handleRetryLoad = () => {
+    if (refetch) {
+      refetch();
+    }
   };
 
   return (
@@ -97,24 +157,106 @@ export default function AdminPackages() {
                 </div>
               )}
             </div>
+
+            {/* Navigation */}
+            <div className="flex justify-end pt-4">
+              <Button
+                onClick={handleContinueToStep2}
+                disabled={!selectedClient}
+                className="gap-2"
+              >
+                Continue to Group Packages
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Future steps will be added here */}
+      {/* Step 2: Group Packages */}
       {currentStep === 2 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Group Packages</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Step 2 implementation coming soon...
-            </p>
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          {/* Client Info Bar */}
+          {selectedClient && (
+            <Alert>
+              <AlertDescription>
+                Grouping packages for:{" "}
+                <span className="font-semibold">{selectedClient.fullName}</span>{" "}
+                ({selectedClient.email})
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Error State */}
+          {hasError && (
+            <Alert variant="destructive">
+              <AlertDescription className="flex items-center justify-between">
+                <span>Unable to load packages. Please try again.</span>
+                <Button variant="outline" size="sm" onClick={handleRetryLoad}>
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Two-column layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+            {/* Left: Packages Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Available Packages</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Select packages to add to the consolidation group.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <PackagesTable
+                  packages={packages}
+                  selectedPackages={selectedPackages}
+                  onSelectionChange={handleSelectionChange}
+                  isLoading={loading}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Right: Current Consolidate Panel */}
+            <div>
+              <CurrentConsolidatePanel
+                selectedPackages={selectedPackages}
+                packages={packages}
+                onRemovePackage={handleRemovePackage}
+                onClearAll={handleClearAll}
+              />
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  onClick={handleBackToStep1}
+                  className="gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Client Selection
+                </Button>
+                <Button
+                  onClick={() => setCurrentStep(3)}
+                  disabled={selectedPackages.length === 0}
+                  className="gap-2"
+                >
+                  Continue to Review
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
+      {/* Step 3: Review & Finalize */}
       {currentStep === 3 && (
         <Card>
           <CardHeader>
@@ -124,6 +266,16 @@ export default function AdminPackages() {
             <p className="text-muted-foreground">
               Step 3 implementation coming soon...
             </p>
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentStep(2)}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Group Packages
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
