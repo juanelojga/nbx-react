@@ -6,11 +6,12 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import { StepHeader } from "./components/StepHeader";
 import { ClientSelect } from "./components/ClientSelect";
 import { PackagesTable } from "./components/PackagesTable";
 import { CurrentConsolidatePanel } from "./components/CurrentConsolidatePanel";
+import { AddPackageDialog } from "./components/AddPackageDialog";
 import { ClientType } from "@/graphql/queries/clients";
 import {
   RESOLVE_ALL_PACKAGES,
@@ -30,6 +31,7 @@ export default function AdminPackages() {
 
   // Step 2 state
   const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
+  const [isAddPackageDialogOpen, setIsAddPackageDialogOpen] = useState(false);
 
   // GraphQL query for packages - only execute when on step 2 and client is selected
   const { data, loading, error, refetch } = useQuery<
@@ -40,7 +42,7 @@ export default function AdminPackages() {
       client_id: selectedClient ? parseInt(selectedClient.id) : 0,
       page: 1,
       page_size: 20,
-      order_by: "created_at",
+      order_by: "-created_at",
       search: "",
     },
     skip: currentStep !== 2 || !selectedClient,
@@ -204,10 +206,21 @@ export default function AdminPackages() {
             {/* Left: Packages Table */}
             <Card>
               <CardHeader>
-                <CardTitle>Available Packages</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Select packages to add to the consolidation group.
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Available Packages</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Select packages to add to the consolidation group.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => setIsAddPackageDialogOpen(true)}
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Package
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <PackagesTable
@@ -279,6 +292,16 @@ export default function AdminPackages() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Add Package Dialog */}
+      {selectedClient && (
+        <AddPackageDialog
+          open={isAddPackageDialogOpen}
+          onOpenChange={setIsAddPackageDialogOpen}
+          clientId={selectedClient.id}
+          onPackageCreated={refetch}
+        />
       )}
     </div>
   );
