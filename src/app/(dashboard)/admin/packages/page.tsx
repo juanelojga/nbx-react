@@ -85,6 +85,10 @@ export default function AdminPackages() {
     }
   };
 
+  const handleRefetchPackages = async () => {
+    await refetch();
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -228,7 +232,7 @@ export default function AdminPackages() {
                   selectedPackages={selectedPackages}
                   onSelectionChange={handleSelectionChange}
                   isLoading={loading}
-                  onRefetch={refetch}
+                  onRefetch={handleRefetchPackages}
                 />
               </CardContent>
             </Card>
@@ -300,7 +304,7 @@ export default function AdminPackages() {
           open={isAddPackageDialogOpen}
           onOpenChange={setIsAddPackageDialogOpen}
           clientId={selectedClient.id}
-          onPackageCreated={refetch}
+          onPackageCreated={handleRefetchPackages}
         />
       )}
     </div>
