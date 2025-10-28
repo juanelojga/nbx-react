@@ -17,10 +17,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Package as PackageIcon, X, Eye, Trash2 } from "lucide-react";
+import { Package as PackageIcon, X, Eye, Trash2, Pencil } from "lucide-react";
 import { Package } from "../types";
 import { PackageDetailsModal } from "./PackageDetailsModal";
 import { DeletePackageDialog } from "./DeletePackageDialog";
+import { UpdatePackageDialog } from "./UpdatePackageDialog";
 
 interface PackagesTableProps {
   packages: Package[];
@@ -41,6 +42,8 @@ export function PackagesTable({
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
     null
   );
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [packageToEdit, setPackageToEdit] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [packageToDelete, setPackageToDelete] = useState<{
     id: string;
@@ -80,12 +83,24 @@ export function PackagesTable({
     setViewModalOpen(true);
   };
 
+  const handleEditPackage = (packageId: string) => {
+    setPackageToEdit(packageId);
+    setEditModalOpen(true);
+  };
+
   const handleDeletePackage = (pkg: Package) => {
     setPackageToDelete({
       id: pkg.id,
       barcode: pkg.barcode,
     });
     setDeleteModalOpen(true);
+  };
+
+  const handlePackageUpdated = async () => {
+    // Refetch packages to update the table
+    if (onRefetch) {
+      await onRefetch();
+    }
   };
 
   const handlePackageDeleted = async () => {
@@ -237,6 +252,22 @@ export function PackagesTable({
                             <Button
                               variant="ghost"
                               size="icon"
+                              className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                              onClick={() => handleEditPackage(pkg.id)}
+                              aria-label={`Edit package ${pkg.barcode}`}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Edit Package</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                               onClick={() => handleDeletePackage(pkg)}
                               aria-label={`Delete package ${pkg.barcode}`}
@@ -287,6 +318,14 @@ export function PackagesTable({
         open={viewModalOpen}
         onOpenChange={setViewModalOpen}
         packageId={selectedPackageId}
+      />
+
+      {/* Edit Package Dialog */}
+      <UpdatePackageDialog
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        packageId={packageToEdit}
+        onPackageUpdated={handlePackageUpdated}
       />
 
       {/* Delete Package Dialog */}
