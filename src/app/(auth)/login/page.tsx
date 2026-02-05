@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -25,7 +24,6 @@ export default function LoginPage() {
   const { login, loading, error, user, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<{
     email?: string;
@@ -165,20 +163,6 @@ export default function LoginPage() {
                 {validationErrors.password}
               </p>
             )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="remember"
-              checked={rememberMe}
-              onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-              disabled={loading}
-            />
-            <label
-              htmlFor="remember"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {t("rememberMe")}
-            </label>
           </div>
           <Button
             type="submit"

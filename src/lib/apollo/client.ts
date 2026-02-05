@@ -13,6 +13,7 @@ import { setContext } from "@apollo/client/link/context";
 import {
   clearTokens,
   getAccessToken,
+  getRefreshToken,
   isTokenExpired,
   saveTokens,
 } from "@/lib/auth/tokens";
@@ -28,33 +29,82 @@ const httpLink = new HttpLink({
   credentials: "include", // Include cookies for authentication
 });
 
+// Global variable to track ongoing refresh to prevent race conditions
+let refreshPromise: Promise<string | null> | null = null;
+
+/**
+ * Perform token refresh with deduplication
+ * Prevents multiple simultaneous refresh attempts
+ */
+async function performTokenRefresh(): Promise<string | null> {
+  // If a refresh is already in progress, return that promise
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  // Create new refresh promise
+  refreshPromise = (async () => {
+    try {
+      const refreshToken = getRefreshToken();
+
+      if (!refreshToken) {
+        throw new Error("No refresh token available");
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+      try {
+        const response = await fetch(GRAPHQL_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: REFRESH_TOKEN_MUTATION.loc?.source.body,
+            variables: { token: refreshToken },
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        const result = await response.json();
+
+        if (result.data?.refreshToken) {
+          const newAccessToken = result.data.refreshToken.token;
+          // Save new access token (keep existing refresh token)
+          saveTokens(newAccessToken, refreshToken);
+          return newAccessToken;
+        }
+
+        throw new Error("Token refresh failed: Invalid response");
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
+    } catch (error) {
+      console.error("Token refresh failed:", error);
+      clearTokens();
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 // Auth Link - adds JWT token to headers if available
 const authLink = setContext(async (_, { headers }) => {
   let token = getAccessToken();
 
   // Check if token is expired and refresh if needed
   if (token && isTokenExpired(token)) {
-    try {
-      const response = await fetch(GRAPHQL_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: REFRESH_TOKEN_MUTATION.loc?.source.body,
-          variables: { token },
-        }),
-      });
-
-      const result = await response.json();
-      if (result.data?.refreshToken) {
-        const newToken = result.data.refreshToken.token;
-        saveTokens(newToken);
-        token = newToken;
-      }
-    } catch (error) {
-      console.error("Token refresh failed:", error);
-      clearTokens();
+    const newToken = await performTokenRefresh();
+    if (newToken) {
+      token = newToken;
+    } else {
       token = null;
     }
   }
@@ -80,31 +130,20 @@ const errorLink = onError(
         if (
           error.extensions?.code === "UNAUTHENTICATED" ||
           error.message.includes("Authentication") ||
-          error.message.includes("Signature has expired")
+          error.message.includes("Signature has expired") ||
+          error.message.includes("token") ||
+          error.message.includes("Token")
         ) {
           // Try to refresh the token
-          const refreshToken = getAccessToken();
+          const refreshToken = getRefreshToken();
           if (
             refreshToken &&
             !operation.operationName?.includes("RefreshToken")
           ) {
             return new Observable((observer) => {
-              fetch(GRAPHQL_API_URL, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  query: REFRESH_TOKEN_MUTATION.loc?.source.body,
-                  variables: { refreshToken },
-                }),
-              })
-                .then((response) => response.json())
-                .then((result) => {
-                  if (result.data?.refreshToken) {
-                    const newToken = result.data.refreshToken.token;
-                    saveTokens(newToken);
-
+              performTokenRefresh()
+                .then((newToken) => {
+                  if (newToken) {
                     // Retry the failed request with new token
                     const subscriber = {
                       next: observer.next.bind(observer),
@@ -171,6 +210,7 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
         errorPolicy: "all",
       },
     },
+    connectToDevTools: process.env.NODE_ENV === "development",
   });
 }
 
