@@ -17,6 +17,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { ErrorAlert } from "@/components/common/ErrorAlert";
 import LanguageSelector from "@/components/LanguageSelector";
+import { useLoginRateLimit } from "@/hooks/useRateLimit";
+import { sanitizeEmail } from "@/lib/utils/sanitize";
 
 export default function LoginPage() {
   const t = useTranslations("login");
@@ -29,6 +31,7 @@ export default function LoginPage() {
     email?: string;
     password?: string;
   }>({});
+  const { attempt, isLocked, lockExpiry } = useLoginRateLimit();
 
   // Redirect if already logged in
   useEffect(() => {
@@ -65,13 +68,39 @@ export default function LoginPage() {
     e.preventDefault();
     setFormError(null);
 
+    // Check rate limiting
+    if (isLocked) {
+      const remainingSeconds = lockExpiry
+        ? Math.ceil((lockExpiry - Date.now()) / 1000)
+        : 0;
+      setFormError(
+        t("rateLimitExceeded", { seconds: remainingSeconds }) ||
+          `Too many login attempts. Please try again in ${remainingSeconds} seconds.`
+      );
+      return;
+    }
+
     // Validate form
     if (!validateForm()) {
       return;
     }
 
+    // Check rate limit before attempting
+    if (!attempt()) {
+      const remainingSeconds = lockExpiry
+        ? Math.ceil((lockExpiry - Date.now()) / 1000)
+        : 0;
+      setFormError(
+        t("rateLimitExceeded", { seconds: remainingSeconds }) ||
+          `Too many login attempts. Please try again in ${remainingSeconds} seconds.`
+      );
+      return;
+    }
+
     try {
-      await login(email, password);
+      // Sanitize email before sending
+      const sanitizedEmail = sanitizeEmail(email);
+      await login(sanitizedEmail, password);
       // Redirect is handled in AuthContext
     } catch (err) {
       setFormError(err instanceof Error ? err.message : t("loginFailed"));
@@ -110,7 +139,7 @@ export default function LoginPage() {
                 setEmail(e.target.value);
                 setValidationErrors((prev) => ({ ...prev, email: undefined }));
               }}
-              disabled={loading}
+              disabled={loading || isLocked}
               aria-invalid={!!validationErrors.email}
               aria-describedby={
                 validationErrors.email ? "email-error" : undefined
@@ -148,7 +177,7 @@ export default function LoginPage() {
                   password: undefined,
                 }));
               }}
-              disabled={loading}
+              disabled={loading || isLocked}
               aria-invalid={!!validationErrors.password}
               aria-describedby={
                 validationErrors.password ? "password-error" : undefined
@@ -167,7 +196,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             className="w-full relative group overflow-hidden"
-            disabled={loading}
+            disabled={loading || isLocked}
             size="lg"
           >
             <span className="relative z-10 flex items-center justify-center gap-2">

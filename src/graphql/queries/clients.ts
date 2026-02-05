@@ -143,5 +143,5 @@ export interface GetClientResponse {
 }
 
 export interface GetClientVariables {
-  id: number;
+  id: string;
 }

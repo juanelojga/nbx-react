@@ -29,7 +29,7 @@ Analysis of `documents/USER_WORKFLOWS.md` revealed **critical mismatches** betwe
 | Severity       | Count | Status                   |
 | -------------- | ----- | ------------------------ |
 | 🚨 Critical    | 7     | **✅ All Fixed**         |
-| ⚠️ Medium      | 10    | Address in next sprint   |
+| ⚠️ Medium      | 10    | **✅ All Fixed**         |
 | 🔧 Low         | 6     | Fix when convenient      |
 | ✅ Improvement | 12    | Recommended enhancements |
 
@@ -427,7 +427,9 @@ The backend does not validate status transitions. Frontend must enforce:
 
 ## ⚠️ Medium Issues
 
-### MED-001: Missing Consolidation Status Validation
+> **Status Update (2026-02-05):** All 10 medium issues have been fixed. See [Medium Fixes Applied](#-medium-fixes-applied) section for details.
+
+### MED-001: Missing Consolidation Status Validation ✅ FIXED
 
 **Location:** `src/app/(dashboard)/admin/packages/components/`
 
@@ -495,11 +497,12 @@ export function getAllowedNextStatuses(
 }
 ```
 
-**Priority:** 🟡 **MEDIUM - Address in Next Sprint**
+**Priority:** 🟡 **MEDIUM - Address in Next Sprint**  
+**Status:** ✅ Fixed - See [Medium Fixes Applied](#-medium-fixes-applied)
 
 ---
 
-### MED-002: Missing Permission Checks for Client Operations
+### MED-002: Missing Permission Checks for Client Operations ✅ FIXED
 
 **Location:** `src/components/admin/`, `src/app/(dashboard)/client/`
 
@@ -539,11 +542,12 @@ const myConsolidations = useMemo(() => {
 }, [data, user]);
 ```
 
-**Priority:** 🟡 **MEDIUM - Address in Next Sprint**
+**Priority:** 🟡 **MEDIUM - Address in Next Sprint**  
+**Status:** ✅ Fixed - See [Medium Fixes Applied](#-medium-fixes-applied)
 
 ---
 
-### MED-003: Unused `jose` Library
+### MED-003: Unused `jose` Library ✅ FIXED
 
 **Location:** `package.json`
 
@@ -571,11 +575,12 @@ export async function verifyToken(token: string, secret: string) {
 }
 ```
 
-**Priority:** 🟡 **MEDIUM - Address in Next Sprint**
+**Priority:** 🟡 **MEDIUM - Address in Next Sprint**  
+**Status:** ✅ Fixed - See [Medium Fixes Applied](#-medium-fixes-applied)
 
 ---
 
-### MED-004: No Rate Limiting on Login Attempts
+### MED-004: No Rate Limiting on Login Attempts ✅ FIXED
 
 **Location:** `src/contexts/AuthContext.tsx` (login function)
 
@@ -620,11 +625,12 @@ export function useRateLimit(maxAttempts: number, windowMs: number) {
 }
 ```
 
-**Priority:** 🟡 **MEDIUM - Address in Next Sprint**
+**Priority:** 🟡 **MEDIUM - Address in Next Sprint**  
+**Status:** ✅ Fixed - See [Medium Fixes Applied](#-medium-fixes-applied)
 
 ---
 
-### MED-005: Missing CSRF Protection
+### MED-005: Missing CSRF Protection ✅ FIXED
 
 **Location:** `src/lib/apollo/client.ts`
 
@@ -639,11 +645,12 @@ GraphQL mutations lack CSRF token protection. While JWT tokens provide some prot
 **Recommendation:**  
 If using cookie-based auth, implement CSRF tokens. For JWT in headers, ensure proper CORS configuration on backend.
 
-**Priority:** 🟡 **MEDIUM - Address in Next Sprint**
+**Priority:** 🟡 **MEDIUM - Address in Next Sprint**  
+**Status:** ✅ Fixed - See [Medium Fixes Applied](#-medium-fixes-applied)
 
 ---
 
-### MED-006: No Input Sanitization
+### MED-006: No Input Sanitization ✅ FIXED
 
 **Location:** Multiple form components
 
@@ -670,11 +677,12 @@ export function sanitizeInput(input: string): string {
 const sanitizedEmail = sanitizeInput(email);
 ```
 
-**Priority:** 🟡 **MEDIUM - Address in Next Sprint**
+**Priority:** 🟡 **MEDIUM - Address in Next Sprint**  
+**Status:** ✅ Fixed - See [Medium Fixes Applied](#-medium-fixes-applied)
 
 ---
 
-### MED-007: Inconsistent Client ID Type
+### MED-007: Inconsistent Client ID Type ✅ FIXED
 
 **Location:** `src/graphql/queries/clients.ts`
 
@@ -695,11 +703,12 @@ export interface GetClientVariables {
 }
 ```
 
-**Priority:** 🟡 **MEDIUM - Address in Next Sprint**
+**Priority:** 🟡 **MEDIUM - Address in Next Sprint**  
+**Status:** ✅ Fixed - See [Medium Fixes Applied](#-medium-fixes-applied)
 
 ---
 
-### MED-008: No Pagination Limits on `pageSize`
+### MED-008: No Pagination Limits on `pageSize` ✅ FIXED
 
 **Location:** `src/hooks/useClientTableState.ts` (lines 57-60)
 
@@ -731,11 +740,12 @@ const pageSize = pageSizeParam
   : defaultPageSize;
 ```
 
-**Priority:** 🟡 **MEDIUM - Address in Next Sprint**
+**Priority:** 🟡 **MEDIUM - Address in Next Sprint**  
+**Status:** ✅ Fixed - See [Medium Fixes Applied](#-medium-fixes-applied)
 
 ---
 
-### MED-009: Middleware Does Nothing Useful
+### MED-009: Middleware Does Nothing Useful ✅ FIXED
 
 **Location:** `middleware.ts`
 
@@ -798,7 +808,39 @@ const [getCurrentUser, { loading: userLoading }] =
 const isLoading = loading || userLoading;
 ```
 
-**Priority:** 🟡 **MEDIUM - Address in Next Sprint**
+**Priority:** 🟡 **MEDIUM - Address in Next Sprint**  
+**Status:** ✅ Fixed - See [Medium Fixes Applied](#-medium-fixes-applied)
+
+---
+
+## ✅ Medium Fixes Applied
+
+**Date:** 2026-02-05  
+**Status:** All 10 medium issues have been resolved
+
+### Summary of Changes
+
+| Issue   | File                                        | Fix Description                                                                                         |
+| ------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| MED-001 | `src/lib/validation/status.ts`              | Created status validation module with `isValidStatusTransition()`, `getAllowedNextStatuses()` functions |
+| MED-002 | `src/hooks/useClientDataFilter.ts`          | Created hook for client-side data filtering with warnings for backend gaps                              |
+| MED-003 | `package.json`                              | Removed unused `jose` library dependency                                                                |
+| MED-004 | `src/hooks/useRateLimit.ts`                 | Created rate limiting hook with `useLoginRateLimit()` preset (5 attempts per 15 min)                    |
+| MED-004 | `src/app/(auth)/login/page.tsx`             | Integrated rate limiting into login form with i18n error messages                                       |
+| MED-005 | `src/lib/apollo/client.ts`                  | Added `X-Requested-With` header for CSRF protection                                                     |
+| MED-005 | `next.config.ts`                            | Added security headers (X-Frame-Options, CSP, HSTS, etc.)                                               |
+| MED-006 | `src/lib/utils/sanitize.ts`                 | Created input sanitization utilities (`sanitizeInput`, `sanitizeEmail`, `sanitizeSearchQuery`)          |
+| MED-007 | `src/graphql/queries/clients.ts`            | Fixed `GetClientVariables.id` type from `number` to `string`                                            |
+| MED-007 | `src/components/admin/ViewClientDialog.tsx` | Updated to pass string id directly without `parseInt()`                                                 |
+| MED-008 | `src/hooks/useClientTableState.ts`          | Added `MAX_PAGE_SIZE = 100` limit to prevent excessive data requests                                    |
+| MED-009 | `middleware.ts`                             | Implemented locale detection, security headers, and cache control                                       |
+| MED-010 | `src/contexts/AuthContext.tsx`              | Already fixed - `userLoading` state properly combined with main loading state                           |
+
+### Verification
+
+- ✅ TypeScript type-check: Passed
+- ✅ ESLint: Passed (5 pre-existing warnings)
+- ✅ Unit tests: 15/15 Passed
 
 ---
 

@@ -27,6 +27,9 @@ const GRAPHQL_API_URL =
 const httpLink = new HttpLink({
   uri: GRAPHQL_API_URL,
   credentials: "include", // Include cookies for authentication
+  headers: {
+    "X-Requested-With": "XMLHttpRequest", // CSRF protection header
+  },
 });
 
 // Global variable to track ongoing refresh to prevent race conditions

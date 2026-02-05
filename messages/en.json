@@ -26,7 +26,9 @@
     "emailInvalid": "Please enter a valid email address",
     "passwordRequired": "Password is required",
     "passwordMinLength": "Password must be at least 6 characters",
-    "loginFailed": "Login failed. Please try again."
+    "loginFailed": "Login failed. Please try again.",
+    "rateLimitExceeded": "Too many login attempts. Please try again in {seconds} seconds.",
+    "rateLimitMessage": "Too many attempts. Try again in {seconds}s"
   },
   "adminClients": {
     "title": "Clients Management",
