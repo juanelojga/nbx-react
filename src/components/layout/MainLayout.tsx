@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 
@@ -11,18 +11,18 @@ interface MainLayoutProps {
 
 const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";
 
+// Helper to get initial sidebar state from localStorage
+const getInitialSidebarState = (): boolean => {
+  if (typeof window === "undefined") return false;
+  const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+  return stored === "true";
+};
+
 export function MainLayout({ children, userRole }: MainLayoutProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] =
-    useState(false);
-
-  // Load sidebar state from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-    if (stored !== null) {
-      setIsDesktopSidebarCollapsed(stored === "true");
-    }
-  }, []);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(
+    getInitialSidebarState
+  );
 
   // Persist sidebar state to localStorage
   const toggleDesktopSidebar = () => {

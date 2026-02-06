@@ -19,6 +19,22 @@ import {
 } from "@/graphql/queries/clients";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+interface InfoRowProps {
+  label: string;
+  value: string | null | undefined;
+}
+
+function InfoRow({ label, value }: InfoRowProps) {
+  return (
+    <div className="flex flex-col space-y-1">
+      <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <span className="text-sm text-foreground">
+        {value && value.trim() !== "" ? value : "-"}
+      </span>
+    </div>
+  );
+}
+
 interface ViewClientDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -45,21 +61,6 @@ export function ViewClientDialog({
   const handleClose = () => {
     onOpenChange(false);
   };
-
-  const InfoRow = ({
-    label,
-    value,
-  }: {
-    label: string;
-    value: string | null | undefined;
-  }) => (
-    <div className="flex flex-col space-y-1">
-      <span className="text-sm font-medium text-muted-foreground">{label}</span>
-      <span className="text-sm text-foreground">
-        {value && value.trim() !== "" ? value : "-"}
-      </span>
-    </div>
-  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
