@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -18,6 +17,9 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { ErrorAlert } from "@/components/common/ErrorAlert";
 import LanguageSelector from "@/components/LanguageSelector";
+import { useLoginRateLimit } from "@/hooks/useRateLimit";
+import { sanitizeEmail } from "@/lib/utils/sanitize";
+import { validateEmail, validatePassword } from "@/lib/validation/auth";
 
 export default function LoginPage() {
   const t = useTranslations("login");
@@ -25,12 +27,12 @@ export default function LoginPage() {
   const { login, loading, error, user, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<{
     email?: string;
     password?: string;
   }>({});
+  const { attempt, isLocked, lockExpiry } = useLoginRateLimit();
 
   // Redirect if already logged in
   useEffect(() => {
@@ -45,18 +47,18 @@ export default function LoginPage() {
   const validateForm = (): boolean => {
     const errors: { email?: string; password?: string } = {};
 
-    // Email validation
-    if (!email) {
-      errors.email = t("emailRequired");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = t("emailInvalid");
+    // Email validation using Zod for comprehensive RFC-compliant checks
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.success) {
+      errors.email = email ? t("emailInvalid") : t("emailRequired");
     }
 
-    // Password validation
-    if (!password) {
-      errors.password = t("passwordRequired");
-    } else if (password.length < 6) {
-      errors.password = t("passwordMinLength");
+    // Password validation using Zod schema
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.success) {
+      errors.password = password
+        ? t("passwordMinLength")
+        : t("passwordRequired");
     }
 
     setValidationErrors(errors);
@@ -67,13 +69,39 @@ export default function LoginPage() {
     e.preventDefault();
     setFormError(null);
 
+    // Check rate limiting
+    if (isLocked) {
+      const remainingSeconds = lockExpiry
+        ? Math.ceil((lockExpiry - Date.now()) / 1000)
+        : 0;
+      setFormError(
+        t("rateLimitExceeded", { seconds: remainingSeconds }) ||
+          `Too many login attempts. Please try again in ${remainingSeconds} seconds.`
+      );
+      return;
+    }
+
     // Validate form
     if (!validateForm()) {
       return;
     }
 
+    // Check rate limit before attempting
+    if (!attempt()) {
+      const remainingSeconds = lockExpiry
+        ? Math.ceil((lockExpiry - Date.now()) / 1000)
+        : 0;
+      setFormError(
+        t("rateLimitExceeded", { seconds: remainingSeconds }) ||
+          `Too many login attempts. Please try again in ${remainingSeconds} seconds.`
+      );
+      return;
+    }
+
     try {
-      await login(email, password);
+      // Sanitize email before sending
+      const sanitizedEmail = sanitizeEmail(email);
+      await login(sanitizedEmail, password);
       // Redirect is handled in AuthContext
     } catch (err) {
       setFormError(err instanceof Error ? err.message : t("loginFailed"));
@@ -112,7 +140,7 @@ export default function LoginPage() {
                 setEmail(e.target.value);
                 setValidationErrors((prev) => ({ ...prev, email: undefined }));
               }}
-              disabled={loading}
+              disabled={loading || isLocked}
               aria-invalid={!!validationErrors.email}
               aria-describedby={
                 validationErrors.email ? "email-error" : undefined
@@ -150,7 +178,7 @@ export default function LoginPage() {
                   password: undefined,
                 }));
               }}
-              disabled={loading}
+              disabled={loading || isLocked}
               aria-invalid={!!validationErrors.password}
               aria-describedby={
                 validationErrors.password ? "password-error" : undefined
@@ -166,24 +194,10 @@ export default function LoginPage() {
               </p>
             )}
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="remember"
-              checked={rememberMe}
-              onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-              disabled={loading}
-            />
-            <label
-              htmlFor="remember"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {t("rememberMe")}
-            </label>
-          </div>
           <Button
             type="submit"
             className="w-full relative group overflow-hidden"
-            disabled={loading}
+            disabled={loading || isLocked}
             size="lg"
           >
             <span className="relative z-10 flex items-center justify-center gap-2">

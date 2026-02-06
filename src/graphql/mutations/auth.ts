@@ -2,13 +2,13 @@ import { gql } from "@apollo/client";
 
 /**
  * Login mutation
- * Note: Field names should be verified with the Django/Graphene backend schema
- * Common patterns: tokenAuth, login, or signIn
+ * Uses emailAuth as per backend GraphQL schema
  */
 export const LOGIN_MUTATION = gql`
   mutation Login($email: String!, $password: String!) {
-    tokenAuth(email: $email, password: $password) {
+    emailAuth(email: $email, password: $password) {
       token
+      refreshToken
       refreshExpiresIn
       payload
     }
@@ -17,7 +17,6 @@ export const LOGIN_MUTATION = gql`
 
 /**
  * Refresh token mutation
- * Note: Verify the mutation name with backend (refreshToken, refreshJwtToken, etc.)
  */
 export const REFRESH_TOKEN_MUTATION = gql`
   mutation RefreshToken($token: String!) {
@@ -31,7 +30,6 @@ export const REFRESH_TOKEN_MUTATION = gql`
 
 /**
  * Logout mutation (if backend supports session invalidation)
- * Note: Some backends handle logout client-side only
  */
 export const LOGOUT_MUTATION = gql`
   mutation Logout {
@@ -45,10 +43,11 @@ export const LOGOUT_MUTATION = gql`
  * TypeScript types for mutation responses
  */
 export interface LoginResponse {
-  tokenAuth: {
+  emailAuth: {
     token: string;
+    refreshToken: string;
     refreshExpiresIn: number;
-    user: {
+    payload: {
       email: string;
       exp: number;
       origIat: number;
@@ -60,7 +59,7 @@ export interface RefreshTokenResponse {
   refreshToken: {
     token: string;
     refreshExpiresIn: number;
-    user: {
+    payload: {
       email: string;
       exp: number;
       origIat: number;
@@ -70,6 +69,6 @@ export interface RefreshTokenResponse {
 
 export interface LogoutResponse {
   revokeToken: {
-    success: boolean;
+    revoked: boolean;
   };
 }

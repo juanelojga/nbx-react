@@ -36,7 +36,7 @@ export function ViewClientDialog({
     GetClientResponse,
     GetClientVariables
   >(GET_CLIENT, {
-    variables: { id: parseInt(clientId || "0") },
+    variables: { id: clientId || "" },
     skip: !clientId || !open, // Skip query if no clientId or dialog is closed
   });
 

@@ -53,10 +53,11 @@ export function useClientTableState(
     const pageParam = searchParams.get("page");
     const page = pageParam ? Math.max(1, parseInt(pageParam, 10)) : 1;
 
-    // Parse pageSize parameter (default to defaultPageSize)
+    // Parse pageSize parameter (default to defaultPageSize, max 100)
+    const MAX_PAGE_SIZE = 100;
     const pageSizeParam = searchParams.get("pageSize");
     const pageSize = pageSizeParam
-      ? Math.max(1, parseInt(pageSizeParam, 10))
+      ? Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(pageSizeParam, 10)))
       : defaultPageSize;
 
     // Parse orderBy parameter (format: "field" or "-field")

@@ -18,10 +18,13 @@ import {
 import {
   clearTokens,
   getAccessToken,
+  getRefreshToken,
   isTokenExpired,
+  isRefreshTokenExpired,
   saveTokens,
 } from "@/lib/auth/tokens";
 import { apolloClient } from "@/lib/apollo/client";
+import { logger } from "@/lib/logger";
 
 interface AuthContextType {
   user: User | null;
@@ -38,6 +41,9 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+// Global variable to track ongoing refresh to prevent race conditions
+let refreshPromise: Promise<string | null> | null = null;
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -49,7 +55,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     REFRESH_TOKEN_MUTATION
   );
   const [logoutMutation] = useMutation(LOGOUT_MUTATION);
-  const [getCurrentUser] =
+  const [getCurrentUser, { loading: userLoading }] =
     useLazyQuery<GetCurrentUserResponse>(GET_CURRENT_USER);
 
   const isAuthenticated = !!user;
@@ -71,32 +77,53 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   /**
+   * Perform token refresh with deduplication
+   * Prevents multiple simultaneous refresh attempts
+   */
+  const performTokenRefresh = async (): Promise<string | null> => {
+    // If a refresh is already in progress, return that promise
+    if (refreshPromise) {
+      return refreshPromise;
+    }
+
+    // Create new refresh promise
+    refreshPromise = (async () => {
+      try {
+        const refreshToken = getRefreshToken();
+        if (!refreshToken) {
+          throw new Error("No refresh token available");
+        }
+
+        const { data } = await refreshTokenMutation({
+          variables: { token: refreshToken },
+        });
+
+        if (data?.refreshToken) {
+          const newAccessToken = data.refreshToken.token;
+          // Save new access token (keep existing refresh token)
+          saveTokens(newAccessToken, refreshToken);
+          return newAccessToken;
+        }
+
+        throw new Error("Token refresh failed: Invalid response");
+      } catch (err) {
+        logger.error("Failed to refresh token:", err);
+        clearTokens();
+        setUser(null);
+        return null;
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+
+    return refreshPromise;
+  };
+
+  /**
    * Refresh the access token using the refresh token
    */
   const refreshAccessToken = async (): Promise<string | null> => {
-    try {
-      const token = getAccessToken();
-      if (!token) {
-        throw new Error("No refresh token available");
-      }
-
-      const { data } = await refreshTokenMutation({
-        variables: { token },
-      });
-
-      if (data?.refreshToken) {
-        const newAccessToken = data.refreshToken.token;
-        saveTokens(newAccessToken);
-        return newAccessToken;
-      }
-
-      return null;
-    } catch (err) {
-      console.error("Failed to refresh token:", err);
-      clearTokens();
-      setUser(null);
-      return null;
-    }
+    return performTokenRefresh();
   };
 
   /**
@@ -105,23 +132,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const loadUser = async (): Promise<void> => {
     try {
       let token = getAccessToken();
+      const refreshToken = getRefreshToken();
 
-      // Check if token exists
-      if (!token) {
+      // Check if tokens exist
+      if (!token || !refreshToken) {
         setUser(null);
         setLoading(false);
-        router.push("/login");
         return;
       }
 
-      // Check if token is expired
+      // Check if refresh token is expired
+      if (isRefreshTokenExpired()) {
+        clearTokens();
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      // Check if access token is expired
       if (isTokenExpired(token)) {
         // Try to refresh
         token = await refreshAccessToken();
         if (!token) {
           setUser(null);
           setLoading(false);
-          router.push("/login");
           return;
         }
       }
@@ -139,14 +173,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setError(null);
       } else {
         setUser(null);
-        router.push("/login");
       }
     } catch (err) {
-      console.error("Failed to load user:", err);
+      logger.error("Failed to load user:", err);
       clearTokens();
       setUser(null);
       setError("Failed to load user session");
-      router.push("/login");
     } finally {
       setLoading(false);
     }
@@ -164,14 +196,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         variables: { email, password },
       });
 
-      if (!data?.tokenAuth) {
+      if (!data?.emailAuth) {
         throw new Error("Invalid response from server");
       }
 
-      const { token } = data.tokenAuth;
+      const { token: accessToken, refreshToken } = data.emailAuth;
 
-      // Save tokens (using token for both access and refresh for now)
-      saveTokens(token);
+      // Save both tokens
+      saveTokens(accessToken, refreshToken);
 
       // Fetch current user data
       const { data: currentUserData } = await getCurrentUser();
@@ -198,7 +230,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           : "Login failed. Please check your credentials.";
 
       setError(errorMessage);
-      console.error("Login error:", err);
+      logger.error("Login error:", err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -213,7 +245,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Try to revoke token on backend (if supported)
       await logoutMutation();
     } catch (err) {
-      console.error("Logout mutation error:", err);
+      logger.error("Logout mutation error:", err);
       // Continue with local logout even if backend fails
     }
 
@@ -239,7 +271,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value: AuthContextType = {
     user,
-    loading,
+    loading: loading || userLoading,
     error,
     isAuthenticated,
     login,
