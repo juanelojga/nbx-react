@@ -162,7 +162,7 @@ export function AddPackageDialog({
       { key: "servicePrice", label: "Service price" },
     ];
 
-    numericFields.forEach(({ key, label }) => {
+    numericFields.forEach(({ key }) => {
       const value = formData[key as keyof FormData].trim();
       if (value) {
         const numValue = parseFloat(value);

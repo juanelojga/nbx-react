@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import {
   Dialog,
@@ -122,38 +122,49 @@ export function UpdatePackageDialog({
     },
   });
 
+  // Track the last processed package to avoid unnecessary re-renders
+  const lastPackageIdRef = useRef<string | null>(null);
+
   // Populate form with existing package data when data is loaded
+  // Using queueMicrotask to defer state update and avoid cascading renders
   useEffect(() => {
     if (data?.package) {
       const pkg = data.package;
+      // Only update form if the package data has actually changed
+      if (lastPackageIdRef.current !== pkg.id) {
+        lastPackageIdRef.current = pkg.id;
 
-      // Helper to format date for input[type="date"]
-      const formatDateForInput = (dateString: string | null) => {
-        if (!dateString) return "";
-        try {
-          const date = new Date(dateString);
-          return date.toISOString().split("T")[0];
-        } catch {
-          return "";
-        }
-      };
+        // Helper to format date for input[type="date"]
+        const formatDateForInput = (dateString: string | null) => {
+          if (!dateString) return "";
+          try {
+            const date = new Date(dateString);
+            return date.toISOString().split("T")[0];
+          } catch {
+            return "";
+          }
+        };
 
-      setFormData({
-        courier: pkg.courier || "",
-        otherCourier: pkg.otherCourier || "",
-        length: pkg.length?.toString() || "",
-        width: pkg.width?.toString() || "",
-        height: pkg.height?.toString() || "",
-        dimensionUnit: pkg.dimensionUnit || "cm",
-        weight: pkg.weight?.toString() || "",
-        weightUnit: pkg.weightUnit || "kg",
-        description: pkg.description || "",
-        purchaseLink: pkg.purchaseLink || "",
-        realPrice: pkg.realPrice?.toString() || "",
-        servicePrice: pkg.servicePrice?.toString() || "",
-        arrivalDate: formatDateForInput(pkg.arrivalDate),
-        comments: pkg.comments || "",
-      });
+        // Defer state update to avoid synchronous setState in effect
+        queueMicrotask(() => {
+          setFormData({
+            courier: pkg.courier || "",
+            otherCourier: pkg.otherCourier || "",
+            length: pkg.length?.toString() || "",
+            width: pkg.width?.toString() || "",
+            height: pkg.height?.toString() || "",
+            dimensionUnit: pkg.dimensionUnit || "cm",
+            weight: pkg.weight?.toString() || "",
+            weightUnit: pkg.weightUnit || "kg",
+            description: pkg.description || "",
+            purchaseLink: pkg.purchaseLink || "",
+            realPrice: pkg.realPrice?.toString() || "",
+            servicePrice: pkg.servicePrice?.toString() || "",
+            arrivalDate: formatDateForInput(pkg.arrivalDate),
+            comments: pkg.comments || "",
+          });
+        });
+      }
     }
   }, [data]);
 
@@ -199,7 +210,7 @@ export function UpdatePackageDialog({
       { key: "servicePrice", label: "Service price" },
     ];
 
-    numericFields.forEach(({ key, label }) => {
+    numericFields.forEach(({ key }) => {
       const value = formData[key as keyof FormData].trim();
       if (value) {
         const numValue = parseFloat(value);
@@ -293,7 +304,7 @@ export function UpdatePackageDialog({
     await updatePackage({ variables });
   };
 
-  const loading = queryLoading || mutationLoading;
+  const isLoading = queryLoading || mutationLoading;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -365,7 +376,7 @@ export function UpdatePackageDialog({
                   onChange={(e) =>
                     handleInputChange("description", e.target.value)
                   }
-                  disabled={mutationLoading}
+                  disabled={isLoading}
                   placeholder="Brief package description"
                 />
               </div>
@@ -386,7 +397,7 @@ export function UpdatePackageDialog({
                     onChange={(e) =>
                       handleInputChange("courier", e.target.value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                     placeholder="e.g., FedEx, UPS, DHL"
                   />
                 </div>
@@ -400,7 +411,7 @@ export function UpdatePackageDialog({
                     onChange={(e) =>
                       handleInputChange("otherCourier", e.target.value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                     placeholder="Alternative courier name (optional)"
                   />
                 </div>
@@ -425,7 +436,7 @@ export function UpdatePackageDialog({
                     onChange={(e) =>
                       handleInputChange("length", e.target.value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                     aria-invalid={!!validationErrors.length}
                     placeholder="0.00"
                   />
@@ -447,7 +458,7 @@ export function UpdatePackageDialog({
                     min="0"
                     value={formData.width}
                     onChange={(e) => handleInputChange("width", e.target.value)}
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                     aria-invalid={!!validationErrors.width}
                     placeholder="0.00"
                   />
@@ -471,7 +482,7 @@ export function UpdatePackageDialog({
                     onChange={(e) =>
                       handleInputChange("height", e.target.value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                     aria-invalid={!!validationErrors.height}
                     placeholder="0.00"
                   />
@@ -491,7 +502,7 @@ export function UpdatePackageDialog({
                     onValueChange={(value) =>
                       handleInputChange("dimensionUnit", value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                   >
                     <SelectTrigger id="dimensionUnit" className="w-full">
                       <SelectValue placeholder="Select unit" />
@@ -525,7 +536,7 @@ export function UpdatePackageDialog({
                     onChange={(e) =>
                       handleInputChange("weight", e.target.value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                     aria-invalid={!!validationErrors.weight}
                     placeholder="0.00"
                   />
@@ -545,7 +556,7 @@ export function UpdatePackageDialog({
                     onValueChange={(value) =>
                       handleInputChange("weightUnit", value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                   >
                     <SelectTrigger id="weightUnit" className="w-full">
                       <SelectValue placeholder="Select unit" />
@@ -579,7 +590,7 @@ export function UpdatePackageDialog({
                     onChange={(e) =>
                       handleInputChange("realPrice", e.target.value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                     aria-invalid={!!validationErrors.realPrice}
                     placeholder="0.00"
                   />
@@ -603,7 +614,7 @@ export function UpdatePackageDialog({
                     onChange={(e) =>
                       handleInputChange("servicePrice", e.target.value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                     aria-invalid={!!validationErrors.servicePrice}
                     placeholder="0.00"
                   />
@@ -633,7 +644,7 @@ export function UpdatePackageDialog({
                     onChange={(e) =>
                       handleInputChange("purchaseLink", e.target.value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                     aria-invalid={!!validationErrors.purchaseLink}
                     placeholder="https://example.com/order/..."
                   />
@@ -655,7 +666,7 @@ export function UpdatePackageDialog({
                     onChange={(e) =>
                       handleInputChange("arrivalDate", e.target.value)
                     }
-                    disabled={mutationLoading}
+                    disabled={isLoading}
                     aria-invalid={!!validationErrors.arrivalDate}
                   />
                   {validationErrors.arrivalDate && (
@@ -676,7 +687,7 @@ export function UpdatePackageDialog({
                   onChange={(e) =>
                     handleInputChange("comments", e.target.value)
                   }
-                  disabled={mutationLoading}
+                  disabled={isLoading}
                   placeholder="Add any additional notes or comments"
                   rows={3}
                 />
@@ -692,8 +703,8 @@ export function UpdatePackageDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={mutationLoading}>
-                {mutationLoading ? (
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Updating...

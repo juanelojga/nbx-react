@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation } from "@apollo/client";
 import { useTranslations } from "next-intl";
 import {
@@ -83,22 +83,33 @@ export function EditClientDialog({
     {}
   );
 
+  // Track the last processed client to avoid unnecessary re-renders
+  const lastClientIdRef = useRef<string | null>(null);
+
   // Prefill form data when client changes
+  // Using queueMicrotask to defer state update and avoid cascading renders
   useEffect(() => {
     if (client) {
-      setFormData({
-        firstName: client.firstName || "",
-        lastName: client.lastName || "",
-        identificationNumber: client.identificationNumber || "",
-        mobilePhoneNumber: client.mobilePhoneNumber || "",
-        phoneNumber: client.phoneNumber || "",
-        state: client.state || "",
-        city: client.city || "",
-        mainStreet: client.mainStreet || "",
-        secondaryStreet: client.secondaryStreet || "",
-        buildingNumber: client.buildingNumber || "",
-      });
-      setValidationErrors({});
+      // Only update form if the client data has actually changed
+      if (lastClientIdRef.current !== client.id) {
+        lastClientIdRef.current = client.id;
+        // Defer state update to avoid synchronous setState in effect
+        queueMicrotask(() => {
+          setFormData({
+            firstName: client.firstName || "",
+            lastName: client.lastName || "",
+            identificationNumber: client.identificationNumber || "",
+            mobilePhoneNumber: client.mobilePhoneNumber || "",
+            phoneNumber: client.phoneNumber || "",
+            state: client.state || "",
+            city: client.city || "",
+            mainStreet: client.mainStreet || "",
+            secondaryStreet: client.secondaryStreet || "",
+            buildingNumber: client.buildingNumber || "",
+          });
+          setValidationErrors({});
+        });
+      }
     }
   }, [client]);
 

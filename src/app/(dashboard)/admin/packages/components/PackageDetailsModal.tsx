@@ -18,6 +18,24 @@ import {
 } from "@/graphql/queries/packages";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+interface InfoRowProps {
+  label: string;
+  value: string | number | null | undefined;
+}
+
+function InfoRow({ label, value }: InfoRowProps) {
+  return (
+    <div className="flex flex-col space-y-1">
+      <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <span className="text-sm text-foreground">
+        {value !== null && value !== undefined && String(value).trim() !== ""
+          ? value
+          : "—"}
+      </span>
+    </div>
+  );
+}
+
 interface PackageDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -42,23 +60,6 @@ export function PackageDetailsModal({
   const handleClose = () => {
     onOpenChange(false);
   };
-
-  const InfoRow = ({
-    label,
-    value,
-  }: {
-    label: string;
-    value: string | number | null | undefined;
-  }) => (
-    <div className="flex flex-col space-y-1">
-      <span className="text-sm font-medium text-muted-foreground">{label}</span>
-      <span className="text-sm text-foreground">
-        {value !== null && value !== undefined && String(value).trim() !== ""
-          ? value
-          : "—"}
-      </span>
-    </div>
-  );
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "—";
