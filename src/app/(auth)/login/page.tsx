@@ -19,6 +19,7 @@ import { ErrorAlert } from "@/components/common/ErrorAlert";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useLoginRateLimit } from "@/hooks/useRateLimit";
 import { sanitizeEmail } from "@/lib/utils/sanitize";
+import { validateEmail, validatePassword } from "@/lib/validation/auth";
 
 export default function LoginPage() {
   const t = useTranslations("login");
@@ -46,18 +47,18 @@ export default function LoginPage() {
   const validateForm = (): boolean => {
     const errors: { email?: string; password?: string } = {};
 
-    // Email validation
-    if (!email) {
-      errors.email = t("emailRequired");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = t("emailInvalid");
+    // Email validation using Zod for comprehensive RFC-compliant checks
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.success) {
+      errors.email = email ? t("emailInvalid") : t("emailRequired");
     }
 
-    // Password validation
-    if (!password) {
-      errors.password = t("passwordRequired");
-    } else if (password.length < 6) {
-      errors.password = t("passwordMinLength");
+    // Password validation using Zod schema
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.success) {
+      errors.password = password
+        ? t("passwordMinLength")
+        : t("passwordRequired");
     }
 
     setValidationErrors(errors);

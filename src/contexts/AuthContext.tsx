@@ -24,6 +24,7 @@ import {
   saveTokens,
 } from "@/lib/auth/tokens";
 import { apolloClient } from "@/lib/apollo/client";
+import { logger } from "@/lib/logger";
 
 interface AuthContextType {
   user: User | null;
@@ -106,7 +107,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         throw new Error("Token refresh failed: Invalid response");
       } catch (err) {
-        console.error("Failed to refresh token:", err);
+        logger.error("Failed to refresh token:", err);
         clearTokens();
         setUser(null);
         return null;
@@ -174,7 +175,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(null);
       }
     } catch (err) {
-      console.error("Failed to load user:", err);
+      logger.error("Failed to load user:", err);
       clearTokens();
       setUser(null);
       setError("Failed to load user session");
@@ -229,7 +230,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           : "Login failed. Please check your credentials.";
 
       setError(errorMessage);
-      console.error("Login error:", err);
+      logger.error("Login error:", err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -244,7 +245,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Try to revoke token on backend (if supported)
       await logoutMutation();
     } catch (err) {
-      console.error("Logout mutation error:", err);
+      logger.error("Logout mutation error:", err);
       // Continue with local logout even if backend fails
     }
 

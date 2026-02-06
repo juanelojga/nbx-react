@@ -1,7 +1,14 @@
 import { jwtDecode } from "jwt-decode";
+import { logger } from "@/lib/logger";
 
 const ACCESS_TOKEN_KEY = "narbox_access_token";
 const REFRESH_TOKEN_KEY = "narbox_refresh_token";
+
+/**
+ * Buffer time (in seconds) before token expiration to treat it as expired.
+ * This ensures we refresh the token before it actually expires to avoid race conditions.
+ */
+export const TOKEN_REFRESH_BUFFER_SECONDS = 30;
 
 interface DecodedToken {
   exp: number;
@@ -23,7 +30,7 @@ export function saveTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   } catch (error) {
-    console.error("Failed to save tokens:", error);
+    logger.error("Failed to save tokens:", error);
   }
 }
 
@@ -36,7 +43,7 @@ export function getAccessToken(): string | null {
   try {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
   } catch (error) {
-    console.error("Failed to get access token:", error);
+    logger.error("Failed to get access token:", error);
     return null;
   }
 }
@@ -50,7 +57,7 @@ export function getRefreshToken(): string | null {
   try {
     return localStorage.getItem(REFRESH_TOKEN_KEY);
   } catch (error) {
-    console.error("Failed to get refresh token:", error);
+    logger.error("Failed to get refresh token:", error);
     return null;
   }
 }
@@ -65,7 +72,7 @@ export function clearTokens(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
   } catch (error) {
-    console.error("Failed to clear tokens:", error);
+    logger.error("Failed to clear tokens:", error);
   }
 }
 
@@ -74,14 +81,17 @@ export function clearTokens(): void {
  * @param token - The JWT token to check
  * @param bufferSeconds - Seconds before actual expiration to treat as expired (default: 30)
  */
-export function isTokenExpired(token: string, bufferSeconds = 30): boolean {
+export function isTokenExpired(
+  token: string,
+  bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS
+): boolean {
   try {
     const decoded = jwtDecode<DecodedToken>(token);
     const currentTime = Date.now() / 1000;
 
     return decoded.exp < currentTime + bufferSeconds;
   } catch (error) {
-    console.error("Failed to decode token:", error);
+    logger.error("Failed to decode token:", error);
     return true; // Treat invalid tokens as expired
   }
 }

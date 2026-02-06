@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types/user";
+import { logger } from "@/lib/logger";
 
 /**
  * Hook for filtering data to show only the current user's data
@@ -38,7 +39,7 @@ export function useClientDataFilter<T>(
     // Client users should only see their own data
     // Warn about the security concern
     if (process.env.NODE_ENV === "development") {
-      console.warn(
+      logger.warn(
         "[useClientDataFilter] Backend does not filter data by client. " +
           "Applying client-side filter as temporary measure. " +
           "TODO: Add backend filtering for production."

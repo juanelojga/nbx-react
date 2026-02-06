@@ -18,6 +18,7 @@ import {
   saveTokens,
 } from "@/lib/auth/tokens";
 import { REFRESH_TOKEN_MUTATION } from "@/graphql/mutations/auth";
+import { logger } from "@/lib/logger";
 
 // Get the GraphQL API URL from environment variables
 const GRAPHQL_API_URL =
@@ -87,7 +88,7 @@ async function performTokenRefresh(): Promise<string | null> {
         throw error;
       }
     } catch (error) {
-      console.error("Token refresh failed:", error);
+      logger.error("Token refresh failed:", error);
       clearTokens();
       return null;
     } finally {
@@ -125,7 +126,7 @@ const errorLink = onError(
   ({ graphQLErrors, networkError, operation, forward }) => {
     if (graphQLErrors) {
       for (const error of graphQLErrors) {
-        console.error(
+        logger.error(
           `[GraphQL error]: Message: ${error.message}, Location: ${JSON.stringify(error.locations)}, Path: ${error.path}`
         );
 
@@ -179,7 +180,7 @@ const errorLink = onError(
     }
 
     if (networkError) {
-      console.error(`[Network error]: ${networkError}`);
+      logger.error(`[Network error]: ${networkError}`);
     }
   }
 );
