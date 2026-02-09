@@ -66,7 +66,7 @@ async function performTokenRefresh(): Promise<string | null> {
           },
           body: JSON.stringify({
             query: REFRESH_TOKEN_MUTATION.loc?.source.body,
-            variables: { token: refreshToken },
+            variables: { refreshToken },
           }),
           signal: controller.signal,
         });
@@ -75,10 +75,11 @@ async function performTokenRefresh(): Promise<string | null> {
 
         const result = await response.json();
 
-        if (result.data?.refreshToken) {
-          const newAccessToken = result.data.refreshToken.token;
-          // Save new access token (keep existing refresh token)
-          saveTokens(newAccessToken, refreshToken);
+        if (result.data?.refreshWithToken) {
+          const newAccessToken = result.data.refreshWithToken.token;
+          const newRefreshToken = result.data.refreshWithToken.refreshToken;
+          // Save new access token and new refresh token (token rotation)
+          saveTokens(newAccessToken, newRefreshToken);
           return newAccessToken;
         }
 

@@ -17,11 +17,13 @@ export const LOGIN_MUTATION = gql`
 
 /**
  * Refresh token mutation
+ * Uses refreshWithToken as per backend GraphQL schema
  */
 export const REFRESH_TOKEN_MUTATION = gql`
-  mutation RefreshToken($token: String!) {
-    refreshToken(token: $token) {
+  mutation RefreshToken($refreshToken: String!) {
+    refreshWithToken(refreshToken: $refreshToken) {
       token
+      refreshToken
       refreshExpiresIn
       payload
     }
@@ -56,8 +58,9 @@ export interface LoginResponse {
 }
 
 export interface RefreshTokenResponse {
-  refreshToken: {
+  refreshWithToken: {
     token: string;
+    refreshToken: string;
     refreshExpiresIn: number;
     payload: {
       email: string;

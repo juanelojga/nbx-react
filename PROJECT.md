@@ -71,5 +71,6 @@ Limited access to view and manage their own packages.
 
 Required environment variables:
 
-- `NEXT_PUBLIC_GRAPHQL_API_URL`: GraphQL endpoint
+- `NEXT_PUBLIC_GRAPHQL_ENDPOINT`: GraphQL API endpoint URL
+- `NEXT_PUBLIC_API_URL`: REST API base URL (optional, for future use)
 - [Others to be added as needed]
