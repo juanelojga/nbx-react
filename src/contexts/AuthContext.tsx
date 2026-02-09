@@ -142,11 +142,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
-      // Parallelize token expiration checks (both are synchronous but good practice)
-      const [isAccessExpired, isRefreshExpired] = [
-        isTokenExpired(token),
-        isRefreshTokenExpired(),
-      ];
+      // Check token expiration status
+      const isAccessExpired = isTokenExpired(token);
+      const isRefreshExpired = isRefreshTokenExpired();
 
       // Check if refresh token is expired
       if (isRefreshExpired) {
@@ -156,15 +154,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
-      // Start token refresh promise if needed (but don't await yet)
-      let tokenRefreshPromise: Promise<string | null> | null = null;
+      // Refresh access token if needed
       if (isAccessExpired) {
-        tokenRefreshPromise = refreshAccessToken();
-      }
-
-      // Now await the refresh if we started it
-      if (tokenRefreshPromise) {
-        token = await tokenRefreshPromise;
+        token = await refreshAccessToken();
         if (!token) {
           setUser(null);
           setLoading(false);
@@ -215,7 +207,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const { token: accessToken, refreshToken } = data.emailAuth;
 
-      // Start both operations in parallel (saveTokens is synchronous, but we start user fetch immediately)
+      // Optimization: Start user fetch immediately after saving tokens
+      // saveTokens is synchronous, so we defer the await on getCurrentUser
       saveTokens(accessToken, refreshToken);
       const userFetchPromise = getCurrentUser();
 
