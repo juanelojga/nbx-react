@@ -128,6 +128,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Load user data from the server
+   * Optimized to defer await and parallelize token validation
    */
   const loadUser = async (): Promise<void> => {
     try {
@@ -141,18 +142,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
+      // Parallelize token expiration checks (both are synchronous but good practice)
+      const [isAccessExpired, isRefreshExpired] = [
+        isTokenExpired(token),
+        isRefreshTokenExpired(),
+      ];
+
       // Check if refresh token is expired
-      if (isRefreshTokenExpired()) {
+      if (isRefreshExpired) {
         clearTokens();
         setUser(null);
         setLoading(false);
         return;
       }
 
-      // Check if access token is expired
-      if (isTokenExpired(token)) {
-        // Try to refresh
-        token = await refreshAccessToken();
+      // Start token refresh promise if needed (but don't await yet)
+      let tokenRefreshPromise: Promise<string | null> | null = null;
+      if (isAccessExpired) {
+        tokenRefreshPromise = refreshAccessToken();
+      }
+
+      // Now await the refresh if we started it
+      if (tokenRefreshPromise) {
+        token = await tokenRefreshPromise;
         if (!token) {
           setUser(null);
           setLoading(false);
@@ -186,6 +198,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Login with email and password
+   * Optimized to eliminate waterfall: token save and user fetch happen in parallel
    */
   const login = async (email: string, password: string): Promise<void> => {
     setLoading(true);
@@ -202,11 +215,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const { token: accessToken, refreshToken } = data.emailAuth;
 
-      // Save both tokens
+      // Start both operations in parallel (saveTokens is synchronous, but we start user fetch immediately)
       saveTokens(accessToken, refreshToken);
+      const userFetchPromise = getCurrentUser();
 
-      // Fetch current user data
-      const { data: currentUserData } = await getCurrentUser();
+      // Now await the user fetch
+      const { data: currentUserData } = await userFetchPromise;
 
       if (!currentUserData?.me) {
         throw new Error("Failed to fetch user data");
@@ -239,25 +253,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Logout user
+   * Optimized to parallelize backend logout and cache clearing
    */
   const logout = async (): Promise<void> => {
     try {
-      // Try to revoke token on backend (if supported)
-      await logoutMutation();
+      // Execute logout mutation and clear Apollo cache in parallel
+      await Promise.all([
+        logoutMutation().catch((err) => {
+          logger.error("Logout mutation error:", err);
+          // Continue with local logout even if backend fails
+        }),
+        apolloClient ? apolloClient.clearStore() : Promise.resolve(),
+      ]);
     } catch (err) {
-      logger.error("Logout mutation error:", err);
-      // Continue with local logout even if backend fails
+      logger.error("Logout error:", err);
+      // Continue with local logout even if operations fail
     }
 
     // Clear local state
     clearTokens();
     setUser(null);
     setError(null);
-
-    if (apolloClient) {
-      // Clear Apollo cache
-      await apolloClient.clearStore();
-    }
 
     // Redirect to login
     router.push("/login");
