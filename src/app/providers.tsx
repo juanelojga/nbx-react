@@ -5,13 +5,15 @@ import { getApolloClient } from "@/lib/apollo/client";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import { useMemo } from "react";
 
 interface ProvidersProps {
   children: React.ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
-  const client = getApolloClient();
+  // Memoize Apollo Client to ensure singleton pattern
+  const client = useMemo(() => getApolloClient(), []);
 
   return (
     <ErrorBoundary>

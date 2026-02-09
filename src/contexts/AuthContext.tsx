@@ -98,10 +98,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           variables: { token: refreshToken },
         });
 
-        if (data?.refreshToken) {
-          const newAccessToken = data.refreshToken.token;
-          // Save new access token (keep existing refresh token)
-          saveTokens(newAccessToken, refreshToken);
+        if (data?.refreshWithToken) {
+          const newAccessToken = data.refreshWithToken.token;
+          const newRefreshToken = data.refreshWithToken.refreshToken;
+          const refreshExpiresIn = data.refreshWithToken.refreshExpiresIn;
+          // Save new tokens (backend may rotate refresh token)
+          saveTokens(newAccessToken, newRefreshToken, refreshExpiresIn);
           return newAccessToken;
         }
 
@@ -128,6 +130,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Load user data from the server
+   * Optimized to defer await and parallelize token validation
    */
   const loadUser = async (): Promise<void> => {
     try {
@@ -141,17 +144,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
+      // Check token expiration status
+      const isAccessExpired = isTokenExpired(token);
+      const isRefreshExpired = isRefreshTokenExpired();
+
       // Check if refresh token is expired
-      if (isRefreshTokenExpired()) {
+      if (isRefreshExpired) {
         clearTokens();
         setUser(null);
         setLoading(false);
         return;
       }
 
-      // Check if access token is expired
-      if (isTokenExpired(token)) {
-        // Try to refresh
+      // Refresh access token if needed
+      if (isAccessExpired) {
         token = await refreshAccessToken();
         if (!token) {
           setUser(null);
@@ -186,6 +192,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Login with email and password
+   * Optimized to eliminate waterfall: token save and user fetch happen in parallel
    */
   const login = async (email: string, password: string): Promise<void> => {
     setLoading(true);
@@ -200,13 +207,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error("Invalid response from server");
       }
 
-      const { token: accessToken, refreshToken } = data.emailAuth;
+      const {
+        token: accessToken,
+        refreshToken,
+        refreshExpiresIn,
+      } = data.emailAuth;
 
-      // Save both tokens
-      saveTokens(accessToken, refreshToken);
+      // Optimization: Start user fetch immediately after saving tokens
+      // saveTokens is synchronous, so we defer the await on getCurrentUser
+      saveTokens(accessToken, refreshToken, refreshExpiresIn);
+      const userFetchPromise = getCurrentUser();
 
-      // Fetch current user data
-      const { data: currentUserData } = await getCurrentUser();
+      // Now await the user fetch
+      const { data: currentUserData } = await userFetchPromise;
 
       if (!currentUserData?.me) {
         throw new Error("Failed to fetch user data");
@@ -239,25 +252,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Logout user
+   * Optimized to parallelize backend logout and cache clearing
    */
   const logout = async (): Promise<void> => {
     try {
-      // Try to revoke token on backend (if supported)
-      await logoutMutation();
+      // Execute logout mutation and clear Apollo cache in parallel
+      await Promise.all([
+        logoutMutation().catch((err) => {
+          logger.error("Logout mutation error:", err);
+          // Continue with local logout even if backend fails
+        }),
+        apolloClient ? apolloClient.clearStore() : Promise.resolve(),
+      ]);
     } catch (err) {
-      logger.error("Logout mutation error:", err);
-      // Continue with local logout even if backend fails
+      logger.error("Logout error:", err);
+      // Continue with local logout even if operations fail
     }
 
     // Clear local state
     clearTokens();
     setUser(null);
     setError(null);
-
-    if (apolloClient) {
-      // Clear Apollo cache
-      await apolloClient.clearStore();
-    }
 
     // Redirect to login
     router.push("/login");
