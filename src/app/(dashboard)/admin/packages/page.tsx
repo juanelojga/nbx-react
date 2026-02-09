@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@apollo/client";
+import dynamic from "next/dynamic";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,13 +12,21 @@ import { StepHeader } from "./components/StepHeader";
 import { ClientSelect } from "./components/ClientSelect";
 import { PackagesTable } from "./components/PackagesTable";
 import { CurrentConsolidatePanel } from "./components/CurrentConsolidatePanel";
-import { AddPackageDialog } from "./components/AddPackageDialog";
 import { ClientType } from "@/graphql/queries/clients";
 import {
   RESOLVE_ALL_PACKAGES,
   ResolveAllPackagesResponse,
   ResolveAllPackagesVariables,
 } from "@/graphql/queries/packages";
+
+// Dynamically import dialog component for better bundle splitting
+const AddPackageDialog = dynamic(
+  () =>
+    import("./components/AddPackageDialog").then((mod) => ({
+      default: mod.AddPackageDialog,
+    })),
+  { ssr: false }
+);
 
 const CONSOLIDATION_STEPS = [
   { number: 1, label: "Select Client" },

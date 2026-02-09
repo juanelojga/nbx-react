@@ -77,6 +77,7 @@ export function Sidebar({
                 key={item.href}
                 href={item.href}
                 onClick={onMobileClose}
+                prefetch={true}
                 className={cn(
                   "flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 group text-sm",
                   "hover:bg-accent hover:shadow-sm active:scale-[0.98]",

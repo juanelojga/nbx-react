@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import {
   Table,
   TableBody,
@@ -19,9 +20,29 @@ import {
 } from "@/components/ui/tooltip";
 import { Package as PackageIcon, X, Eye, Trash2, Pencil } from "lucide-react";
 import { Package } from "../types";
-import { PackageDetailsModal } from "./PackageDetailsModal";
-import { DeletePackageDialog } from "./DeletePackageDialog";
-import { UpdatePackageDialog } from "./UpdatePackageDialog";
+
+// Dynamically import dialog components for better bundle splitting
+const PackageDetailsModal = dynamic(
+  () =>
+    import("./PackageDetailsModal").then((mod) => ({
+      default: mod.PackageDetailsModal,
+    })),
+  { ssr: false }
+);
+const DeletePackageDialog = dynamic(
+  () =>
+    import("./DeletePackageDialog").then((mod) => ({
+      default: mod.DeletePackageDialog,
+    })),
+  { ssr: false }
+);
+const UpdatePackageDialog = dynamic(
+  () =>
+    import("./UpdatePackageDialog").then((mod) => ({
+      default: mod.UpdatePackageDialog,
+    })),
+  { ssr: false }
+);
 
 interface PackagesTableProps {
   packages: Package[];
