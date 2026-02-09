@@ -54,4 +54,4 @@ docker-compose.override.yml
 *.tsbuildinfo
 tsconfig.tsbuildinfo
 
-.env\
+.env
