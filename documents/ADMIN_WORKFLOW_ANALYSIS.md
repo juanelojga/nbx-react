@@ -515,9 +515,8 @@ mutation CreateClient(
   createClient(
     firstName: $firstName
     lastName: $lastName
-    email: $email
-  ) # ... other fields
-  {
+    email: $email # ... other fields
+  ) {
     client {
       id
       fullName
@@ -545,9 +544,8 @@ mutation CreateClient(
 mutation UpdateClient(
   $id: ID!
   $mobilePhoneNumber: String
-  $city: String
-) # ... other fields
-{
+  $city: String # ... other fields
+) {
   updateClient(id: $id, mobilePhoneNumber: $mobilePhoneNumber) {
     client {
       id
@@ -698,9 +696,8 @@ mutation CreatePackage(
   createPackage(
     barcode: $barcode
     clientId: $clientId
-    courier: $courier
-  ) # ... other fields
-  {
+    courier: $courier # ... other fields
+  ) {
     package {
       id
       barcode
@@ -898,9 +895,8 @@ mutation UpdateConsolidate(
   updateConsolidate(
     id: $id
     status: $status
-    comment: $comment
-  ) # ... other fields
-  {
+    comment: $comment # ... other fields
+  ) {
     consolidate {
       id
       status

@@ -98,10 +98,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           variables: { token: refreshToken },
         });
 
-        if (data?.refreshToken) {
-          const newAccessToken = data.refreshToken.token;
-          // Save new access token (keep existing refresh token)
-          saveTokens(newAccessToken, refreshToken);
+        if (data?.refreshWithToken) {
+          const newAccessToken = data.refreshWithToken.token;
+          const newRefreshToken = data.refreshWithToken.refreshToken;
+          const refreshExpiresIn = data.refreshWithToken.refreshExpiresIn;
+          // Save new tokens (backend may rotate refresh token)
+          saveTokens(newAccessToken, newRefreshToken, refreshExpiresIn);
           return newAccessToken;
         }
 
@@ -205,11 +207,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error("Invalid response from server");
       }
 
-      const { token: accessToken, refreshToken } = data.emailAuth;
+      const {
+        token: accessToken,
+        refreshToken,
+        refreshExpiresIn,
+      } = data.emailAuth;
 
       // Optimization: Start user fetch immediately after saving tokens
       // saveTokens is synchronous, so we defer the await on getCurrentUser
-      saveTokens(accessToken, refreshToken);
+      saveTokens(accessToken, refreshToken, refreshExpiresIn);
       const userFetchPromise = getCurrentUser();
 
       // Now await the user fetch

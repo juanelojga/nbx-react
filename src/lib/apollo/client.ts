@@ -215,7 +215,9 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
         errorPolicy: "all",
       },
     },
-    connectToDevTools: process.env.NODE_ENV === "development",
+    devtools: {
+      enabled: process.env.NODE_ENV === "development",
+    },
   });
 }
 

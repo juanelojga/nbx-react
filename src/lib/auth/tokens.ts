@@ -3,6 +3,7 @@ import { logger } from "@/lib/logger";
 
 const ACCESS_TOKEN_KEY = "narbox_access_token";
 const REFRESH_TOKEN_KEY = "narbox_refresh_token";
+const REFRESH_TOKEN_EXPIRES_AT_KEY = "narbox_refresh_token_expires_at";
 
 /**
  * Buffer time (in seconds) before token expiration to treat it as expired.
@@ -22,13 +23,26 @@ const isBrowser = typeof window !== "undefined";
 
 /**
  * Save authentication tokens to localStorage
+ * @param accessToken - JWT access token
+ * @param refreshToken - Opaque refresh token (not a JWT)
+ * @param refreshExpiresIn - Optional: seconds until refresh token expires
  */
-export function saveTokens(accessToken: string, refreshToken: string): void {
+export function saveTokens(
+  accessToken: string,
+  refreshToken: string,
+  refreshExpiresIn?: number
+): void {
   if (!isBrowser) return;
 
   try {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+
+    // Save refresh token expiration timestamp if provided
+    if (refreshExpiresIn) {
+      const expiresAt = Date.now() + refreshExpiresIn * 1000;
+      localStorage.setItem(REFRESH_TOKEN_EXPIRES_AT_KEY, expiresAt.toString());
+    }
   } catch (error) {
     logger.error("Failed to save tokens:", error);
   }
@@ -71,6 +85,7 @@ export function clearTokens(): void {
   try {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_EXPIRES_AT_KEY);
   } catch (error) {
     logger.error("Failed to clear tokens:", error);
   }
@@ -98,15 +113,24 @@ export function isTokenExpired(
 
 /**
  * Check if refresh token is expired
+ * Note: Refresh token is an opaque token (not a JWT), so we check stored expiration timestamp
  */
 export function isRefreshTokenExpired(): boolean {
   const refreshToken = getRefreshToken();
   if (!refreshToken) return true;
 
   try {
-    const decoded = jwtDecode<DecodedToken>(refreshToken);
-    const currentTime = Date.now() / 1000;
-    return decoded.exp < currentTime;
+    // Check if we have a stored expiration timestamp
+    const expiresAtStr = localStorage.getItem(REFRESH_TOKEN_EXPIRES_AT_KEY);
+    if (expiresAtStr) {
+      const expiresAt = parseInt(expiresAtStr, 10);
+      const currentTime = Date.now();
+      return expiresAt < currentTime;
+    }
+
+    // If no expiration timestamp stored, assume token is valid
+    // This handles tokens saved before this fix was implemented
+    return false;
   } catch {
     return true;
   }
