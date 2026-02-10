@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import {
   Table,
@@ -44,6 +44,98 @@ const UpdatePackageDialog = dynamic(
   { ssr: false }
 );
 
+// Rule 5.5: Extract to memoized components - PackageRow
+interface PackageRowProps {
+  pkg: Package;
+  isSelected: boolean;
+  onSelect: (packageId: string) => void;
+  onView: (packageId: string) => void;
+  onEdit: (packageId: string) => void;
+  onDelete: (pkg: Package) => void;
+}
+
+const PackageRow = memo(function PackageRow({
+  pkg,
+  isSelected,
+  onSelect,
+  onView,
+  onEdit,
+  onDelete,
+}: PackageRowProps) {
+  return (
+    <TableRow
+      className={
+        isSelected ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/50"
+      }
+    >
+      <TableCell>
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={() => onSelect(pkg.id)}
+          aria-label={`Select package ${pkg.barcode}`}
+        />
+      </TableCell>
+      <TableCell className="font-medium">{pkg.barcode}</TableCell>
+      <TableCell className="text-muted-foreground">
+        {pkg.description || "—"}
+      </TableCell>
+      <TableCell>{new Date(pkg.createdAt).toLocaleDateString()}</TableCell>
+      <TableCell>
+        <div className="flex items-center justify-end gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                onClick={() => onView(pkg.id)}
+                aria-label={`View package ${pkg.barcode}`}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>View Package Details</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                onClick={() => onEdit(pkg.id)}
+                aria-label={`Edit package ${pkg.barcode}`}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Edit Package</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                onClick={() => onDelete(pkg)}
+                aria-label={`Delete package ${pkg.barcode}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete Package</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
+
 interface PackagesTableProps {
   packages: Package[];
   selectedPackages: string[];
@@ -71,6 +163,7 @@ export function PackagesTable({
     barcode: string;
   } | null>(null);
 
+  // Rule 5.8: Subscribe to derived state with useMemo
   const allSelected = useMemo(() => {
     return packages.length > 0 && selectedPackages.length === packages.length;
   }, [packages.length, selectedPackages.length]);
@@ -79,52 +172,57 @@ export function PackagesTable({
     return selectedPackages.length > 0 && !allSelected;
   }, [selectedPackages.length, allSelected]);
 
-  const handleSelectAll = () => {
+  // Rule 5.7: Put interaction logic in event handlers with useCallback
+  const handleSelectAll = useCallback(() => {
     if (allSelected) {
       onSelectionChange([]);
     } else {
       onSelectionChange(packages.map((pkg) => pkg.id));
     }
-  };
+  }, [allSelected, onSelectionChange, packages]);
 
-  const handleSelectPackage = (packageId: string) => {
-    if (selectedPackages.includes(packageId)) {
-      onSelectionChange(selectedPackages.filter((id) => id !== packageId));
-    } else {
-      onSelectionChange([...selectedPackages, packageId]);
-    }
-  };
+  const handleSelectPackage = useCallback(
+    (packageId: string) => {
+      // Rule 5.9: Use functional setState pattern through callback
+      if (selectedPackages.includes(packageId)) {
+        onSelectionChange(selectedPackages.filter((id) => id !== packageId));
+      } else {
+        onSelectionChange([...selectedPackages, packageId]);
+      }
+    },
+    [onSelectionChange, selectedPackages]
+  );
 
-  const handleClearSelection = () => {
+  const handleClearSelection = useCallback(() => {
     onSelectionChange([]);
-  };
+  }, [onSelectionChange]);
 
-  const handleViewPackage = (packageId: string) => {
+  const handleViewPackage = useCallback((packageId: string) => {
     setSelectedPackageId(packageId);
     setViewModalOpen(true);
-  };
+  }, []);
 
-  const handleEditPackage = (packageId: string) => {
+  const handleEditPackage = useCallback((packageId: string) => {
     setPackageToEdit(packageId);
     setEditModalOpen(true);
-  };
+  }, []);
 
-  const handleDeletePackage = (pkg: Package) => {
+  const handleDeletePackage = useCallback((pkg: Package) => {
     setPackageToDelete({
       id: pkg.id,
       barcode: pkg.barcode,
     });
     setDeleteModalOpen(true);
-  };
+  }, []);
 
-  const handlePackageUpdated = async () => {
+  const handlePackageUpdated = useCallback(async () => {
     // Refetch packages to update the table
     if (onRefetch) {
       await onRefetch();
     }
-  };
+  }, [onRefetch]);
 
-  const handlePackageDeleted = async () => {
+  const handlePackageDeleted = useCallback(async () => {
     // Clear selection if the deleted package was selected
     if (packageToDelete && selectedPackages.includes(packageToDelete.id)) {
       onSelectionChange(
@@ -135,7 +233,7 @@ export function PackagesTable({
     if (onRefetch) {
       await onRefetch();
     }
-  };
+  }, [onRefetch, onSelectionChange, packageToDelete, selectedPackages]);
 
   // Loading skeleton
   if (isLoading) {
@@ -225,86 +323,17 @@ export function PackagesTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {packages.map((pkg) => {
-                const isSelected = selectedPackages.includes(pkg.id);
-                return (
-                  <TableRow
-                    key={pkg.id}
-                    className={
-                      isSelected
-                        ? "bg-primary/5 hover:bg-primary/10"
-                        : "hover:bg-muted/50"
-                    }
-                  >
-                    <TableCell>
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => handleSelectPackage(pkg.id)}
-                        aria-label={`Select package ${pkg.barcode}`}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">{pkg.barcode}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {pkg.description || "—"}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(pkg.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
-                              onClick={() => handleViewPackage(pkg.id)}
-                              aria-label={`View package ${pkg.barcode}`}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>View Package Details</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
-                              onClick={() => handleEditPackage(pkg.id)}
-                              aria-label={`Edit package ${pkg.barcode}`}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Edit Package</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                              onClick={() => handleDeletePackage(pkg)}
-                              aria-label={`Delete package ${pkg.barcode}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Delete Package</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {packages.map((pkg) => (
+                <PackageRow
+                  key={pkg.id}
+                  pkg={pkg}
+                  isSelected={selectedPackages.includes(pkg.id)}
+                  onSelect={handleSelectPackage}
+                  onView={handleViewPackage}
+                  onEdit={handleEditPackage}
+                  onDelete={handleDeletePackage}
+                />
+              ))}
             </TableBody>
           </Table>
         </div>

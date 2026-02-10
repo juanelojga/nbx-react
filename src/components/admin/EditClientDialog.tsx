@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation } from "@apollo/client";
 import { useTranslations } from "next-intl";
 import {
@@ -136,26 +136,37 @@ export function EditClientDialog({
     },
   });
 
-  const handleClose = () => {
+  // Rule 5.7: Put interaction logic in event handlers with useCallback
+  const handleClose = useCallback(() => {
     setValidationErrors({});
     onOpenChange(false);
-  };
+  }, [onOpenChange]);
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear validation error for this field
-    if (validationErrors[field]) {
-      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
+  const handleInputChange = useCallback(
+    (field: keyof FormData, value: string) => {
+      // Rule 5.9: Use functional setState updates
+      setFormData((prev) => ({ ...prev, [field]: value }));
+      // Clear validation error for this field
+      setValidationErrors((prev) => {
+        if (prev[field]) {
+          return { ...prev, [field]: undefined };
+        }
+        return prev;
+      });
+    },
+    []
+  );
 
-  const handlePhoneInputChange = (field: keyof FormData, value: string) => {
-    // Allow only numeric values
-    const numericValue = value.replace(/\D/g, "");
-    handleInputChange(field, numericValue);
-  };
+  const handlePhoneInputChange = useCallback(
+    (field: keyof FormData, value: string) => {
+      // Allow only numeric values
+      const numericValue = value.replace(/\D/g, "");
+      handleInputChange(field, numericValue);
+    },
+    [handleInputChange]
+  );
 
-  const validateForm = (): boolean => {
+  const validateForm = useCallback((): boolean => {
     const errors: ValidationErrors = {};
 
     // Required fields
@@ -179,54 +190,57 @@ export function EditClientDialog({
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [formData, t]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!client || !validateForm()) {
-      return;
-    }
+      if (!client || !validateForm()) {
+        return;
+      }
 
-    // Prepare variables - only include fields that have values
-    const variables: UpdateClientVariables = {
-      id: client.id,
-    };
+      // Prepare variables - only include fields that have values
+      const variables: UpdateClientVariables = {
+        id: client.id,
+      };
 
-    // Add fields only if they have values (trim strings)
-    if (formData.firstName.trim()) {
-      variables.firstName = formData.firstName.trim();
-    }
-    if (formData.lastName.trim()) {
-      variables.lastName = formData.lastName.trim();
-    }
-    if (formData.identificationNumber.trim()) {
-      variables.identificationNumber = formData.identificationNumber.trim();
-    }
-    if (formData.mobilePhoneNumber.trim()) {
-      variables.mobilePhoneNumber = formData.mobilePhoneNumber.trim();
-    }
-    if (formData.phoneNumber.trim()) {
-      variables.phoneNumber = formData.phoneNumber.trim();
-    }
-    if (formData.state.trim()) {
-      variables.state = formData.state.trim();
-    }
-    if (formData.city.trim()) {
-      variables.city = formData.city.trim();
-    }
-    if (formData.mainStreet.trim()) {
-      variables.mainStreet = formData.mainStreet.trim();
-    }
-    if (formData.secondaryStreet.trim()) {
-      variables.secondaryStreet = formData.secondaryStreet.trim();
-    }
-    if (formData.buildingNumber.trim()) {
-      variables.buildingNumber = formData.buildingNumber.trim();
-    }
+      // Add fields only if they have values (trim strings)
+      if (formData.firstName.trim()) {
+        variables.firstName = formData.firstName.trim();
+      }
+      if (formData.lastName.trim()) {
+        variables.lastName = formData.lastName.trim();
+      }
+      if (formData.identificationNumber.trim()) {
+        variables.identificationNumber = formData.identificationNumber.trim();
+      }
+      if (formData.mobilePhoneNumber.trim()) {
+        variables.mobilePhoneNumber = formData.mobilePhoneNumber.trim();
+      }
+      if (formData.phoneNumber.trim()) {
+        variables.phoneNumber = formData.phoneNumber.trim();
+      }
+      if (formData.state.trim()) {
+        variables.state = formData.state.trim();
+      }
+      if (formData.city.trim()) {
+        variables.city = formData.city.trim();
+      }
+      if (formData.mainStreet.trim()) {
+        variables.mainStreet = formData.mainStreet.trim();
+      }
+      if (formData.secondaryStreet.trim()) {
+        variables.secondaryStreet = formData.secondaryStreet.trim();
+      }
+      if (formData.buildingNumber.trim()) {
+        variables.buildingNumber = formData.buildingNumber.trim();
+      }
 
-    await updateClient({ variables });
-  };
+      await updateClient({ variables });
+    },
+    [client, formData, updateClient, validateForm]
+  );
 
   if (!client) return null;
 

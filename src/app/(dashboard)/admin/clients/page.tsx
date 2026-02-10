@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
@@ -85,6 +85,164 @@ const ViewClientDialog = dynamic(
 type SortField = "full_name" | "email" | "created_at";
 
 const DEBOUNCE_DELAY = 400; // milliseconds
+
+// Rule 5.5: Extract to memoized components - ClientRow
+interface ClientRowProps {
+  client: {
+    id: string;
+    fullName: string;
+    email: string;
+    mobilePhoneNumber: string | null;
+    phoneNumber: string | null;
+    city: string | null;
+    state: string | null;
+    createdAt: string;
+    user: {
+      id: string;
+      firstName: string | null;
+      lastName: string | null;
+      email: string;
+    };
+    identificationNumber: string | null;
+    mainStreet: string | null;
+    secondaryStreet: string | null;
+    buildingNumber: string | null;
+  };
+  onView: (clientId: string) => void;
+  onEdit: (client: ClientRowProps["client"]) => void;
+  onDelete: (client: ClientRowProps["client"]) => void;
+  t: (key: string) => string;
+}
+
+const ClientRow = memo(function ClientRow({
+  client,
+  onView,
+  onEdit,
+  onDelete,
+  t,
+}: ClientRowProps) {
+  return (
+    <TableRow key={client.id}>
+      <TableCell className="font-medium">
+        <div className="max-w-[200px] truncate" title={client.fullName || "-"}>
+          {client.fullName || "-"}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="max-w-[250px] truncate" title={client.email}>
+          {client.email}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div
+          className="max-w-[150px] truncate"
+          title={client.mobilePhoneNumber || client.phoneNumber || "-"}
+        >
+          {client.mobilePhoneNumber || client.phoneNumber || "-"}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div
+          className="max-w-[200px] truncate"
+          title={
+            client.city && client.state
+              ? `${client.city}, ${client.state}`
+              : client.city || client.state || "-"
+          }
+        >
+          {client.city && client.state
+            ? `${client.city}, ${client.state}`
+            : client.city || client.state || "-"}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="whitespace-nowrap">
+          {new Date(client.createdAt).toLocaleDateString()}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center justify-end gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                onClick={() => onView(client.id)}
+                aria-label={`View ${client.fullName || client.email}`}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("viewClient")}</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                onClick={() => onEdit(client)}
+                aria-label={`Edit ${client.fullName || client.email}`}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("editClient")}</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                onClick={() => onDelete(client)}
+                aria-label={`Delete ${client.fullName || client.email}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("deleteClient")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
+
+// Rule 5.5: Extract to memoized components - PaginationButton
+interface PaginationButtonProps {
+  pageNumber: number;
+  isActive: boolean;
+  onClick: (page: number) => void;
+  t: (key: string, values?: Record<string, unknown>) => string;
+}
+
+const PaginationButton = memo(function PaginationButton({
+  pageNumber,
+  isActive,
+  onClick,
+  t,
+}: PaginationButtonProps) {
+  return (
+    <Button
+      variant={isActive ? "default" : "outline"}
+      size="sm"
+      onClick={() => onClick(pageNumber)}
+      className="h-8 w-8 p-0"
+      aria-label={t("goToPage", { page: pageNumber })}
+      aria-current={isActive ? "page" : undefined}
+    >
+      {pageNumber}
+    </Button>
+  );
+});
 
 export default function AdminClients() {
   const t = useTranslations("adminClients");
@@ -187,40 +345,48 @@ export default function AdminClients() {
     notifyOnNetworkStatusChange: true, // Show loading state on refetch
   });
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      // Toggle sort order
-      const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
-      updateURL({ sortOrder: newSortOrder });
-    } else {
-      // Change sort field, default to ascending
-      updateURL({ sortField: field, sortOrder: "asc" });
-    }
-  };
+  // Rule 5.9: Use functional setState updates & Rule 5.6: Narrow effect dependencies with useCallback
+  const handleSort = useCallback(
+    (field: SortField) => {
+      if (sortField === field) {
+        // Toggle sort order
+        const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
+        updateURL({ sortOrder: newSortOrder });
+      } else {
+        // Change sort field, default to ascending
+        updateURL({ sortField: field, sortOrder: "asc" });
+      }
+    },
+    [sortField, sortOrder, updateURL]
+  );
 
-  const handlePageSizeChange = (newSize: number) => {
-    // Update page size and reset to page 1
-    updateURL({ pageSize: newSize, page: 1 });
-  };
+  const handlePageSizeChange = useCallback(
+    (newSize: number) => {
+      // Update page size and reset to page 1
+      updateURL({ pageSize: newSize, page: 1 });
+    },
+    [updateURL]
+  );
 
-  const handleClearSearch = () => {
+  const handleClearSearch = useCallback(() => {
     setSearchInput("");
     setDebouncedSearch("");
     updateURL({ search: "", page: 1 });
-  };
+  }, [updateURL]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     await refetch();
-  };
+  }, [refetch]);
 
+  // Rule 5.1: Calculate derived state during rendering
   const clients = data?.allClients.results || [];
   const totalCount = data?.allClients.totalCount || 0;
   const hasNext = data?.allClients.hasNext || false;
   const hasPrevious = data?.allClients.hasPrevious || false;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  // Generate page numbers for pagination
-  const generatePageNumbers = () => {
+  // Rule 5.8: Subscribe to derived state with useMemo
+  const pageNumbers = useMemo(() => {
     const pages: (number | string)[] = [];
     const maxVisiblePages = 5;
     const ellipsis = "...";
@@ -260,9 +426,7 @@ export default function AdminClients() {
     }
 
     return pages;
-  };
-
-  const pageNumbers = generatePageNumbers();
+  }, [page, totalPages]);
 
   // Helper function to get sort icon for a column
   const getSortIcon = (field: SortField) => {
@@ -284,60 +448,66 @@ export default function AdminClients() {
     return sortOrder === "asc" ? "ascending" : "descending";
   };
 
-  // Action handlers
-  const handleViewClient = (clientId: string) => {
+  // Rule 5.7: Put interaction logic in event handlers (with useCallback for stability)
+  const handleViewClient = useCallback((clientId: string) => {
     setClientIdToView(clientId);
     setIsViewDialogOpen(true);
-  };
+  }, []);
 
-  const handleEditClient = (client: {
-    id: string;
-    user: {
-      firstName: string | null;
-      lastName: string | null;
+  const handleEditClient = useCallback(
+    (client: {
+      id: string;
+      user: {
+        firstName: string | null;
+        lastName: string | null;
+        email: string;
+      };
       email: string;
-    };
-    email: string;
-    identificationNumber: string | null;
-    mobilePhoneNumber: string | null;
-    phoneNumber: string | null;
-    state: string | null;
-    city: string | null;
-    mainStreet: string | null;
-    secondaryStreet: string | null;
-    buildingNumber: string | null;
-  }) => {
-    setClientToEdit({
-      id: client.id,
-      firstName: client.user.firstName || "",
-      lastName: client.user.lastName || "",
-      email: client.email,
-      identificationNumber: client.identificationNumber,
-      mobilePhoneNumber: client.mobilePhoneNumber,
-      phoneNumber: client.phoneNumber,
-      state: client.state,
-      city: client.city,
-      mainStreet: client.mainStreet,
-      secondaryStreet: client.secondaryStreet,
-      buildingNumber: client.buildingNumber,
-    });
-    setIsEditDialogOpen(true);
-  };
+      identificationNumber: string | null;
+      mobilePhoneNumber: string | null;
+      phoneNumber: string | null;
+      state: string | null;
+      city: string | null;
+      mainStreet: string | null;
+      secondaryStreet: string | null;
+      buildingNumber: string | null;
+    }) => {
+      setClientToEdit({
+        id: client.id,
+        firstName: client.user.firstName || "",
+        lastName: client.user.lastName || "",
+        email: client.email,
+        identificationNumber: client.identificationNumber,
+        mobilePhoneNumber: client.mobilePhoneNumber,
+        phoneNumber: client.phoneNumber,
+        state: client.state,
+        city: client.city,
+        mainStreet: client.mainStreet,
+        secondaryStreet: client.secondaryStreet,
+        buildingNumber: client.buildingNumber,
+      });
+      setIsEditDialogOpen(true);
+    },
+    []
+  );
 
-  const handleDeleteClient = (client: {
-    id: string;
-    user: { id: string };
-    fullName: string;
-    email: string;
-  }) => {
-    setClientToDelete({
-      id: client.id,
-      userId: client.user.id,
-      fullName: client.fullName,
-      email: client.email,
-    });
-    setIsDeleteDialogOpen(true);
-  };
+  const handleDeleteClient = useCallback(
+    (client: {
+      id: string;
+      user: { id: string };
+      fullName: string;
+      email: string;
+    }) => {
+      setClientToDelete({
+        id: client.id,
+        userId: client.user.id,
+        fullName: client.fullName,
+        email: client.email,
+      });
+      setIsDeleteDialogOpen(true);
+    },
+    []
+  );
 
   return (
     <TooltipProvider>
@@ -597,109 +767,14 @@ export default function AdminClients() {
                     </TableHeader>
                     <TableBody>
                       {clients.map((client) => (
-                        <TableRow key={client.id}>
-                          <TableCell className="font-medium">
-                            <div
-                              className="max-w-[200px] truncate"
-                              title={client.fullName || "-"}
-                            >
-                              {client.fullName || "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              className="max-w-[250px] truncate"
-                              title={client.email}
-                            >
-                              {client.email}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              className="max-w-[150px] truncate"
-                              title={
-                                client.mobilePhoneNumber ||
-                                client.phoneNumber ||
-                                "-"
-                              }
-                            >
-                              {client.mobilePhoneNumber ||
-                                client.phoneNumber ||
-                                "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              className="max-w-[200px] truncate"
-                              title={
-                                client.city && client.state
-                                  ? `${client.city}, ${client.state}`
-                                  : client.city || client.state || "-"
-                              }
-                            >
-                              {client.city && client.state
-                                ? `${client.city}, ${client.state}`
-                                : client.city || client.state || "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="whitespace-nowrap">
-                              {new Date(client.createdAt).toLocaleDateString()}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-end gap-2">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
-                                    onClick={() => handleViewClient(client.id)}
-                                    aria-label={`View ${client.fullName || client.email}`}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{t("viewClient")}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
-                                    onClick={() => handleEditClient(client)}
-                                    aria-label={`Edit ${client.fullName || client.email}`}
-                                  >
-                                    <Pencil className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{t("editClient")}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                                    onClick={() => handleDeleteClient(client)}
-                                    aria-label={`Delete ${client.fullName || client.email}`}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{t("deleteClient")}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                        <ClientRow
+                          key={client.id}
+                          client={client}
+                          onView={handleViewClient}
+                          onEdit={handleEditClient}
+                          onDelete={handleDeleteClient}
+                          t={t}
+                        />
                       ))}
                     </TableBody>
                   </Table>
@@ -773,17 +848,13 @@ export default function AdminClients() {
                         const isActive = pageNumber === page;
 
                         return (
-                          <Button
+                          <PaginationButton
                             key={pageNumber}
-                            variant={isActive ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => updateURL({ page: pageNumber })}
-                            className="h-8 w-8 p-0"
-                            aria-label={t("goToPage", { page: pageNumber })}
-                            aria-current={isActive ? "page" : undefined}
-                          >
-                            {pageNumber}
-                          </Button>
+                            pageNumber={pageNumber}
+                            isActive={isActive}
+                            onClick={(p) => updateURL({ page: p })}
+                            t={t}
+                          />
                         );
                       })}
                     </div>
