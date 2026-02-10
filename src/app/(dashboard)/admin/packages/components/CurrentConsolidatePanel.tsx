@@ -30,6 +30,37 @@ export function CurrentConsolidatePanel({
     return packages.filter((pkg) => selectedPackages.has(pkg.id));
   }, [packages, selectedPackages]);
 
+  // Calculate aggregate statistics for selected packages
+  const statistics = useMemo(() => {
+    return selectedPackageDetails.reduce(
+      (acc, pkg) => {
+        // Sum real prices
+        if (pkg.realPrice !== null) {
+          acc.totalRealPrice += pkg.realPrice;
+        }
+        // Sum service prices
+        if (pkg.servicePrice !== null) {
+          acc.totalServicePrice += pkg.servicePrice;
+        }
+        // Sum weights (assuming all in same unit or handling mixed units)
+        if (pkg.weight !== null) {
+          acc.totalWeight += pkg.weight;
+          // Track weight unit (use first non-null unit found)
+          if (!acc.weightUnit && pkg.weightUnit) {
+            acc.weightUnit = pkg.weightUnit;
+          }
+        }
+        return acc;
+      },
+      {
+        totalRealPrice: 0,
+        totalServicePrice: 0,
+        totalWeight: 0,
+        weightUnit: null as string | null,
+      }
+    );
+  }, [selectedPackageDetails]);
+
   const isEmpty = selectedPackages.size === 0;
 
   return (
@@ -67,6 +98,36 @@ export function CurrentConsolidatePanel({
                   {t("totalPackages")}
                 </span>
                 <span className="font-semibold">{selectedPackages.size}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {t("totalRealPrice")}
+                </span>
+                <span className="font-semibold">
+                  {statistics.totalRealPrice > 0
+                    ? `$${statistics.totalRealPrice.toFixed(2)}`
+                    : "—"}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {t("totalServicePrice")}
+                </span>
+                <span className="font-semibold">
+                  {statistics.totalServicePrice > 0
+                    ? `$${statistics.totalServicePrice.toFixed(2)}`
+                    : "—"}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {t("totalWeight")}
+                </span>
+                <span className="font-semibold">
+                  {statistics.totalWeight > 0
+                    ? `${statistics.totalWeight.toFixed(2)} ${statistics.weightUnit || "kg"}`
+                    : "—"}
+                </span>
               </div>
             </div>
 

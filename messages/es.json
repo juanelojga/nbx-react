@@ -388,6 +388,9 @@
       "clearAll": "Limpiar Todo",
       "emptyMessage": "Selecciona paquetes de la tabla para comenzar a agrupar.",
       "totalPackages": "Total de Paquetes:",
+      "totalRealPrice": "Precio Real Total:",
+      "totalServicePrice": "Precio de Servicio Total:",
+      "totalWeight": "Peso Total:",
       "selectedPackagesTitle": "Paquetes Seleccionados"
     },
     "consolidationForm": {

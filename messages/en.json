@@ -388,6 +388,9 @@
       "clearAll": "Clear All",
       "emptyMessage": "Select packages from the table to start grouping.",
       "totalPackages": "Total Packages:",
+      "totalRealPrice": "Total Real Price:",
+      "totalServicePrice": "Total Service Price:",
+      "totalWeight": "Total Weight:",
       "selectedPackagesTitle": "Selected Packages"
     },
     "consolidationForm": {

@@ -22,6 +22,10 @@ export const RESOLVE_ALL_PACKAGES = gql`
         id
         barcode
         description
+        realPrice
+        servicePrice
+        weight
+        weightUnit
         createdAt
       }
       totalCount
@@ -73,6 +77,10 @@ export interface PackageType {
   id: string;
   barcode: string;
   description: string | null;
+  realPrice: number | null;
+  servicePrice: number | null;
+  weight: number | null;
+  weightUnit: string | null;
   createdAt: string;
 }
 
