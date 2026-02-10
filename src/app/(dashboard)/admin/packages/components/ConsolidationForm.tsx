@@ -44,9 +44,19 @@ interface ConsolidationFormProps {
 const getConsolidationSchema = (t: (key: string) => string) =>
   z.object({
     description: z.string().min(1, t("descriptionRequired")),
-    status: z.enum(["pending", "in_transit", "delivered"], {
-      errorMap: () => ({ message: t("statusValidationError") }),
-    }),
+    status: z.enum(
+      [
+        "awaiting_payment",
+        "pending",
+        "processing",
+        "in_transit",
+        "delivered",
+        "cancelled",
+      ],
+      {
+        errorMap: () => ({ message: t("statusValidationError") }),
+      }
+    ),
     deliveryDate: z.string().optional(),
     comment: z.string().optional(),
     sendEmail: z.boolean().optional().default(false),
@@ -377,15 +387,30 @@ export function ConsolidationForm({
                       <SelectValue placeholder={t("statusPlaceholder")} />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem
+                        value="awaiting_payment"
+                        className="status-badge"
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                          {t("statusAwaitingPayment")}
+                        </span>
+                      </SelectItem>
                       <SelectItem value="pending" className="status-badge">
                         <span className="inline-flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
                           {t("statusPending")}
                         </span>
                       </SelectItem>
-                      <SelectItem value="in_transit" className="status-badge">
+                      <SelectItem value="processing" className="status-badge">
                         <span className="inline-flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                          {t("statusProcessing")}
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="in_transit" className="status-badge">
+                        <span className="inline-flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-purple-500"></span>
                           {t("statusInTransit")}
                         </span>
                       </SelectItem>
@@ -393,6 +418,12 @@ export function ConsolidationForm({
                         <span className="inline-flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-green-500"></span>
                           {t("statusDelivered")}
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="cancelled" className="status-badge">
+                        <span className="inline-flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                          {t("statusCancelled")}
                         </span>
                       </SelectItem>
                     </SelectContent>

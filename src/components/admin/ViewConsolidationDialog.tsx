@@ -73,13 +73,19 @@ export function ViewConsolidationDialog({
   };
 
   const getStatusLabel = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
+      case "awaiting_payment":
+        return tStatus("statusAwaitingPayment");
       case "pending":
         return tStatus("statusPending");
+      case "processing":
+        return tStatus("statusProcessing");
       case "in_transit":
         return tStatus("statusInTransit");
       case "delivered":
         return tStatus("statusDelivered");
+      case "cancelled":
+        return tStatus("statusCancelled");
       default:
         return status;
     }

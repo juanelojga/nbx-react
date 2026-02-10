@@ -74,9 +74,12 @@ export function ConsolidationSuccess({
 
   // Status badge color mapping
   const statusColors = {
+    awaiting_payment: "bg-orange-500",
     pending: "bg-yellow-500",
-    in_transit: "bg-blue-500",
+    processing: "bg-blue-500",
+    in_transit: "bg-purple-500",
     delivered: "bg-green-500",
+    cancelled: "bg-red-500",
   };
 
   const statusColor =

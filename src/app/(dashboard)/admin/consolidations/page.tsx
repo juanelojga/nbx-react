@@ -102,13 +102,19 @@ const ConsolidationRow = memo(function ConsolidationRow({
   const [isHovered, setIsHovered] = useState(false);
 
   const getStatusLabel = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
+      case "awaiting_payment":
+        return tStatus("statusAwaitingPayment");
       case "pending":
         return tStatus("statusPending");
+      case "processing":
+        return tStatus("statusProcessing");
       case "in_transit":
         return tStatus("statusInTransit");
       case "delivered":
         return tStatus("statusDelivered");
+      case "cancelled":
+        return tStatus("statusCancelled");
       default:
         return status;
     }
@@ -679,14 +685,23 @@ export default function AdminConsolidations() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t("allStatuses")}</SelectItem>
+                    <SelectItem value="awaiting_payment">
+                      {t("statusAwaitingPayment")}
+                    </SelectItem>
                     <SelectItem value="pending">
                       {t("statusPending")}
+                    </SelectItem>
+                    <SelectItem value="processing">
+                      {t("statusProcessing")}
                     </SelectItem>
                     <SelectItem value="in_transit">
                       {t("statusInTransit")}
                     </SelectItem>
                     <SelectItem value="delivered">
                       {t("statusDelivered")}
+                    </SelectItem>
+                    <SelectItem value="cancelled">
+                      {t("statusCancelled")}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -827,12 +842,21 @@ export default function AdminConsolidations() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t("allStatuses")}</SelectItem>
+                  <SelectItem value="awaiting_payment">
+                    {t("statusAwaitingPayment")}
+                  </SelectItem>
                   <SelectItem value="pending">{t("statusPending")}</SelectItem>
+                  <SelectItem value="processing">
+                    {t("statusProcessing")}
+                  </SelectItem>
                   <SelectItem value="in_transit">
                     {t("statusInTransit")}
                   </SelectItem>
                   <SelectItem value="delivered">
                     {t("statusDelivered")}
+                  </SelectItem>
+                  <SelectItem value="cancelled">
+                    {t("statusCancelled")}
                   </SelectItem>
                 </SelectContent>
               </Select>

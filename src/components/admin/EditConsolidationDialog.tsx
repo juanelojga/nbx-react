@@ -127,7 +127,14 @@ export function EditConsolidationDialog({
         errors.description = t("descriptionRequired");
       }
 
-      const validStatuses = ["pending", "in_transit", "delivered"];
+      const validStatuses = [
+        "awaiting_payment",
+        "pending",
+        "processing",
+        "in_transit",
+        "delivered",
+        "cancelled",
+      ];
       if (!formData.status || !validStatuses.includes(formData.status)) {
         errors.status = t("statusRequired");
       }
@@ -215,12 +222,21 @@ export function EditConsolidationDialog({
                 <SelectValue placeholder={t("selectStatus")} />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="awaiting_payment">
+                  {t("statusAwaitingPayment")}
+                </SelectItem>
                 <SelectItem value="pending">{t("statusPending")}</SelectItem>
+                <SelectItem value="processing">
+                  {t("statusProcessing")}
+                </SelectItem>
                 <SelectItem value="in_transit">
                   {t("statusInTransit")}
                 </SelectItem>
                 <SelectItem value="delivered">
                   {t("statusDelivered")}
+                </SelectItem>
+                <SelectItem value="cancelled">
+                  {t("statusCancelled")}
                 </SelectItem>
               </SelectContent>
             </Select>

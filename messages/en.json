@@ -227,9 +227,12 @@
     "allStatuses": "All statuses",
     "allClients": "All clients",
     "packages": "{count} packages",
+    "statusAwaitingPayment": "Awaiting Payment",
     "statusPending": "Pending",
+    "statusProcessing": "Processing",
     "statusInTransit": "In Transit",
     "statusDelivered": "Delivered",
+    "statusCancelled": "Cancelled",
     "viewDialog": {
       "title": "View Consolidation Details",
       "description": "Detailed information about the selected consolidation.",

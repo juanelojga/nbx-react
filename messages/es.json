@@ -227,9 +227,12 @@
     "allStatuses": "Todos los estados",
     "allClients": "Todos los clientes",
     "packages": "{count} paquetes",
+    "statusAwaitingPayment": "Esperando Pago",
     "statusPending": "Pendiente",
+    "statusProcessing": "Procesando",
     "statusInTransit": "En Tránsito",
     "statusDelivered": "Entregado",
+    "statusCancelled": "Cancelado",
     "viewDialog": {
       "title": "Ver Detalles de Consolidación",
       "description": "Información detallada sobre la consolidación seleccionada.",
