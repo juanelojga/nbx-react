@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { User, UserRole } from "@/types/user";
@@ -194,67 +201,70 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Login with email and password
    * Optimized to eliminate waterfall: token save and user fetch happen in parallel
    */
-  const login = async (email: string, password: string): Promise<void> => {
-    setLoading(true);
-    setError(null);
+  const login = useCallback(
+    async (email: string, password: string): Promise<void> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const { data } = await loginMutation({
-        variables: { email, password },
-      });
+      try {
+        const { data } = await loginMutation({
+          variables: { email, password },
+        });
 
-      if (!data?.emailAuth) {
-        throw new Error("Invalid response from server");
+        if (!data?.emailAuth) {
+          throw new Error("Invalid response from server");
+        }
+
+        const {
+          token: accessToken,
+          refreshToken,
+          refreshExpiresIn,
+        } = data.emailAuth;
+
+        // Optimization: Start user fetch immediately after saving tokens
+        // saveTokens is synchronous, so we defer the await on getCurrentUser
+        saveTokens(accessToken, refreshToken, refreshExpiresIn);
+        const userFetchPromise = getCurrentUser();
+
+        // Now await the user fetch
+        const { data: currentUserData } = await userFetchPromise;
+
+        if (!currentUserData?.me) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const user = mapBackendUserToUser(currentUserData.me);
+
+        // Set user
+        setUser(user);
+
+        // Redirect based on isSuperuser
+        const redirectPath = currentUserData.me.isSuperuser
+          ? "/admin/dashboard"
+          : "/client/dashboard";
+
+        router.push(redirectPath);
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Login failed. Please check your credentials.";
+
+        setError(errorMessage);
+        logger.error("Login error:", err);
+        throw new Error(errorMessage);
+      } finally {
+        setLoading(false);
       }
-
-      const {
-        token: accessToken,
-        refreshToken,
-        refreshExpiresIn,
-      } = data.emailAuth;
-
-      // Optimization: Start user fetch immediately after saving tokens
-      // saveTokens is synchronous, so we defer the await on getCurrentUser
-      saveTokens(accessToken, refreshToken, refreshExpiresIn);
-      const userFetchPromise = getCurrentUser();
-
-      // Now await the user fetch
-      const { data: currentUserData } = await userFetchPromise;
-
-      if (!currentUserData?.me) {
-        throw new Error("Failed to fetch user data");
-      }
-
-      const user = mapBackendUserToUser(currentUserData.me);
-
-      // Set user
-      setUser(user);
-
-      // Redirect based on isSuperuser
-      const redirectPath = currentUserData.me.isSuperuser
-        ? "/admin/dashboard"
-        : "/client/dashboard";
-
-      router.push(redirectPath);
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Login failed. Please check your credentials.";
-
-      setError(errorMessage);
-      logger.error("Login error:", err);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [loginMutation, getCurrentUser, router]
+  );
 
   /**
    * Logout user
    * Optimized to parallelize backend logout and cache clearing
    */
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async (): Promise<void> => {
     try {
       // Execute logout mutation and clear Apollo cache in parallel
       await Promise.all([
@@ -276,7 +286,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Redirect to login
     router.push("/login");
-  };
+  }, [logoutMutation, router]);
 
   // Initialize auth on mount
   useEffect(() => {
@@ -284,14 +294,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const value: AuthContextType = {
-    user,
-    loading: loading || userLoading,
-    error,
-    isAuthenticated,
-    login,
-    logout,
-  };
+  // Memoize the context value to prevent unnecessary re-renders
+  // Only recompute when dependencies change
+  const value: AuthContextType = useMemo(
+    () => ({
+      user,
+      loading: loading || userLoading,
+      error,
+      isAuthenticated,
+      login,
+      logout,
+    }),
+    [user, loading, userLoading, error, isAuthenticated, login, logout]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
