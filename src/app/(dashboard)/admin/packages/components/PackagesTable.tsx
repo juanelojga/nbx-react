@@ -44,6 +44,22 @@ const UpdatePackageDialog = dynamic(
   { ssr: false }
 );
 
+// Rule 6.3: Hoist static JSX elements to module-level constants
+const EMPTY_PACKAGE_STATE = (
+  <>
+    <div className="mb-6 rounded-full bg-primary/10 p-6">
+      <PackageIcon className="h-16 w-16 text-primary/60" />
+    </div>
+    <h3 className="text-xl font-semibold text-foreground">
+      No Unassigned Packages
+    </h3>
+    <p className="mt-2 max-w-md text-sm text-muted-foreground">
+      No unassigned packages for this client. All packages may already be
+      consolidated or there are no packages yet.
+    </p>
+  </>
+);
+
 // Rule 5.5: Extract to memoized components - PackageRow
 interface PackageRowProps {
   pkg: Package;
@@ -284,16 +300,7 @@ export function PackagesTable({
   if (packages.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-16 text-center">
-        <div className="mb-6 rounded-full bg-primary/10 p-6">
-          <PackageIcon className="h-16 w-16 text-primary/60" />
-        </div>
-        <h3 className="text-xl font-semibold text-foreground">
-          No Unassigned Packages
-        </h3>
-        <p className="mt-2 max-w-md text-sm text-muted-foreground">
-          No unassigned packages for this client. All packages may already be
-          consolidated or there are no packages yet.
-        </p>
+        {EMPTY_PACKAGE_STATE}
       </div>
     );
   }
