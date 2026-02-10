@@ -1,9 +1,10 @@
 "use client";
 
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
+import { useConsolidationTableState } from "@/hooks/useConsolidationTableState";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -32,9 +33,15 @@ import {
 import {
   GET_ALL_CONSOLIDATES,
   GetAllConsolidatesResponse,
+  GetAllConsolidatesVariables,
   ConsolidateType,
 } from "@/graphql/queries/consolidations";
 import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   Loader2,
   Pencil,
@@ -69,6 +76,13 @@ const DeleteConsolidationDialog = dynamic(
     })),
   { ssr: false }
 );
+
+type SortField = "created_at" | "delivery_date" | "status";
+
+const DEBOUNCE_DELAY = 400; // milliseconds
+
+// Rule 7.9: Hoist RegExp creation to module level
+const DANGEROUS_CHARS_REGEX = /[<>{};\\\[\]]/g;
 
 // Empty state icon
 const EMPTY_STATE_ICON = (
@@ -222,11 +236,61 @@ const ConsolidationRow = memo(function ConsolidationRow({
   );
 });
 
+// Pagination button component
+interface PaginationButtonProps {
+  pageNumber: number;
+  isActive: boolean;
+  onClick: (page: number) => void;
+  t: (key: string, values?: Record<string, string | number | Date>) => string;
+}
+
+const PaginationButton = memo(function PaginationButton({
+  pageNumber,
+  isActive,
+  onClick,
+  t,
+}: PaginationButtonProps) {
+  return (
+    <Button
+      variant={isActive ? "default" : "outline"}
+      size="sm"
+      onClick={() => onClick(pageNumber)}
+      className="h-8 w-8 p-0"
+      aria-label={t("goToPage", { page: pageNumber })}
+      aria-current={isActive ? "page" : undefined}
+    >
+      {pageNumber}
+    </Button>
+  );
+});
+
 export default function AdminConsolidations() {
   const t = useTranslations("adminConsolidations");
 
-  const [searchInput, setSearchInput] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  // URL state synchronization
+  const {
+    state: urlState,
+    updateURL,
+    getOrderBy,
+  } = useConsolidationTableState({
+    defaultPageSize: 10,
+    defaultSortField: "created_at",
+    defaultSortOrder: "desc",
+  });
+
+  // Local state for search input (not synced to URL until debounced)
+  const [searchInput, setSearchInput] = useState(urlState.search);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlState.search);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+
+  // Destructure URL state for easier access
+  const {
+    page,
+    pageSize,
+    sortField,
+    sortOrder,
+    status: statusFilter,
+  } = urlState;
   const [clientFilter, setClientFilter] = useState<string>("all");
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -246,18 +310,104 @@ export default function AdminConsolidations() {
     packagesCount: number;
   } | null>(null);
 
-  const { data, loading, error, refetch } =
-    useQuery<GetAllConsolidatesResponse>(GET_ALL_CONSOLIDATES, {
-      notifyOnNetworkStatusChange: true,
-    });
+  const orderBy = getOrderBy();
+
+  // Rule 7.9: Input sanitization function using hoisted regex
+  const sanitizeInput = (input: string): string => {
+    // Remove potentially dangerous characters
+    return input.replace(DANGEROUS_CHARS_REGEX, "").trim();
+  };
+
+  // Sync search input from URL when it changes (e.g., browser back/forward)
+  useEffect(() => {
+    if (urlState.search !== searchInput && !isDebouncing) {
+      setSearchInput(urlState.search);
+      setDebouncedSearch(urlState.search);
+    }
+  }, [urlState.search, searchInput, isDebouncing]);
+
+  // Debounce search input and update URL
+  useEffect(() => {
+    if (searchInput !== debouncedSearch) {
+      setIsDebouncing(true);
+    }
+
+    const timer = setTimeout(() => {
+      const sanitized = sanitizeInput(searchInput);
+      setDebouncedSearch(sanitized);
+      // Update URL with new search and reset to page 1
+      updateURL({ search: sanitized, page: 1 });
+      setIsDebouncing(false);
+    }, DEBOUNCE_DELAY);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput]);
+
+  // Build GraphQL variables
+  const queryVariables: GetAllConsolidatesVariables = {
+    page,
+    pageSize,
+    orderBy,
+  };
+
+  // Only include search if it has a valid value
+  if (debouncedSearch) {
+    queryVariables.search = debouncedSearch;
+  }
+
+  // Only include status if it's not "all"
+  if (statusFilter !== "all") {
+    queryVariables.status = statusFilter;
+  }
+
+  const { data, loading, error, refetch } = useQuery<
+    GetAllConsolidatesResponse,
+    GetAllConsolidatesVariables
+  >(GET_ALL_CONSOLIDATES, {
+    variables: queryVariables,
+    notifyOnNetworkStatusChange: true,
+  });
+
+  // Rule 5.9: Use functional setState updates & Rule 5.6: Narrow effect dependencies with useCallback
+  const handleSort = useCallback(
+    (field: SortField) => {
+      if (sortField === field) {
+        // Toggle sort order
+        const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
+        updateURL({ sortOrder: newSortOrder });
+      } else {
+        // Change sort field, default to ascending
+        updateURL({ sortField: field, sortOrder: "asc" });
+      }
+    },
+    [sortField, sortOrder, updateURL]
+  );
+
+  const handlePageSizeChange = useCallback(
+    (newSize: number) => {
+      // Update page size and reset to page 1
+      updateURL({ pageSize: newSize, page: 1 });
+    },
+    [updateURL]
+  );
+
+  const handleClearSearch = useCallback(() => {
+    setSearchInput("");
+    setDebouncedSearch("");
+    updateURL({ search: "", page: 1 });
+  }, [updateURL]);
+
+  const handleStatusFilterChange = useCallback(
+    (newStatus: string) => {
+      updateURL({ status: newStatus, page: 1 });
+    },
+    [updateURL]
+  );
 
   const handleRefresh = useCallback(async () => {
     await refetch();
   }, [refetch]);
-
-  const handleClearSearch = useCallback(() => {
-    setSearchInput("");
-  }, []);
 
   const handleViewConsolidation = useCallback((id: string) => {
     setConsolidationIdToView(id);
@@ -285,47 +435,100 @@ export default function AdminConsolidations() {
     []
   );
 
-  // Filter and search consolidations
+  // Rule 5.1: Calculate derived state during rendering
+  const totalCount = data?.allConsolidates.totalCount || 0;
+  const hasNext = data?.allConsolidates.hasNext || false;
+  const hasPrevious = data?.allConsolidates.hasPrevious || false;
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  // Memoize consolidations from API response
+  const consolidations = useMemo(
+    () => data?.allConsolidates.results || [],
+    [data?.allConsolidates.results]
+  );
+
+  // Apply client-side filtering for client (backend doesn't support this yet)
   const filteredConsolidations = useMemo(() => {
-    if (!data?.allConsolidates) return [];
-
-    let result = [...data.allConsolidates];
-
-    // Apply status filter
-    if (statusFilter !== "all") {
-      result = result.filter((c) => c.status === statusFilter);
+    if (clientFilter === "all") {
+      return consolidations;
     }
-
-    // Apply client filter
-    if (clientFilter !== "all") {
-      result = result.filter((c) => c.client.id === clientFilter);
-    }
-
-    // Apply search
-    if (searchInput.trim()) {
-      const searchLower = searchInput.toLowerCase().trim();
-      result = result.filter(
-        (c) =>
-          c.client.fullName.toLowerCase().includes(searchLower) ||
-          c.client.email.toLowerCase().includes(searchLower) ||
-          c.description.toLowerCase().includes(searchLower)
-      );
-    }
-
-    return result;
-  }, [data, statusFilter, clientFilter, searchInput]);
+    return consolidations.filter((c) => c.client.id === clientFilter);
+  }, [consolidations, clientFilter]);
 
   // Get unique clients for filter dropdown
   const uniqueClients = useMemo(() => {
-    if (!data?.allConsolidates) return [];
+    if (!consolidations.length) return [];
     const clientsMap = new Map();
-    data.allConsolidates.forEach((c) => {
+    consolidations.forEach((c) => {
       if (!clientsMap.has(c.client.id)) {
         clientsMap.set(c.client.id, c.client);
       }
     });
     return Array.from(clientsMap.values());
-  }, [data]);
+  }, [consolidations]);
+
+  // Rule 5.8: Subscribe to derived state with useMemo
+  const pageNumbers = useMemo(() => {
+    const pages: (number | string)[] = [];
+    const maxVisiblePages = 5;
+    const ellipsis = "...";
+
+    if (totalPages <= maxVisiblePages + 2) {
+      // Show all pages if total is small
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (page <= 3) {
+        // Near the beginning
+        for (let i = 2; i <= Math.min(maxVisiblePages, totalPages - 1); i++) {
+          pages.push(i);
+        }
+        pages.push(ellipsis);
+      } else if (page >= totalPages - 2) {
+        // Near the end
+        pages.push(ellipsis);
+        for (let i = totalPages - maxVisiblePages + 1; i < totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Middle section
+        pages.push(ellipsis);
+        for (let i = page - 1; i <= page + 1; i++) {
+          pages.push(i);
+        }
+        pages.push(ellipsis);
+      }
+
+      // Always show last page
+      pages.push(totalPages);
+    }
+
+    return pages;
+  }, [page, totalPages]);
+
+  // Helper function to get sort icon for a column
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-4 w-4" />;
+    }
+    return sortOrder === "asc" ? (
+      <ArrowUp className="h-4 w-4" />
+    ) : (
+      <ArrowDown className="h-4 w-4" />
+    );
+  };
+
+  // Helper function to get ARIA sort attribute
+  const getAriaSort = (
+    field: SortField
+  ): "ascending" | "descending" | "none" => {
+    if (sortField !== field) return "none";
+    return sortOrder === "asc" ? "ascending" : "descending";
+  };
 
   return (
     <TooltipProvider>
@@ -396,7 +599,10 @@ export default function AdminConsolidations() {
               </div>
 
               {/* Status Filter */}
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select
+                value={statusFilter}
+                onValueChange={handleStatusFilterChange}
+              >
                 <SelectTrigger className="w-full md:w-[200px]">
                   <SelectValue placeholder={t("filterByStatus")} />
                 </SelectTrigger>
@@ -476,8 +682,8 @@ export default function AdminConsolidations() {
                     size="sm"
                     onClick={() => {
                       setSearchInput("");
-                      setStatusFilter("all");
                       setClientFilter("all");
+                      updateURL({ search: "", status: "all", page: 1 });
                     }}
                     className="mt-4"
                   >
@@ -490,37 +696,147 @@ export default function AdminConsolidations() {
 
             {/* Table */}
             {!loading && !error && filteredConsolidations.length > 0 && (
-              <div className="overflow-x-auto rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t("id")}</TableHead>
-                      <TableHead>{t("client")}</TableHead>
-                      <TableHead>{t("description")}</TableHead>
-                      <TableHead>{t("status")}</TableHead>
-                      <TableHead>{t("packagesCount")}</TableHead>
-                      <TableHead>{t("deliveryDate")}</TableHead>
-                      <TableHead>{t("createdAt")}</TableHead>
-                      <TableHead className="text-right">
-                        {t("actions")}
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredConsolidations.map((consolidation) => (
-                      <ConsolidationRow
-                        key={consolidation.id}
-                        consolidation={consolidation}
-                        onView={handleViewConsolidation}
-                        onEdit={handleEditConsolidation}
-                        onDelete={handleDeleteConsolidation}
-                        t={t}
-                        tStatus={t}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <>
+                <div className="overflow-x-auto rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t("id")}</TableHead>
+                        <TableHead>{t("client")}</TableHead>
+                        <TableHead>{t("description")}</TableHead>
+                        <TableHead
+                          className="cursor-pointer select-none hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort("status")}
+                          aria-sort={getAriaSort("status")}
+                        >
+                          <div className="flex items-center gap-2">
+                            {t("status")}
+                            {getSortIcon("status")}
+                          </div>
+                        </TableHead>
+                        <TableHead>{t("packagesCount")}</TableHead>
+                        <TableHead
+                          className="cursor-pointer select-none hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort("delivery_date")}
+                          aria-sort={getAriaSort("delivery_date")}
+                        >
+                          <div className="flex items-center gap-2">
+                            {t("deliveryDate")}
+                            {getSortIcon("delivery_date")}
+                          </div>
+                        </TableHead>
+                        <TableHead
+                          className="cursor-pointer select-none hover:bg-accent/50 transition-colors"
+                          onClick={() => handleSort("created_at")}
+                          aria-sort={getAriaSort("created_at")}
+                        >
+                          <div className="flex items-center gap-2">
+                            {t("createdAt")}
+                            {getSortIcon("created_at")}
+                          </div>
+                        </TableHead>
+                        <TableHead className="text-right">
+                          {t("actions")}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredConsolidations.map((consolidation) => (
+                        <ConsolidationRow
+                          key={consolidation.id}
+                          consolidation={consolidation}
+                          onView={handleViewConsolidation}
+                          onEdit={handleEditConsolidation}
+                          onDelete={handleDeleteConsolidation}
+                          t={t}
+                          tStatus={t}
+                        />
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-4">
+                  {/* Results info and page size selector */}
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                    <p className="text-sm text-muted-foreground">
+                      {t("showingResults", {
+                        start: (page - 1) * pageSize + 1,
+                        end: Math.min(page * pageSize, totalCount),
+                        total: totalCount,
+                      })}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        {t("itemsPerPage")}:
+                      </span>
+                      <Select
+                        value={pageSize.toString()}
+                        onValueChange={(value) =>
+                          handlePageSizeChange(parseInt(value, 10))
+                        }
+                      >
+                        <SelectTrigger className="h-8 w-16">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10</SelectItem>
+                          <SelectItem value="20">20</SelectItem>
+                          <SelectItem value="50">50</SelectItem>
+                          <SelectItem value="100">100</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Page navigation */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateURL({ page: page - 1 })}
+                        disabled={!hasPrevious}
+                        aria-label={t("previousPage")}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+
+                      <div className="flex items-center gap-1">
+                        {pageNumbers.map((pageNum, idx) =>
+                          pageNum === "..." ? (
+                            <span
+                              key={`ellipsis-${idx}`}
+                              className="px-2 text-muted-foreground"
+                            >
+                              ...
+                            </span>
+                          ) : (
+                            <PaginationButton
+                              key={pageNum}
+                              pageNumber={pageNum as number}
+                              isActive={page === pageNum}
+                              onClick={(p) => updateURL({ page: p })}
+                              t={t}
+                            />
+                          )
+                        )}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateURL({ page: page + 1 })}
+                        disabled={!hasNext}
+                        aria-label={t("nextPage")}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
