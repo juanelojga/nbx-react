@@ -194,6 +194,59 @@ const { data, loading, error } = useQuery<GetClientsResponse>(GET_CLIENTS);
 - 80 character line width
 - ES5 trailing commas
 
+## React/Next.js Best Practices
+
+### Mandatory Skill Usage
+
+**IMPORTANT:** When creating new React/Next.js components or features, you **MUST** invoke the `vercel-react-best-practices` skill at the start of your work. This ensures all new code follows Vercel's performance optimization guidelines and best practices.
+
+### When to Invoke the Skill
+
+The `vercel-react-best-practices` skill must be used for:
+
+- **New page creation** - Any new route/page in `app/` directory
+- **New component development** - Creating new components in `components/` directory
+- **Major feature additions** - Significant new functionality (e.g., new dashboard section, new form flows)
+- **Component refactoring** - Restructuring existing components with architectural changes
+
+### When NOT to Invoke the Skill
+
+The skill is not required for:
+
+- Bug fixes and patches
+- Minor style/CSS updates
+- Copy/text changes
+- Documentation updates
+- Configuration changes
+- Dependency updates
+- Test file modifications (unless adding new component tests)
+
+### How to Invoke
+
+When starting work on a qualifying task, invoke the skill using:
+
+```
+Use the vercel-react-best-practices skill to review/guide this implementation
+```
+
+The skill should be invoked **before or during** implementation, not after completion.
+
+### Examples
+
+**Requires skill:**
+
+- "Create a new PackageStatusCard component"
+- "Add a new admin/reports page"
+- "Build a search filter feature for the packages table"
+- "Refactor ClientTable to use server components"
+
+**Does NOT require skill:**
+
+- "Fix typo in button label"
+- "Update primary color in Tailwind config"
+- "Fix bug where date picker doesn't clear"
+- "Add translations for error messages"
+
 ## Testing
 
 ### Unit Tests
