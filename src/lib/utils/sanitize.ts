@@ -5,12 +5,16 @@
  * to prevent XSS and injection attacks.
  */
 
+// Rule 7.9: Hoist RegExp creation to module level
+const HTML_TAG_REGEX = /<[^>]*>/g;
+const GRAPHQL_SPECIAL_CHARS_REGEX = /[{}\[\]()]/g;
+
 /**
  * Basic HTML tag stripper for simple use cases
  * For more robust sanitization, consider using DOMPurify
  */
 export function stripHtml(input: string): string {
-  return input.replace(/<[^>]*>/g, "");
+  return input.replace(HTML_TAG_REGEX, "");
 }
 
 /**
@@ -29,8 +33,8 @@ export function sanitizeInput(input: string): string {
     input
       // Trim whitespace
       .trim()
-      // Remove HTML tags
-      .replace(/<[^>]*>/g, "")
+      // Remove HTML tags using hoisted regex
+      .replace(HTML_TAG_REGEX, "")
       // Normalize unicode (NFKC normalization)
       .normalize("NFKC")
   );
@@ -56,8 +60,8 @@ export function sanitizeSearchQuery(query: string): string {
 
   return (
     sanitizeInput(query)
-      // Remove special GraphQL characters that could cause issues
-      .replace(/[{}\[\]()]/g, "")
+      // Remove special GraphQL characters that could cause issues using hoisted regex
+      .replace(GRAPHQL_SPECIAL_CHARS_REGEX, "")
       // Limit length to prevent abuse
       .slice(0, 100)
   );
