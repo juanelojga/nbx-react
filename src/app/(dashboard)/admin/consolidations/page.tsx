@@ -43,13 +43,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  Loader2,
   Pencil,
   RefreshCw,
   Search,
   Trash2,
   X,
-  Package,
+  Package as PackageIcon,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -79,35 +78,16 @@ const DeleteConsolidationDialog = dynamic(
 
 type SortField = "created_at" | "delivery_date" | "status";
 
-const DEBOUNCE_DELAY = 400; // milliseconds
-
-// Rule 7.9: Hoist RegExp creation to module level
+const DEBOUNCE_DELAY = 400;
 const DANGEROUS_CHARS_REGEX = /[<>{};\\\[\]]/g;
 
-// Empty state icon
-const EMPTY_STATE_ICON = (
-  <svg
-    className="h-16 w-16 text-primary/60"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={1.5}
-      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-    />
-  </svg>
-);
-
+// Memoized ConsolidationRow component
 interface ConsolidationRowProps {
   consolidation: ConsolidateType;
   onView: (id: string) => void;
   onEdit: (consolidation: ConsolidateType) => void;
   onDelete: (consolidation: ConsolidateType) => void;
-  t: (key: string) => string;
-  tStatus: (key: string) => string;
+  animationDelay?: number;
 }
 
 const ConsolidationRow = memo(function ConsolidationRow({
@@ -115,9 +95,12 @@ const ConsolidationRow = memo(function ConsolidationRow({
   onView,
   onEdit,
   onDelete,
-  t,
-  tStatus,
+  animationDelay = 0,
 }: ConsolidationRowProps) {
+  const t = useTranslations("adminConsolidations");
+  const tStatus = useTranslations("adminConsolidations");
+  const [isHovered, setIsHovered] = useState(false);
+
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "pending":
@@ -132,26 +115,61 @@ const ConsolidationRow = memo(function ConsolidationRow({
   };
 
   return (
-    <TableRow key={consolidation.id}>
-      <TableCell className="font-mono font-medium">
-        <div className="max-w-[100px] truncate" title={consolidation.id}>
-          {consolidation.id}
+    <TableRow
+      className="group relative transition-all duration-300 hover:bg-gradient-to-r hover:from-muted/80 hover:to-transparent border-l-4 border-l-transparent hover:border-l-primary"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        animationName: "fade-in",
+        animationDuration: "0.4s",
+        animationTimingFunction: "ease-out",
+        animationFillMode: "forwards",
+        animationDelay: `${animationDelay}ms`,
+      }}
+    >
+      <TableCell>
+        <div className="flex items-center gap-3">
+          <div
+            className={`transition-all duration-500 ${
+              isHovered ? "scale-110 rotate-3" : "scale-100"
+            }`}
+          >
+            <PackageIcon className="h-5 w-5 text-muted-foreground/60 group-hover:text-primary transition-colors duration-300" />
+          </div>
+          <div className="relative">
+            <div
+              className="font-mono text-sm font-semibold tracking-wide text-foreground transition-colors duration-300"
+              style={{ fontVariantNumeric: "tabular-nums" }}
+              title={consolidation.id}
+            >
+              <div className="max-w-[120px] truncate">{consolidation.id}</div>
+            </div>
+            <div
+              className={`absolute -bottom-0.5 left-0 h-[2px] bg-gradient-to-r from-primary to-secondary transition-all duration-500 ${
+                isHovered ? "w-full opacity-100" : "w-0 opacity-0"
+              }`}
+            />
+          </div>
         </div>
       </TableCell>
       <TableCell>
-        <div
-          className="max-w-[200px] truncate"
-          title={consolidation.client.fullName}
-        >
-          {consolidation.client.fullName}
+        <div className="relative max-w-[200px]">
+          <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300 truncate">
+            {consolidation.client.fullName}
+          </p>
         </div>
       </TableCell>
       <TableCell>
-        <div
-          className="max-w-[250px] truncate"
-          title={consolidation.description}
-        >
-          {consolidation.description}
+        <div className="relative max-w-md">
+          <p
+            className={`text-sm transition-colors duration-300 truncate ${
+              consolidation.description
+                ? "text-muted-foreground group-hover:text-foreground"
+                : "text-muted-foreground/40 italic"
+            }`}
+          >
+            {consolidation.description || "—"}
+          </p>
         </div>
       </TableCell>
       <TableCell>
@@ -163,38 +181,69 @@ const ConsolidationRow = memo(function ConsolidationRow({
         />
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-1">
-          <Package className="h-4 w-4 text-muted-foreground" />
-          <span>{consolidation.packages.length}</span>
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
+            <span className="text-xs font-medium text-foreground/80">
+              {consolidation.packages.length}
+            </span>
+          </div>
         </div>
       </TableCell>
       <TableCell>
-        <div className="whitespace-nowrap">
-          {consolidation.deliveryDate
-            ? new Date(consolidation.deliveryDate).toLocaleDateString()
-            : "-"}
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
+            <time
+              className="text-xs font-medium text-foreground/80 whitespace-nowrap"
+              dateTime={consolidation.deliveryDate || undefined}
+            >
+              {consolidation.deliveryDate
+                ? new Date(consolidation.deliveryDate).toLocaleDateString(
+                    undefined,
+                    {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    }
+                  )
+                : "—"}
+            </time>
+          </div>
         </div>
       </TableCell>
       <TableCell>
-        <div className="whitespace-nowrap">
-          {new Date(consolidation.createdAt).toLocaleDateString()}
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
+            <time
+              className="text-xs font-medium text-foreground/80 whitespace-nowrap"
+              dateTime={consolidation.createdAt}
+            >
+              {new Date(consolidation.createdAt).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </time>
+          </div>
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1.5">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-600 shadow-sm ring-1 ring-blue-200/50 transition-all duration-300 hover:scale-110 hover:from-blue-100 hover:to-blue-200/50 hover:text-blue-700 hover:shadow-md hover:ring-blue-300/50 active:scale-95 dark:from-blue-950/30 dark:to-blue-900/20 dark:ring-blue-800/30 dark:hover:from-blue-900/40"
                 onClick={() => onView(consolidation.id)}
                 aria-label={`View ${consolidation.description}`}
               >
                 <Eye className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent
+              side="top"
+              className="rounded-lg bg-blue-950 px-3 py-1.5 text-xs font-medium text-blue-50"
+            >
               <p>{t("viewConsolidation")}</p>
             </TooltipContent>
           </Tooltip>
@@ -203,14 +252,17 @@ const ConsolidationRow = memo(function ConsolidationRow({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                className="h-9 w-9 rounded-lg bg-gradient-to-br from-amber-50 to-amber-100/50 text-amber-600 shadow-sm ring-1 ring-amber-200/50 transition-all duration-300 hover:scale-110 hover:from-amber-100 hover:to-amber-200/50 hover:text-amber-700 hover:shadow-md hover:ring-amber-300/50 active:scale-95 dark:from-amber-950/30 dark:to-amber-900/20 dark:ring-amber-800/30 dark:hover:from-amber-900/40"
                 onClick={() => onEdit(consolidation)}
                 aria-label={`Edit ${consolidation.description}`}
               >
                 <Pencil className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent
+              side="top"
+              className="rounded-lg bg-amber-950 px-3 py-1.5 text-xs font-medium text-amber-50"
+            >
               <p>{t("editConsolidation")}</p>
             </TooltipContent>
           </Tooltip>
@@ -219,48 +271,23 @@ const ConsolidationRow = memo(function ConsolidationRow({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                className="h-9 w-9 rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 text-red-600 shadow-sm ring-1 ring-red-200/50 transition-all duration-300 hover:scale-110 hover:from-red-100 hover:to-red-200/50 hover:text-red-700 hover:shadow-md hover:ring-red-300/50 active:scale-95 dark:from-red-950/30 dark:to-red-900/20 dark:ring-red-800/30 dark:hover:from-red-900/40"
                 onClick={() => onDelete(consolidation)}
                 aria-label={`Delete ${consolidation.description}`}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent
+              side="top"
+              className="rounded-lg bg-red-950 px-3 py-1.5 text-xs font-medium text-red-50"
+            >
               <p>{t("deleteConsolidation")}</p>
             </TooltipContent>
           </Tooltip>
         </div>
       </TableCell>
     </TableRow>
-  );
-});
-
-// Pagination button component
-interface PaginationButtonProps {
-  pageNumber: number;
-  isActive: boolean;
-  onClick: (page: number) => void;
-  t: (key: string, values?: Record<string, string | number | Date>) => string;
-}
-
-const PaginationButton = memo(function PaginationButton({
-  pageNumber,
-  isActive,
-  onClick,
-  t,
-}: PaginationButtonProps) {
-  return (
-    <Button
-      variant={isActive ? "default" : "outline"}
-      size="sm"
-      onClick={() => onClick(pageNumber)}
-      className="h-8 w-8 p-0"
-      aria-label={t("goToPage", { page: pageNumber })}
-      aria-current={isActive ? "page" : undefined}
-    >
-      {pageNumber}
-    </Button>
   );
 });
 
@@ -278,12 +305,11 @@ export default function AdminConsolidations() {
     defaultSortOrder: "desc",
   });
 
-  // Local state for search input (not synced to URL until debounced)
+  // Local state for search input
   const [searchInput, setSearchInput] = useState(urlState.search);
   const [debouncedSearch, setDebouncedSearch] = useState(urlState.search);
   const [isDebouncing, setIsDebouncing] = useState(false);
 
-  // Destructure URL state for easier access
   const {
     page,
     pageSize,
@@ -312,13 +338,11 @@ export default function AdminConsolidations() {
 
   const orderBy = getOrderBy();
 
-  // Rule 7.9: Input sanitization function using hoisted regex
   const sanitizeInput = (input: string): string => {
-    // Remove potentially dangerous characters
     return input.replace(DANGEROUS_CHARS_REGEX, "").trim();
   };
 
-  // Sync search input from URL when it changes (e.g., browser back/forward)
+  // Sync search input from URL
   useEffect(() => {
     if (urlState.search !== searchInput && !isDebouncing) {
       setSearchInput(urlState.search);
@@ -326,7 +350,7 @@ export default function AdminConsolidations() {
     }
   }, [urlState.search, searchInput, isDebouncing]);
 
-  // Debounce search input and update URL
+  // Debounce search input
   useEffect(() => {
     if (searchInput !== debouncedSearch) {
       setIsDebouncing(true);
@@ -335,7 +359,6 @@ export default function AdminConsolidations() {
     const timer = setTimeout(() => {
       const sanitized = sanitizeInput(searchInput);
       setDebouncedSearch(sanitized);
-      // Update URL with new search and reset to page 1
       updateURL({ search: sanitized, page: 1 });
       setIsDebouncing(false);
     }, DEBOUNCE_DELAY);
@@ -351,12 +374,10 @@ export default function AdminConsolidations() {
     orderBy,
   };
 
-  // Only include search if it has a valid value
   if (debouncedSearch) {
     queryVariables.search = debouncedSearch;
   }
 
-  // Only include status if it's not "all"
   if (statusFilter !== "all") {
     queryVariables.status = statusFilter;
   }
@@ -369,15 +390,12 @@ export default function AdminConsolidations() {
     notifyOnNetworkStatusChange: true,
   });
 
-  // Rule 5.9: Use functional setState updates & Rule 5.6: Narrow effect dependencies with useCallback
   const handleSort = useCallback(
     (field: SortField) => {
       if (sortField === field) {
-        // Toggle sort order
         const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
         updateURL({ sortOrder: newSortOrder });
       } else {
-        // Change sort field, default to ascending
         updateURL({ sortField: field, sortOrder: "asc" });
       }
     },
@@ -386,7 +404,6 @@ export default function AdminConsolidations() {
 
   const handlePageSizeChange = useCallback(
     (newSize: number) => {
-      // Update page size and reset to page 1
       updateURL({ pageSize: newSize, page: 1 });
     },
     [updateURL]
@@ -435,19 +452,16 @@ export default function AdminConsolidations() {
     []
   );
 
-  // Rule 5.1: Calculate derived state during rendering
   const totalCount = data?.allConsolidates.totalCount || 0;
   const hasNext = data?.allConsolidates.hasNext || false;
   const hasPrevious = data?.allConsolidates.hasPrevious || false;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  // Memoize consolidations from API response
   const consolidations = useMemo(
     () => data?.allConsolidates.results || [],
     [data?.allConsolidates.results]
   );
 
-  // Apply client-side filtering for client (backend doesn't support this yet)
   const filteredConsolidations = useMemo(() => {
     if (clientFilter === "all") {
       return consolidations;
@@ -455,7 +469,6 @@ export default function AdminConsolidations() {
     return consolidations.filter((c) => c.client.id === clientFilter);
   }, [consolidations, clientFilter]);
 
-  // Get unique clients for filter dropdown
   const uniqueClients = useMemo(() => {
     if (!consolidations.length) return [];
     const clientsMap = new Map();
@@ -467,35 +480,29 @@ export default function AdminConsolidations() {
     return Array.from(clientsMap.values());
   }, [consolidations]);
 
-  // Rule 5.8: Subscribe to derived state with useMemo
   const pageNumbers = useMemo(() => {
     const pages: (number | string)[] = [];
     const maxVisiblePages = 5;
     const ellipsis = "...";
 
     if (totalPages <= maxVisiblePages + 2) {
-      // Show all pages if total is small
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Always show first page
       pages.push(1);
 
       if (page <= 3) {
-        // Near the beginning
         for (let i = 2; i <= Math.min(maxVisiblePages, totalPages - 1); i++) {
           pages.push(i);
         }
         pages.push(ellipsis);
       } else if (page >= totalPages - 2) {
-        // Near the end
         pages.push(ellipsis);
         for (let i = totalPages - maxVisiblePages + 1; i < totalPages; i++) {
           pages.push(i);
         }
       } else {
-        // Middle section
         pages.push(ellipsis);
         for (let i = page - 1; i <= page + 1; i++) {
           pages.push(i);
@@ -503,14 +510,12 @@ export default function AdminConsolidations() {
         pages.push(ellipsis);
       }
 
-      // Always show last page
       pages.push(totalPages);
     }
 
     return pages;
   }, [page, totalPages]);
 
-  // Helper function to get sort icon for a column
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) {
       return <ArrowUpDown className="h-4 w-4" />;
@@ -522,7 +527,6 @@ export default function AdminConsolidations() {
     );
   };
 
-  // Helper function to get ARIA sort attribute
   const getAriaSort = (
     field: SortField
   ): "ascending" | "descending" | "none" => {
@@ -530,24 +534,241 @@ export default function AdminConsolidations() {
     return sortOrder === "asc" ? "ascending" : "descending";
   };
 
+  // Loading skeleton
+  if (loading) {
+    return (
+      <TooltipProvider>
+        <div className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <PageHeader title={t("title")} description={t("description")} />
+          </div>
+
+          <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent shimmer" />
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20">
+                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {t("id")}
+                    </TableHead>
+                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {t("client")}
+                    </TableHead>
+                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {t("description")}
+                    </TableHead>
+                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {t("status")}
+                    </TableHead>
+                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {t("packagesCount")}
+                    </TableHead>
+                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {t("deliveryDate")}
+                    </TableHead>
+                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {t("createdAt")}
+                    </TableHead>
+                    <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {t("actions")}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...Array(5)].map((_, index) => (
+                    <TableRow
+                      key={index}
+                      style={{
+                        animationDelay: `${index * 100}ms`,
+                        animation: "fade-in 0.6s ease-out forwards",
+                        opacity: 0,
+                      }}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-5 w-5 animate-pulse rounded bg-muted/60"></div>
+                          <div className="h-4 w-32 animate-pulse rounded-md bg-muted/60"></div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-4 w-36 animate-pulse rounded-md bg-muted/60"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-4 w-48 animate-pulse rounded-md bg-muted/60"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-6 w-20 animate-pulse rounded-full bg-muted/60"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-8 w-12 animate-pulse rounded-md bg-muted/60"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-8 w-28 animate-pulse rounded-md bg-muted/60"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-8 w-28 animate-pulse rounded-md bg-muted/60"></div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {[...Array(3)].map((_, i) => (
+                            <div
+                              key={i}
+                              className="h-9 w-9 animate-pulse rounded-lg bg-muted/60"
+                              style={{ animationDelay: `${i * 50}ms` }}
+                            ></div>
+                          ))}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </div>
+      </TooltipProvider>
+    );
+  }
+
+  // Empty state
+  if (!loading && !error && filteredConsolidations.length === 0) {
+    return (
+      <TooltipProvider>
+        <div className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <PageHeader title={t("title")} description={t("description")} />
+            <Button variant="outline" onClick={handleRefresh}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              {t("refresh")}
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="mb-6 flex flex-col gap-4 md:flex-row">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder={t("searchPlaceholder")}
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="pl-9 pr-9"
+                    aria-label={t("searchPlaceholder")}
+                  />
+                  {searchInput && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleClearSearch}
+                      className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                      aria-label={t("clearSearch")}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+
+                <Select
+                  value={statusFilter}
+                  onValueChange={handleStatusFilterChange}
+                >
+                  <SelectTrigger className="w-full md:w-[200px]">
+                    <SelectValue placeholder={t("filterByStatus")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("allStatuses")}</SelectItem>
+                    <SelectItem value="pending">
+                      {t("statusPending")}
+                    </SelectItem>
+                    <SelectItem value="in_transit">
+                      {t("statusInTransit")}
+                    </SelectItem>
+                    <SelectItem value="delivered">
+                      {t("statusDelivered")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={clientFilter} onValueChange={setClientFilter}>
+                  <SelectTrigger className="w-full md:w-[200px]">
+                    <SelectValue placeholder={t("filterByClient")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("allClients")}</SelectItem>
+                    {uniqueClients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.fullName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-border/50 bg-gradient-to-br from-muted/30 via-background to-muted/20 py-24 text-center shadow-lg backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:shadow-xl">
+                <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary/5 blur-3xl transition-all duration-1000 group-hover:scale-150" />
+                <div className="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-secondary/5 blur-3xl transition-all duration-1000 group-hover:scale-150" />
+                <div className="relative">
+                  <div className="mb-8 inline-flex rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 shadow-inner ring-1 ring-primary/10 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
+                    <PackageIcon className="h-20 w-20 text-primary/60 transition-all duration-500 group-hover:text-primary" />
+                  </div>
+                  <h3 className="mb-3 text-2xl font-bold tracking-tight text-foreground transition-colors duration-300 group-hover:text-primary">
+                    {searchInput ||
+                    statusFilter !== "all" ||
+                    clientFilter !== "all"
+                      ? t("noMatchingConsolidations")
+                      : t("noConsolidationsFound")}
+                  </h3>
+                  <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted-foreground transition-colors duration-300 group-hover:text-foreground/80">
+                    {searchInput
+                      ? t("noMatchingConsolidationsDescription", {
+                          search: searchInput,
+                        })
+                      : t("noConsolidationsFoundDescription")}
+                  </p>
+                  {(searchInput ||
+                    statusFilter !== "all" ||
+                    clientFilter !== "all") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSearchInput("");
+                        setClientFilter("all");
+                        updateURL({ search: "", status: "all", page: 1 });
+                      }}
+                      className="mt-8 gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      {t("clearSearch")}
+                    </Button>
+                  )}
+                  <div className="mt-8 flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
+                    <div className="h-px w-8 bg-gradient-to-r from-transparent to-muted-foreground/30" />
+                    <span>Ready to start</span>
+                    <div className="h-px w-8 bg-gradient-to-l from-transparent to-muted-foreground/30" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </TooltipProvider>
+    );
+  }
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <PageHeader title={t("title")} description={t("description")} />
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={loading}
-              className="sm:w-auto"
-            >
-              <div className={loading ? "animate-spin mr-2" : "mr-2"}>
-                <RefreshCw className="h-4 w-4" />
-              </div>
-              {t("refresh")}
-            </Button>
-          </div>
+          <Button variant="outline" onClick={handleRefresh} disabled={loading}>
+            <div className={loading ? "animate-spin mr-2" : "mr-2"}>
+              <RefreshCw className="h-4 w-4" />
+            </div>
+            {t("refresh")}
+          </Button>
         </div>
 
         <ViewConsolidationDialog
@@ -574,7 +795,6 @@ export default function AdminConsolidations() {
           <CardContent className="p-6">
             {/* Search and Filters */}
             <div className="mb-6 flex flex-col gap-4 md:flex-row">
-              {/* Search Input */}
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -598,7 +818,6 @@ export default function AdminConsolidations() {
                 )}
               </div>
 
-              {/* Status Filter */}
               <Select
                 value={statusFilter}
                 onValueChange={handleStatusFilterChange}
@@ -618,7 +837,6 @@ export default function AdminConsolidations() {
                 </SelectContent>
               </Select>
 
-              {/* Client Filter */}
               <Select value={clientFilter} onValueChange={setClientFilter}>
                 <SelectTrigger className="w-full md:w-[200px]">
                   <SelectValue placeholder={t("filterByClient")} />
@@ -634,210 +852,165 @@ export default function AdminConsolidations() {
               </Select>
             </div>
 
-            {/* Error State */}
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="mb-6">
                 <AlertDescription>
                   {t("loadingError", { error: error.message })}
                 </AlertDescription>
               </Alert>
             )}
 
-            {/* Loading State */}
-            {loading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="animate-spin">
-                    <Loader2 className="h-12 w-12 text-primary" />
-                  </div>
+            <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
+              <div className="relative overflow-x-auto">
+                <div className="pointer-events-none absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-card/80 to-transparent" />
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20 backdrop-blur-sm transition-colors hover:from-muted/60 hover:to-muted/30">
+                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {t("id")}
+                      </TableHead>
+                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {t("client")}
+                      </TableHead>
+                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {t("description")}
+                      </TableHead>
+                      <TableHead
+                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
+                        onClick={() => handleSort("status")}
+                        aria-sort={getAriaSort("status")}
+                      >
+                        <div className="flex items-center gap-2">
+                          {t("status")}
+                          {getSortIcon("status")}
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {t("packagesCount")}
+                      </TableHead>
+                      <TableHead
+                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
+                        onClick={() => handleSort("delivery_date")}
+                        aria-sort={getAriaSort("delivery_date")}
+                      >
+                        <div className="flex items-center gap-2">
+                          {t("deliveryDate")}
+                          {getSortIcon("delivery_date")}
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
+                        onClick={() => handleSort("created_at")}
+                        aria-sort={getAriaSort("created_at")}
+                      >
+                        <div className="flex items-center gap-2">
+                          {t("createdAt")}
+                          {getSortIcon("created_at")}
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {t("actions")}
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredConsolidations.map((consolidation, index) => (
+                      <ConsolidationRow
+                        key={consolidation.id}
+                        consolidation={consolidation}
+                        onView={handleViewConsolidation}
+                        onEdit={handleEditConsolidation}
+                        onDelete={handleDeleteConsolidation}
+                        animationDelay={index * 50}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                <p className="text-sm text-muted-foreground">
+                  {t("showingResults", {
+                    start: (page - 1) * pageSize + 1,
+                    end: Math.min(page * pageSize, totalCount),
+                    total: totalCount,
+                  })}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {t("itemsPerPage")}:
+                  </span>
+                  <Select
+                    value={pageSize.toString()}
+                    onValueChange={(value) =>
+                      handlePageSizeChange(parseInt(value, 10))
+                    }
+                  >
+                    <SelectTrigger className="h-8 w-16">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            )}
 
-            {/* Empty State */}
-            {!loading && !error && filteredConsolidations.length === 0 && (
-              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-16 text-center">
-                <div className="mb-6 rounded-full bg-primary/10 p-6">
-                  {EMPTY_STATE_ICON}
-                </div>
-                <h3 className="text-xl font-semibold text-foreground">
-                  {searchInput ||
-                  statusFilter !== "all" ||
-                  clientFilter !== "all"
-                    ? t("noMatchingConsolidations")
-                    : t("noConsolidationsFound")}
-                </h3>
-                <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                  {searchInput
-                    ? t("noMatchingConsolidationsDescription", {
-                        search: searchInput,
-                      })
-                    : t("noConsolidationsFoundDescription")}
-                </p>
-                {(searchInput ||
-                  statusFilter !== "all" ||
-                  clientFilter !== "all") && (
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setSearchInput("");
-                      setClientFilter("all");
-                      updateURL({ search: "", status: "all", page: 1 });
-                    }}
-                    className="mt-4"
+                    onClick={() => updateURL({ page: page - 1 })}
+                    disabled={!hasPrevious}
+                    aria-label={t("previousPage")}
                   >
-                    <X className="mr-2 h-4 w-4" />
-                    {t("clearSearch")}
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
-                )}
-              </div>
-            )}
 
-            {/* Table */}
-            {!loading && !error && filteredConsolidations.length > 0 && (
-              <>
-                <div className="overflow-x-auto rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t("id")}</TableHead>
-                        <TableHead>{t("client")}</TableHead>
-                        <TableHead>{t("description")}</TableHead>
-                        <TableHead
-                          className="cursor-pointer select-none hover:bg-accent/50 transition-colors"
-                          onClick={() => handleSort("status")}
-                          aria-sort={getAriaSort("status")}
+                  <div className="flex items-center gap-1">
+                    {pageNumbers.map((pageNum, idx) =>
+                      pageNum === "..." ? (
+                        <span
+                          key={`ellipsis-${idx}`}
+                          className="px-2 text-muted-foreground"
                         >
-                          <div className="flex items-center gap-2">
-                            {t("status")}
-                            {getSortIcon("status")}
-                          </div>
-                        </TableHead>
-                        <TableHead>{t("packagesCount")}</TableHead>
-                        <TableHead
-                          className="cursor-pointer select-none hover:bg-accent/50 transition-colors"
-                          onClick={() => handleSort("delivery_date")}
-                          aria-sort={getAriaSort("delivery_date")}
+                          ...
+                        </span>
+                      ) : (
+                        <Button
+                          key={pageNum}
+                          variant={page === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => updateURL({ page: pageNum as number })}
+                          className="h-8 w-8 p-0"
+                          aria-label={t("goToPage", { page: pageNum })}
+                          aria-current={page === pageNum ? "page" : undefined}
                         >
-                          <div className="flex items-center gap-2">
-                            {t("deliveryDate")}
-                            {getSortIcon("delivery_date")}
-                          </div>
-                        </TableHead>
-                        <TableHead
-                          className="cursor-pointer select-none hover:bg-accent/50 transition-colors"
-                          onClick={() => handleSort("created_at")}
-                          aria-sort={getAriaSort("created_at")}
-                        >
-                          <div className="flex items-center gap-2">
-                            {t("createdAt")}
-                            {getSortIcon("created_at")}
-                          </div>
-                        </TableHead>
-                        <TableHead className="text-right">
-                          {t("actions")}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredConsolidations.map((consolidation) => (
-                        <ConsolidationRow
-                          key={consolidation.id}
-                          consolidation={consolidation}
-                          onView={handleViewConsolidation}
-                          onEdit={handleEditConsolidation}
-                          onDelete={handleDeleteConsolidation}
-                          t={t}
-                          tStatus={t}
-                        />
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-
-                {/* Pagination Controls */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-4">
-                  {/* Results info and page size selector */}
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                    <p className="text-sm text-muted-foreground">
-                      {t("showingResults", {
-                        start: (page - 1) * pageSize + 1,
-                        end: Math.min(page * pageSize, totalCount),
-                        total: totalCount,
-                      })}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        {t("itemsPerPage")}:
-                      </span>
-                      <Select
-                        value={pageSize.toString()}
-                        onValueChange={(value) =>
-                          handlePageSizeChange(parseInt(value, 10))
-                        }
-                      >
-                        <SelectTrigger className="h-8 w-16">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="10">10</SelectItem>
-                          <SelectItem value="20">20</SelectItem>
-                          <SelectItem value="50">50</SelectItem>
-                          <SelectItem value="100">100</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                          {pageNum}
+                        </Button>
+                      )
+                    )}
                   </div>
 
-                  {/* Page navigation */}
-                  {totalPages > 1 && (
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => updateURL({ page: page - 1 })}
-                        disabled={!hasPrevious}
-                        aria-label={t("previousPage")}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-
-                      <div className="flex items-center gap-1">
-                        {pageNumbers.map((pageNum, idx) =>
-                          pageNum === "..." ? (
-                            <span
-                              key={`ellipsis-${idx}`}
-                              className="px-2 text-muted-foreground"
-                            >
-                              ...
-                            </span>
-                          ) : (
-                            <PaginationButton
-                              key={pageNum}
-                              pageNumber={pageNum as number}
-                              isActive={page === pageNum}
-                              onClick={(p) => updateURL({ page: p })}
-                              t={t}
-                            />
-                          )
-                        )}
-                      </div>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => updateURL({ page: page + 1 })}
-                        disabled={!hasNext}
-                        aria-label={t("nextPage")}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => updateURL({ page: page + 1 })}
+                    disabled={!hasNext}
+                    aria-label={t("nextPage")}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
-              </>
-            )}
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
