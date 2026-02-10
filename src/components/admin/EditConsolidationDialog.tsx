@@ -113,27 +113,27 @@ export function EditConsolidationDialog({
     },
   });
 
-  const validateForm = (): boolean => {
-    const errors: ValidationErrors = {};
-
-    if (!formData.description.trim()) {
-      errors.description = t("descriptionRequired");
-    }
-
-    const validStatuses = ["pending", "in_transit", "delivered"];
-    if (!formData.status || !validStatuses.includes(formData.status)) {
-      errors.status = t("statusRequired");
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
 
-      if (!consolidation || !validateForm()) {
+      if (!consolidation) {
+        return;
+      }
+
+      // Inline validation
+      const errors: ValidationErrors = {};
+      if (!formData.description.trim()) {
+        errors.description = t("descriptionRequired");
+      }
+
+      const validStatuses = ["pending", "in_transit", "delivered"];
+      if (!formData.status || !validStatuses.includes(formData.status)) {
+        errors.status = t("statusRequired");
+      }
+
+      setValidationErrors(errors);
+      if (Object.keys(errors).length > 0) {
         return;
       }
 
@@ -147,7 +147,7 @@ export function EditConsolidationDialog({
 
       await updateConsolidate({ variables });
     },
-    [consolidation, formData, updateConsolidate]
+    [consolidation, formData, updateConsolidate, t]
   );
 
   const handleCancel = () => {
@@ -174,7 +174,8 @@ export function EditConsolidationDialog({
           {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description">
-              {t("description_label")} <span className="text-destructive">*</span>
+              {t("description_label")}{" "}
+              <span className="text-destructive">*</span>
             </Label>
             <Input
               id="description"
@@ -185,7 +186,9 @@ export function EditConsolidationDialog({
                 setFormData({ ...formData, description: e.target.value })
               }
               disabled={loading}
-              className={validationErrors.description ? "border-destructive" : ""}
+              className={
+                validationErrors.description ? "border-destructive" : ""
+              }
             />
             {validationErrors.description && (
               <p className="text-sm text-destructive">
@@ -213,8 +216,12 @@ export function EditConsolidationDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="pending">{t("statusPending")}</SelectItem>
-                <SelectItem value="in_transit">{t("statusInTransit")}</SelectItem>
-                <SelectItem value="delivered">{t("statusDelivered")}</SelectItem>
+                <SelectItem value="in_transit">
+                  {t("statusInTransit")}
+                </SelectItem>
+                <SelectItem value="delivered">
+                  {t("statusDelivered")}
+                </SelectItem>
               </SelectContent>
             </Select>
             {validationErrors.status && (

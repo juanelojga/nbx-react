@@ -264,10 +264,13 @@ export default function AdminConsolidations() {
     setIsViewDialogOpen(true);
   }, []);
 
-  const handleEditConsolidation = useCallback((consolidation: ConsolidateType) => {
-    setConsolidationToEdit(consolidation);
-    setIsEditDialogOpen(true);
-  }, []);
+  const handleEditConsolidation = useCallback(
+    (consolidation: ConsolidateType) => {
+      setConsolidationToEdit(consolidation);
+      setIsEditDialogOpen(true);
+    },
+    []
+  );
 
   const handleDeleteConsolidation = useCallback(
     (consolidation: ConsolidateType) => {
@@ -286,7 +289,7 @@ export default function AdminConsolidations() {
   const filteredConsolidations = useMemo(() => {
     if (!data?.allConsolidates) return [];
 
-    let result = data.allConsolidates;
+    let result = [...data.allConsolidates];
 
     // Apply status filter
     if (statusFilter !== "all") {
@@ -310,7 +313,7 @@ export default function AdminConsolidations() {
     }
 
     return result;
-  }, [data?.allConsolidates, statusFilter, clientFilter, searchInput]);
+  }, [data, statusFilter, clientFilter, searchInput]);
 
   // Get unique clients for filter dropdown
   const uniqueClients = useMemo(() => {
@@ -322,7 +325,7 @@ export default function AdminConsolidations() {
       }
     });
     return Array.from(clientsMap.values());
-  }, [data?.allConsolidates]);
+  }, [data]);
 
   return (
     <TooltipProvider>
@@ -452,7 +455,9 @@ export default function AdminConsolidations() {
                   {EMPTY_STATE_ICON}
                 </div>
                 <h3 className="text-xl font-semibold text-foreground">
-                  {searchInput || statusFilter !== "all" || clientFilter !== "all"
+                  {searchInput ||
+                  statusFilter !== "all" ||
+                  clientFilter !== "all"
                     ? t("noMatchingConsolidations")
                     : t("noConsolidationsFound")}
                 </h3>
@@ -496,7 +501,9 @@ export default function AdminConsolidations() {
                       <TableHead>{t("packagesCount")}</TableHead>
                       <TableHead>{t("deliveryDate")}</TableHead>
                       <TableHead>{t("createdAt")}</TableHead>
-                      <TableHead className="text-right">{t("actions")}</TableHead>
+                      <TableHead className="text-right">
+                        {t("actions")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
