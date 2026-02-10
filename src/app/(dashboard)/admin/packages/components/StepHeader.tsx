@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,9 +13,11 @@ interface StepHeaderProps {
 }
 
 export function StepHeader({ currentStep, steps }: StepHeaderProps) {
+  const t = useTranslations("adminPackages.stepHeader");
+
   return (
     <div className="w-full">
-      <nav aria-label="Progress" className="px-4 py-6">
+      <nav aria-label={t("progressLabel")} className="px-4 py-6">
         <ol
           role="list"
           className="flex items-center justify-between gap-2 sm:gap-4"

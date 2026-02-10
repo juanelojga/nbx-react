@@ -42,6 +42,7 @@ export function getApolloClient(): ApolloClient<NormalizedCacheObject> {
 ```
 
 **Key Features**:
+
 - ✅ Single client instance across entire app lifecycle
 - ✅ SSR-safe (creates new instance on server)
 - ✅ Module-level variable prevents re-initialization
@@ -70,6 +71,7 @@ export function Providers({ children }: ProvidersProps) {
 ```
 
 **Key Features**:
+
 - ✅ `useMemo` with empty deps ensures single initialization
 - ✅ Client persists across component re-renders
 - ✅ No duplicate subscriptions or memory leaks
@@ -102,11 +104,13 @@ async function performTokenRefresh(): Promise<string | null> {
 ```
 
 **Key Features**:
+
 - ✅ Module-level promise prevents duplicate concurrent refresh attempts
 - ✅ Multiple components can safely call refresh simultaneously
 - ✅ Single refresh resolves for all waiting callers
 
 **Impact**:
+
 - **Prevents**: Multiple Apollo Client instances causing duplicate queries
 - **Prevents**: Race conditions from concurrent token refresh requests
 - **Ensures**: Clean app initialization and teardown
@@ -176,6 +180,7 @@ const handleView = useCallback((clientId: string) => {
 **Decision**: ❌ Not implemented - `useCallback` is sufficient
 
 **Reasoning**:
+
 1. **31+ handlers** already wrapped with `useCallback`
 2. **Most have empty dependencies** `[]` - already maximally stable
 3. **Components use `React.memo`** - prevents unnecessary re-renders
@@ -183,6 +188,7 @@ const handleView = useCallback((clientId: string) => {
 5. **Ref pattern adds complexity** without measured benefit
 
 **When to use refs instead**:
+
 - Handler depends on many changing values but should stay stable
 - Profiling shows child re-renders despite `useCallback`
 - Working with animation frames or external libraries needing stable refs
@@ -197,7 +203,9 @@ const handleClick = useCallback(() => {
 
 // ✅ Solution: Ref keeps stable reference
 const countRef = useRef(count);
-useEffect(() => { countRef.current = count; });
+useEffect(() => {
+  countRef.current = count;
+});
 
 const handleClick = useCallback(() => {
   logAnalytics(countRef.current); // Always latest, callback never changes
@@ -296,11 +304,11 @@ useEffect(() => {
 
 ### ✅ Pattern Implementation Status
 
-| Rule | Status | Implementation |
-|------|--------|----------------|
-| 8.1 - Initialize App Once | ✅ Optimized | Apollo singleton, token refresh deduplication |
-| 8.2 - Store Handlers in Refs | ✅ Sufficient | 31+ `useCallback` handlers, `React.memo` components |
-| 8.3 - useEffectEvent | ⚠️ Not Available | Ref patterns used where needed, ready for migration |
+| Rule                         | Status           | Implementation                                      |
+| ---------------------------- | ---------------- | --------------------------------------------------- |
+| 8.1 - Initialize App Once    | ✅ Optimized     | Apollo singleton, token refresh deduplication       |
+| 8.2 - Store Handlers in Refs | ✅ Sufficient    | 31+ `useCallback` handlers, `React.memo` components |
+| 8.3 - useEffectEvent         | ⚠️ Not Available | Ref patterns used where needed, ready for migration |
 
 ### Key Achievements
 
@@ -322,12 +330,14 @@ useEffect(() => {
 ### Performance Impact
 
 **Measured Benefits**:
+
 - ✅ Zero duplicate Apollo Client instances
 - ✅ No redundant token refresh requests
 - ✅ Stable callback references prevent unnecessary row re-renders
 - ✅ Clean app initialization and teardown
 
 **No Action Required**:
+
 - Current patterns are already optimal for React 19
 - Ref-based callbacks not needed (no profiling evidence)
 - `useEffectEvent` migration can wait for stable release
@@ -339,12 +349,14 @@ useEffect(() => {
 ### 8.1 - App Initialization
 
 **Use singleton pattern for**:
+
 - ✅ GraphQL/API clients (Apollo, Axios instances)
 - ✅ Analytics initialization
 - ✅ Feature flag services
 - ✅ Global event emitters
 
 **Don't use for**:
+
 - ❌ Component-level state
 - ❌ Per-user session data
 - ❌ Server-side rendering (create per-request)
@@ -352,12 +364,14 @@ useEffect(() => {
 ### 8.2 - Ref-Based Callbacks
 
 **Use refs when**:
+
 - Handler needs latest state but must stay stable
 - Profiling shows re-renders despite `useCallback`
 - Working with third-party libs requiring stable callbacks
 - Animation frame handlers
 
 **Prefer useCallback when**:
+
 - Dependencies are stable or empty
 - Components use `React.memo` effectively
 - No profiling evidence of issues
@@ -366,12 +380,14 @@ useEffect(() => {
 ### 8.3 - useEffectEvent
 
 **Will be ideal for** (when stable):
+
 - Effects that need latest callback without re-running
 - Event handlers inside effects
 - Timers/intervals needing fresh state
 - WebSocket message handlers
 
 **Current alternatives**:
+
 - Refs for latest values
 - `useCallback` for stable callbacks
 - Effect dependencies when re-run is acceptable
@@ -392,11 +408,13 @@ useEffect(() => {
 ### Performance Monitoring
 
 **Tools**:
+
 1. React DevTools Profiler - Check for unnecessary re-renders
 2. Chrome Performance tab - Verify single Apollo Client instance
 3. Network tab - Confirm no duplicate token refresh requests
 
 **Metrics to Watch**:
+
 - Component render count (should be minimal with memo + callback)
 - Network requests (no duplicate GraphQL queries)
 - Memory (single Apollo Client cache)
@@ -404,6 +422,7 @@ useEffect(() => {
 ### Future Optimizations
 
 When React releases `useEffectEvent`:
+
 1. Audit effects with callback dependencies
 2. Migrate to `useEffectEvent` for cleaner code
 3. Remove manual ref tracking where possible

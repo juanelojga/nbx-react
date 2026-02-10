@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useMutation } from "@apollo/client";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -64,6 +65,7 @@ export function AddPackageDialog({
   clientId,
   onPackageCreated,
 }: AddPackageDialogProps) {
+  const t = useTranslations("adminPackages.addDialog");
   const [formData, setFormData] = useState<FormData>({
     barcode: "",
     courier: "",
@@ -91,8 +93,10 @@ export function AddPackageDialog({
     CreatePackageVariables
   >(CREATE_PACKAGE, {
     onCompleted: async (data) => {
-      toast.success("Package created successfully", {
-        description: `Package ${data.createPackage.package.barcode} has been created.`,
+      toast.success(t("successTitle"), {
+        description: t("successDescription", {
+          barcode: data.createPackage.package.barcode,
+        }),
       });
       handleClose();
       // Trigger refresh
@@ -101,7 +105,7 @@ export function AddPackageDialog({
       }
     },
     onError: (error) => {
-      toast.error("Failed to create package", {
+      toast.error(t("errorTitle"), {
         description: error.message,
       });
     },
@@ -142,14 +146,14 @@ export function AddPackageDialog({
 
     // Required: Barcode (min length 3)
     if (!formData.barcode.trim()) {
-      errors.barcode = "Barcode is required.";
+      errors.barcode = t("barcodeRequired");
     } else if (formData.barcode.trim().length < 3) {
-      errors.barcode = "Barcode must be at least 3 characters.";
+      errors.barcode = t("barcodeMinLength");
     }
 
     // Required: Courier
     if (!formData.courier.trim()) {
-      errors.courier = "Courier is required.";
+      errors.courier = t("courierRequired");
     }
 
     // Optional: Numeric fields must be > 0 if provided
@@ -167,7 +171,7 @@ export function AddPackageDialog({
       if (value) {
         const numValue = parseFloat(value);
         if (isNaN(numValue) || numValue <= 0) {
-          errors[key] = "Must be a positive number.";
+          errors[key] = t("positiveNumberError");
         }
       }
     });
@@ -177,7 +181,7 @@ export function AddPackageDialog({
       try {
         new URL(formData.purchaseLink.trim());
       } catch {
-        errors.purchaseLink = "Must be a valid URL.";
+        errors.purchaseLink = t("invalidUrlError");
       }
     }
 
@@ -185,7 +189,7 @@ export function AddPackageDialog({
     if (formData.arrivalDate.trim()) {
       const dateValue = new Date(formData.arrivalDate.trim());
       if (isNaN(dateValue.getTime())) {
-        errors.arrivalDate = "Invalid date format.";
+        errors.arrivalDate = t("invalidDateError");
       }
     }
 
@@ -261,24 +265,23 @@ export function AddPackageDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <Plus className="h-6 w-6" />
-            Create New Package
+            {t("title")}
           </DialogTitle>
-          <DialogDescription>
-            Fill in the details below to register a new package for this client.
-          </DialogDescription>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Basic Information
+              {t("basicInfoTitle")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Barcode */}
               <div className="space-y-2">
                 <Label htmlFor="barcode">
-                  Barcode <span className="text-destructive">*</span>
+                  {t("barcodeLabel")}{" "}
+                  <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="barcode"
@@ -286,7 +289,7 @@ export function AddPackageDialog({
                   onChange={(e) => handleInputChange("barcode", e.target.value)}
                   disabled={loading}
                   aria-invalid={!!validationErrors.barcode}
-                  placeholder="Enter package barcode"
+                  placeholder={t("barcodePlaceholder")}
                 />
                 {validationErrors.barcode && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">
@@ -298,7 +301,7 @@ export function AddPackageDialog({
 
               {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("descriptionLabel")}</Label>
                 <Input
                   id="description"
                   value={formData.description}
@@ -306,7 +309,7 @@ export function AddPackageDialog({
                     handleInputChange("description", e.target.value)
                   }
                   disabled={loading}
-                  placeholder="Brief package description"
+                  placeholder={t("descriptionPlaceholder")}
                 />
               </div>
             </div>
@@ -315,13 +318,14 @@ export function AddPackageDialog({
           {/* Courier Information */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Courier Information
+              {t("courierInfoTitle")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Courier */}
               <div className="space-y-2">
                 <Label htmlFor="courier">
-                  Courier <span className="text-destructive">*</span>
+                  {t("courierLabel")}{" "}
+                  <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="courier"
@@ -329,7 +333,7 @@ export function AddPackageDialog({
                   onChange={(e) => handleInputChange("courier", e.target.value)}
                   disabled={loading}
                   aria-invalid={!!validationErrors.courier}
-                  placeholder="e.g., FedEx, UPS, DHL"
+                  placeholder={t("courierPlaceholder")}
                 />
                 {validationErrors.courier && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">
@@ -341,7 +345,7 @@ export function AddPackageDialog({
 
               {/* Other Courier */}
               <div className="space-y-2">
-                <Label htmlFor="otherCourier">Other Courier</Label>
+                <Label htmlFor="otherCourier">{t("otherCourierLabel")}</Label>
                 <Input
                   id="otherCourier"
                   value={formData.otherCourier}
@@ -349,7 +353,7 @@ export function AddPackageDialog({
                     handleInputChange("otherCourier", e.target.value)
                   }
                   disabled={loading}
-                  placeholder="Alternative courier name (optional)"
+                  placeholder={t("otherCourierPlaceholder")}
                 />
               </div>
             </div>
@@ -358,12 +362,12 @@ export function AddPackageDialog({
           {/* Dimensions */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Dimensions
+              {t("dimensionsTitle")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* Length */}
               <div className="space-y-2">
-                <Label htmlFor="length">Length</Label>
+                <Label htmlFor="length">{t("lengthLabel")}</Label>
                 <Input
                   id="length"
                   type="number"
@@ -373,7 +377,7 @@ export function AddPackageDialog({
                   onChange={(e) => handleInputChange("length", e.target.value)}
                   disabled={loading}
                   aria-invalid={!!validationErrors.length}
-                  placeholder="0.00"
+                  placeholder={t("dimensionPlaceholder")}
                 />
                 {validationErrors.length && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">
@@ -385,7 +389,7 @@ export function AddPackageDialog({
 
               {/* Width */}
               <div className="space-y-2">
-                <Label htmlFor="width">Width</Label>
+                <Label htmlFor="width">{t("widthLabel")}</Label>
                 <Input
                   id="width"
                   type="number"
@@ -395,7 +399,7 @@ export function AddPackageDialog({
                   onChange={(e) => handleInputChange("width", e.target.value)}
                   disabled={loading}
                   aria-invalid={!!validationErrors.width}
-                  placeholder="0.00"
+                  placeholder={t("dimensionPlaceholder")}
                 />
                 {validationErrors.width && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">
@@ -407,7 +411,7 @@ export function AddPackageDialog({
 
               {/* Height */}
               <div className="space-y-2">
-                <Label htmlFor="height">Height</Label>
+                <Label htmlFor="height">{t("heightLabel")}</Label>
                 <Input
                   id="height"
                   type="number"
@@ -417,7 +421,7 @@ export function AddPackageDialog({
                   onChange={(e) => handleInputChange("height", e.target.value)}
                   disabled={loading}
                   aria-invalid={!!validationErrors.height}
-                  placeholder="0.00"
+                  placeholder={t("dimensionPlaceholder")}
                 />
                 {validationErrors.height && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">
@@ -429,7 +433,7 @@ export function AddPackageDialog({
 
               {/* Dimension Unit */}
               <div className="space-y-2">
-                <Label htmlFor="dimensionUnit">Unit</Label>
+                <Label htmlFor="dimensionUnit">{t("unitLabel")}</Label>
                 <Select
                   value={formData.dimensionUnit}
                   onValueChange={(value) =>
@@ -438,13 +442,13 @@ export function AddPackageDialog({
                   disabled={loading}
                 >
                   <SelectTrigger id="dimensionUnit" className="w-full">
-                    <SelectValue placeholder="Select unit" />
+                    <SelectValue placeholder={t("unitPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="cm">cm</SelectItem>
-                    <SelectItem value="in">in</SelectItem>
-                    <SelectItem value="m">m</SelectItem>
-                    <SelectItem value="ft">ft</SelectItem>
+                    <SelectItem value="cm">{t("unitCm")}</SelectItem>
+                    <SelectItem value="in">{t("unitIn")}</SelectItem>
+                    <SelectItem value="m">{t("unitM")}</SelectItem>
+                    <SelectItem value="ft">{t("unitFt")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -454,12 +458,12 @@ export function AddPackageDialog({
           {/* Weight */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Weight
+              {t("weightTitle")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Weight Value */}
               <div className="space-y-2">
-                <Label htmlFor="weight">Weight</Label>
+                <Label htmlFor="weight">{t("weightLabel")}</Label>
                 <Input
                   id="weight"
                   type="number"
@@ -469,7 +473,7 @@ export function AddPackageDialog({
                   onChange={(e) => handleInputChange("weight", e.target.value)}
                   disabled={loading}
                   aria-invalid={!!validationErrors.weight}
-                  placeholder="0.00"
+                  placeholder={t("weightPlaceholder")}
                 />
                 {validationErrors.weight && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">
@@ -481,7 +485,7 @@ export function AddPackageDialog({
 
               {/* Weight Unit */}
               <div className="space-y-2">
-                <Label htmlFor="weightUnit">Unit</Label>
+                <Label htmlFor="weightUnit">{t("unitLabel")}</Label>
                 <Select
                   value={formData.weightUnit}
                   onValueChange={(value) =>
@@ -490,13 +494,13 @@ export function AddPackageDialog({
                   disabled={loading}
                 >
                   <SelectTrigger id="weightUnit" className="w-full">
-                    <SelectValue placeholder="Select unit" />
+                    <SelectValue placeholder={t("unitPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="kg">kg</SelectItem>
-                    <SelectItem value="lb">lb</SelectItem>
-                    <SelectItem value="g">g</SelectItem>
-                    <SelectItem value="oz">oz</SelectItem>
+                    <SelectItem value="kg">{t("unitKg")}</SelectItem>
+                    <SelectItem value="lb">{t("unitLb")}</SelectItem>
+                    <SelectItem value="g">{t("unitG")}</SelectItem>
+                    <SelectItem value="oz">{t("unitOz")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -506,12 +510,12 @@ export function AddPackageDialog({
           {/* Pricing */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Pricing
+              {t("pricingTitle")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Real Price */}
               <div className="space-y-2">
-                <Label htmlFor="realPrice">Real Price</Label>
+                <Label htmlFor="realPrice">{t("realPriceLabel")}</Label>
                 <Input
                   id="realPrice"
                   type="number"
@@ -523,7 +527,7 @@ export function AddPackageDialog({
                   }
                   disabled={loading}
                   aria-invalid={!!validationErrors.realPrice}
-                  placeholder="0.00"
+                  placeholder={t("dimensionPlaceholder")}
                 />
                 {validationErrors.realPrice && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">
@@ -535,7 +539,7 @@ export function AddPackageDialog({
 
               {/* Service Price */}
               <div className="space-y-2">
-                <Label htmlFor="servicePrice">Service Price</Label>
+                <Label htmlFor="servicePrice">{t("servicePriceLabel")}</Label>
                 <Input
                   id="servicePrice"
                   type="number"
@@ -547,7 +551,7 @@ export function AddPackageDialog({
                   }
                   disabled={loading}
                   aria-invalid={!!validationErrors.servicePrice}
-                  placeholder="0.00"
+                  placeholder={t("dimensionPlaceholder")}
                 />
                 {validationErrors.servicePrice && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">
@@ -562,12 +566,12 @@ export function AddPackageDialog({
           {/* Additional Details */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Additional Details
+              {t("additionalDetailsTitle")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Purchase Link */}
               <div className="space-y-2">
-                <Label htmlFor="purchaseLink">Purchase Link</Label>
+                <Label htmlFor="purchaseLink">{t("purchaseLinkLabel")}</Label>
                 <Input
                   id="purchaseLink"
                   type="url"
@@ -577,7 +581,7 @@ export function AddPackageDialog({
                   }
                   disabled={loading}
                   aria-invalid={!!validationErrors.purchaseLink}
-                  placeholder="https://example.com/order/..."
+                  placeholder={t("purchaseLinkPlaceholder")}
                 />
                 {validationErrors.purchaseLink && (
                   <p className="text-sm text-destructive font-medium flex items-center gap-1">
@@ -589,7 +593,7 @@ export function AddPackageDialog({
 
               {/* Arrival Date */}
               <div className="space-y-2">
-                <Label htmlFor="arrivalDate">Arrival Date</Label>
+                <Label htmlFor="arrivalDate">{t("arrivalDateLabel")}</Label>
                 <Input
                   id="arrivalDate"
                   type="date"
@@ -611,13 +615,13 @@ export function AddPackageDialog({
 
             {/* Comments */}
             <div className="space-y-2">
-              <Label htmlFor="comments">Comments</Label>
+              <Label htmlFor="comments">{t("commentsLabel")}</Label>
               <Textarea
                 id="comments"
                 value={formData.comments}
                 onChange={(e) => handleInputChange("comments", e.target.value)}
                 disabled={loading}
-                placeholder="Add any additional notes or comments"
+                placeholder={t("commentsPlaceholder")}
                 rows={3}
               />
             </div>
@@ -630,18 +634,18 @@ export function AddPackageDialog({
               onClick={handleClose}
               disabled={loading}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  {t("creating")}
                 </>
               ) : (
                 <>
                   <Plus className="mr-2 h-4 w-4" />
-                  Create Package
+                  {t("createButton")}
                 </>
               )}
             </Button>

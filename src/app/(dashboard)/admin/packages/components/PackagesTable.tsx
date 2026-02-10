@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import {
   Table,
   TableBody,
@@ -44,22 +45,6 @@ const UpdatePackageDialog = dynamic(
   { ssr: false }
 );
 
-// Rule 6.3: Hoist static JSX elements to module-level constants
-const EMPTY_PACKAGE_STATE = (
-  <>
-    <div className="mb-6 rounded-full bg-primary/10 p-6">
-      <PackageIcon className="h-16 w-16 text-primary/60" />
-    </div>
-    <h3 className="text-xl font-semibold text-foreground">
-      No Unassigned Packages
-    </h3>
-    <p className="mt-2 max-w-md text-sm text-muted-foreground">
-      No unassigned packages for this client. All packages may already be
-      consolidated or there are no packages yet.
-    </p>
-  </>
-);
-
 // Rule 5.5: Extract to memoized components - PackageRow
 interface PackageRowProps {
   pkg: Package;
@@ -78,6 +63,8 @@ const PackageRow = memo(function PackageRow({
   onEdit,
   onDelete,
 }: PackageRowProps) {
+  const t = useTranslations("adminPackages.table");
+
   return (
     <TableRow
       className={`table-row-optimized ${
@@ -88,7 +75,7 @@ const PackageRow = memo(function PackageRow({
         <Checkbox
           checked={isSelected}
           onCheckedChange={() => onSelect(pkg.id)}
-          aria-label={`Select package ${pkg.barcode}`}
+          aria-label={t("selectPackage", { barcode: pkg.barcode })}
         />
       </TableCell>
       <TableCell className="font-medium">{pkg.barcode}</TableCell>
@@ -105,13 +92,13 @@ const PackageRow = memo(function PackageRow({
                 size="icon"
                 className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
                 onClick={() => onView(pkg.id)}
-                aria-label={`View package ${pkg.barcode}`}
+                aria-label={t("viewDetails")}
               >
                 <Eye className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>View Package Details</p>
+              <p>{t("viewDetails")}</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -121,13 +108,13 @@ const PackageRow = memo(function PackageRow({
                 size="icon"
                 className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
                 onClick={() => onEdit(pkg.id)}
-                aria-label={`Edit package ${pkg.barcode}`}
+                aria-label={t("editPackage")}
               >
                 <Pencil className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Edit Package</p>
+              <p>{t("editPackage")}</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -137,13 +124,13 @@ const PackageRow = memo(function PackageRow({
                 size="icon"
                 className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                 onClick={() => onDelete(pkg)}
-                aria-label={`Delete package ${pkg.barcode}`}
+                aria-label={t("deletePackage")}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Delete Package</p>
+              <p>{t("deletePackage")}</p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -167,6 +154,7 @@ export function PackagesTable({
   isLoading,
   onRefetch,
 }: PackagesTableProps) {
+  const t = useTranslations("adminPackages.table");
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
     null
@@ -263,10 +251,12 @@ export function PackagesTable({
                 <TableHead className="w-12">
                   <div className="h-4 w-4 animate-pulse rounded bg-muted"></div>
                 </TableHead>
-                <TableHead>Barcode</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Created At</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t("barcodeHeader")}</TableHead>
+                <TableHead>{t("descriptionHeader")}</TableHead>
+                <TableHead>{t("createdAtHeader")}</TableHead>
+                <TableHead className="text-right">
+                  {t("actionsHeader")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -302,7 +292,15 @@ export function PackagesTable({
   if (packages.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-16 text-center">
-        {EMPTY_PACKAGE_STATE}
+        <div className="mb-6 rounded-full bg-primary/10 p-6">
+          <PackageIcon className="h-16 w-16 text-primary/60" />
+        </div>
+        <h3 className="text-xl font-semibold text-foreground">
+          {t("emptyTitle")}
+        </h3>
+        <p className="mt-2 max-w-md text-sm text-muted-foreground">
+          {t("emptyDescription")}
+        </p>
       </div>
     );
   }
@@ -318,16 +316,18 @@ export function PackagesTable({
                   <Checkbox
                     checked={allSelected}
                     onCheckedChange={handleSelectAll}
-                    aria-label="Select all packages"
+                    aria-label={t("selectPackage", { barcode: "" })}
                     className={
                       someSelected ? "data-[state=checked]:bg-primary/50" : ""
                     }
                   />
                 </TableHead>
-                <TableHead>Barcode</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Created At</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t("barcodeHeader")}</TableHead>
+                <TableHead>{t("descriptionHeader")}</TableHead>
+                <TableHead>{t("createdAtHeader")}</TableHead>
+                <TableHead className="text-right">
+                  {t("actionsHeader")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -351,8 +351,10 @@ export function PackagesTable({
           <div className="sticky bottom-4 z-10 flex items-center justify-between rounded-lg border bg-background p-4 shadow-lg">
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium">
-                {selectedPackages.size} package
-                {selectedPackages.size !== 1 ? "s" : ""} selected
+                {t("selectedCount", {
+                  count: selectedPackages.size,
+                  plural: selectedPackages.size !== 1 ? "s" : "",
+                })}
               </span>
               <Button
                 variant="outline"
@@ -361,11 +363,11 @@ export function PackagesTable({
                 className="gap-2"
               >
                 <X className="h-4 w-4" />
-                Clear Selection
+                {t("clearSelection")}
               </Button>
             </div>
             <div className="text-sm text-muted-foreground">
-              Select packages to add to consolidation group
+              {t("selectToConsolidate")}
             </div>
           </div>
         )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,6 +23,8 @@ export function CurrentConsolidatePanel({
   onRemovePackage,
   onClearAll,
 }: CurrentConsolidatePanelProps) {
+  const t = useTranslations("adminPackages.panel");
+
   const selectedPackageDetails = useMemo(() => {
     // Rule 7.11: Use Set.has() for O(1) lookup instead of Array.includes()
     return packages.filter((pkg) => selectedPackages.has(pkg.id));
@@ -33,7 +36,7 @@ export function CurrentConsolidatePanel({
     <Card className="sticky top-6 h-fit">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Current Consolidate</CardTitle>
+          <CardTitle className="text-lg">{t("title")}</CardTitle>
           {!isEmpty && (
             <Button
               variant="ghost"
@@ -41,7 +44,7 @@ export function CurrentConsolidatePanel({
               onClick={onClearAll}
               className="h-8 text-xs text-muted-foreground hover:text-foreground"
             >
-              Clear All
+              {t("clearAll")}
             </Button>
           )}
         </div>
@@ -53,16 +56,16 @@ export function CurrentConsolidatePanel({
             <div className="mb-4 rounded-full bg-muted p-4">
               <Package className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-sm text-muted-foreground">
-              Select packages from the table to start grouping.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("emptyMessage")}</p>
           </div>
         ) : (
           <div className="space-y-4">
             {/* Summary */}
             <div className="rounded-lg bg-primary/5 p-3 space-y-1">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Packages:</span>
+                <span className="text-muted-foreground">
+                  {t("totalPackages")}
+                </span>
                 <span className="font-semibold">{selectedPackages.size}</span>
               </div>
             </div>
@@ -71,7 +74,9 @@ export function CurrentConsolidatePanel({
 
             {/* Package List */}
             <div>
-              <h4 className="mb-3 text-sm font-medium">Selected Packages</h4>
+              <h4 className="mb-3 text-sm font-medium">
+                {t("selectedPackagesTitle")}
+              </h4>
               <ScrollArea className="h-[400px] pr-4">
                 <div className="space-y-2">
                   {selectedPackageDetails.map((pkg) => (

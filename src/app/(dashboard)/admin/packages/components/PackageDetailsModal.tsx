@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,7 @@ export function PackageDetailsModal({
   onOpenChange,
   packageId,
 }: PackageDetailsModalProps) {
+  const t = useTranslations("adminPackages.detailsModal");
   const { data, loading, error } = useQuery<
     GetPackageResponse,
     GetPackageVariables
@@ -103,11 +105,9 @@ export function PackageDetailsModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <PackageIcon className="h-6 w-6" />
-            Package Details
+            {t("title")}
           </DialogTitle>
-          <DialogDescription>
-            View complete information about this package
-          </DialogDescription>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         {/* Loading State */}
@@ -115,9 +115,7 @@ export function PackageDetailsModal({
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">
-                Loading package details...
-              </p>
+              <p className="text-sm text-muted-foreground">{t("loading")}</p>
             </div>
           </div>
         )}
@@ -127,7 +125,7 @@ export function PackageDetailsModal({
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Failed to load package details. {error.message}
+              {t("loadError")} {error.message}
             </AlertDescription>
           </Alert>
         )}
@@ -138,32 +136,35 @@ export function PackageDetailsModal({
             {/* Header: Barcode */}
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
-                Package Identification
+                {t("identificationTitle")}
               </h3>
               <div className="grid grid-cols-1 gap-4">
-                <InfoRow label="Barcode" value={pkg.barcode} />
+                <InfoRow label={t("barcodeLabel")} value={pkg.barcode} />
               </div>
             </div>
 
             {/* Section 1: Courier Information */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
-                Courier Information
+                {t("courierInfoTitle")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow label="Courier" value={pkg.courier} />
-                <InfoRow label="Other Courier" value={pkg.otherCourier} />
+                <InfoRow label={t("courierLabel")} value={pkg.courier} />
+                <InfoRow
+                  label={t("otherCourierLabel")}
+                  value={pkg.otherCourier}
+                />
               </div>
             </div>
 
             {/* Section 2: Dimensions */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
-                Dimensions & Weight
+                {t("dimensionsWeightTitle")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoRow
-                  label="Length"
+                  label={t("lengthLabel")}
                   value={
                     pkg.length && pkg.dimensionUnit
                       ? `${pkg.length} ${pkg.dimensionUnit}`
@@ -171,7 +172,7 @@ export function PackageDetailsModal({
                   }
                 />
                 <InfoRow
-                  label="Width"
+                  label={t("widthLabel")}
                   value={
                     pkg.width && pkg.dimensionUnit
                       ? `${pkg.width} ${pkg.dimensionUnit}`
@@ -179,7 +180,7 @@ export function PackageDetailsModal({
                   }
                 />
                 <InfoRow
-                  label="Height"
+                  label={t("heightLabel")}
                   value={
                     pkg.height && pkg.dimensionUnit
                       ? `${pkg.height} ${pkg.dimensionUnit}`
@@ -187,7 +188,7 @@ export function PackageDetailsModal({
                   }
                 />
                 <InfoRow
-                  label="Weight"
+                  label={t("weightLabel")}
                   value={
                     pkg.weight && pkg.weightUnit
                       ? `${pkg.weight} ${pkg.weightUnit}`
@@ -200,15 +201,15 @@ export function PackageDetailsModal({
             {/* Section 3: Pricing */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
-                Pricing
+                {t("pricingTitle")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoRow
-                  label="Real Price"
+                  label={t("realPriceLabel")}
                   value={formatCurrency(pkg.realPrice)}
                 />
                 <InfoRow
-                  label="Service Price"
+                  label={t("servicePriceLabel")}
                   value={formatCurrency(pkg.servicePrice)}
                 />
               </div>
@@ -217,38 +218,41 @@ export function PackageDetailsModal({
             {/* Section 4: Additional Information */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
-                Additional Information
+                {t("additionalInfoTitle")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoRow
-                  label="Arrival Date"
+                  label={t("arrivalDateLabel")}
                   value={formatDate(pkg.arrivalDate)}
                 />
                 <InfoRow
-                  label="Created At"
+                  label={t("createdAtLabel")}
                   value={formatDateTime(pkg.createdAt)}
                 />
                 <InfoRow
-                  label="Last Updated"
+                  label={t("lastUpdatedLabel")}
                   value={formatDateTime(pkg.updatedAt)}
                 />
                 {pkg.client && (
                   <InfoRow
-                    label="Client"
+                    label={t("clientLabel")}
                     value={`${pkg.client.fullName} (${pkg.client.email})`}
                   />
                 )}
               </div>
               {pkg.description && (
                 <div className="col-span-full">
-                  <InfoRow label="Description" value={pkg.description} />
+                  <InfoRow
+                    label={t("descriptionLabel")}
+                    value={pkg.description}
+                  />
                 </div>
               )}
               {pkg.purchaseLink && (
                 <div className="col-span-full">
                   <div className="flex flex-col space-y-1">
                     <span className="text-sm font-medium text-muted-foreground">
-                      Purchase Link
+                      {t("purchaseLinkLabel")}
                     </span>
                     <a
                       href={pkg.purchaseLink}
@@ -263,7 +267,7 @@ export function PackageDetailsModal({
               )}
               {pkg.comments && (
                 <div className="col-span-full">
-                  <InfoRow label="Comments" value={pkg.comments} />
+                  <InfoRow label={t("commentsLabel")} value={pkg.comments} />
                 </div>
               )}
             </div>
@@ -277,7 +281,7 @@ export function PackageDetailsModal({
             onClick={handleClose}
             disabled={loading}
           >
-            Close
+            {t("close")}
           </Button>
         </DialogFooter>
       </DialogContent>

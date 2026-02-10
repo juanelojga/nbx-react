@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@apollo/client";
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,14 +30,8 @@ const AddPackageDialog = dynamic(
   { ssr: false }
 );
 
-// Rule 5.4: Extract default non-primitive values to constants
-const CONSOLIDATION_STEPS = [
-  { number: 1, label: "Select Client" },
-  { number: 2, label: "Group Packages" },
-  { number: 3, label: "Review & Finalize" },
-];
-
 export default function AdminPackages() {
+  const t = useTranslations("adminPackages.page");
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedClient, setSelectedClient] = useState<ClientType | null>(null);
 
@@ -45,6 +40,16 @@ export default function AdminPackages() {
     new Set()
   );
   const [isAddPackageDialogOpen, setIsAddPackageDialogOpen] = useState(false);
+
+  // Rule 5.4: Extract default non-primitive values to constants
+  const consolidationSteps = useMemo(
+    () => [
+      { number: 1, label: t("step1Title") },
+      { number: 2, label: t("step2Title") },
+      { number: 3, label: t("step3Title") },
+    ],
+    [t]
+  );
 
   // Rule 5.8: Subscribe to derived state with useMemo for GraphQL variables
   const queryVariables = useMemo(
@@ -121,24 +126,20 @@ export default function AdminPackages() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Package Consolidation"
-        description="Consolidate packages for clients through a guided workflow"
-      />
+      <PageHeader title={t("title")} description={t("description")} />
 
       {/* Step Progress Indicator */}
       <Card>
-        <StepHeader currentStep={currentStep} steps={CONSOLIDATION_STEPS} />
+        <StepHeader currentStep={currentStep} steps={consolidationSteps} />
       </Card>
 
       {/* Step 1: Client Selection */}
       {currentStep === 1 && (
         <Card>
           <CardHeader>
-            <CardTitle>Select a Client</CardTitle>
+            <CardTitle>{t("step1Title")}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Choose a client to consolidate their packages. You can search by
-              name or email address.
+              {t("step1Description")}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -147,7 +148,7 @@ export default function AdminPackages() {
                 htmlFor="client-select"
                 className="block text-sm font-medium mb-2"
               >
-                Client
+                {t("clientLabel")}
               </label>
               <ClientSelect
                 selectedClient={selectedClient}
@@ -156,26 +157,28 @@ export default function AdminPackages() {
               {selectedClient && (
                 <div className="mt-4 p-4 border rounded-lg bg-muted/50">
                   <h4 className="text-sm font-semibold mb-2">
-                    Selected Client
+                    {t("selectedClientTitle")}
                   </h4>
                   <div className="space-y-1 text-sm">
                     <p>
-                      <span className="font-medium">Name:</span>{" "}
+                      <span className="font-medium">{t("nameLabel")}</span>{" "}
                       {selectedClient.fullName}
                     </p>
                     <p>
-                      <span className="font-medium">Email:</span>{" "}
+                      <span className="font-medium">{t("emailLabel")}</span>{" "}
                       {selectedClient.email}
                     </p>
                     {selectedClient.identificationNumber && (
                       <p>
-                        <span className="font-medium">ID:</span>{" "}
+                        <span className="font-medium">{t("idLabel")}</span>{" "}
                         {selectedClient.identificationNumber}
                       </p>
                     )}
                     {(selectedClient.city || selectedClient.state) && (
                       <p>
-                        <span className="font-medium">Location:</span>{" "}
+                        <span className="font-medium">
+                          {t("locationLabel")}
+                        </span>{" "}
                         {selectedClient.city && selectedClient.state
                           ? `${selectedClient.city}, ${selectedClient.state}`
                           : selectedClient.city || selectedClient.state}
@@ -184,7 +187,7 @@ export default function AdminPackages() {
                     {(selectedClient.mobilePhoneNumber ||
                       selectedClient.phoneNumber) && (
                       <p>
-                        <span className="font-medium">Phone:</span>{" "}
+                        <span className="font-medium">{t("phoneLabel")}</span>{" "}
                         {selectedClient.mobilePhoneNumber ||
                           selectedClient.phoneNumber}
                       </p>
@@ -201,7 +204,7 @@ export default function AdminPackages() {
                 disabled={!selectedClient}
                 className="gap-2"
               >
-                Continue to Group Packages
+                {t("continueToPackages")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -216,7 +219,7 @@ export default function AdminPackages() {
           {selectedClient && (
             <Alert>
               <AlertDescription>
-                Grouping packages for:{" "}
+                {t("groupingFor")}{" "}
                 <span className="font-semibold">{selectedClient.fullName}</span>{" "}
                 ({selectedClient.email})
               </AlertDescription>
@@ -227,9 +230,9 @@ export default function AdminPackages() {
           {hasError && (
             <Alert variant="destructive">
               <AlertDescription className="flex items-center justify-between">
-                <span>Unable to load packages. Please try again.</span>
+                <span>{t("unableToLoadPackages")}</span>
                 <Button variant="outline" size="sm" onClick={handleRetryLoad}>
-                  Retry
+                  {t("retry")}
                 </Button>
               </AlertDescription>
             </Alert>
@@ -242,9 +245,9 @@ export default function AdminPackages() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Available Packages</CardTitle>
+                    <CardTitle>{t("availablePackages")}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Select packages to add to the consolidation group.
+                      {t("selectPackagesDescription")}
                     </p>
                   </div>
                   <Button
@@ -252,7 +255,7 @@ export default function AdminPackages() {
                     className="gap-2"
                   >
                     <Plus className="h-4 w-4" />
-                    Add Package
+                    {t("addPackage")}
                   </Button>
                 </div>
               </CardHeader>
@@ -288,14 +291,14 @@ export default function AdminPackages() {
                   className="gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Back to Client Selection
+                  {t("backToClientSelection")}
                 </Button>
                 <Button
                   onClick={() => setCurrentStep(3)}
                   disabled={selectedPackages.size === 0}
                   className="gap-2"
                 >
-                  Continue to Review
+                  {t("continueToReview")}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>

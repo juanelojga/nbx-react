@@ -6,6 +6,7 @@ import { useMutation } from "@apollo/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,18 +38,25 @@ interface ConsolidationFormProps {
   onBack: () => void;
 }
 
-// Zod validation schema
-const consolidationSchema = z.object({
-  description: z.string().min(1, "Description is required"),
-  status: z.enum(["pending", "in_transit", "delivered"], {
-    errorMap: () => ({ message: "Please select a valid status" }),
-  }),
-  deliveryDate: z.string().optional(),
-  comment: z.string().optional(),
-  sendEmail: z.boolean().default(false),
-});
+// Zod validation schema - needs to use translation values
+const getConsolidationSchema = (t: (key: string) => string) =>
+  z.object({
+    description: z.string().min(1, t("descriptionRequired")),
+    status: z.enum(["pending", "in_transit", "delivered"], {
+      errorMap: () => ({ message: t("statusValidationError") }),
+    }),
+    deliveryDate: z.string().optional(),
+    comment: z.string().optional(),
+    sendEmail: z.boolean().optional().default(false),
+  });
 
-type ConsolidationFormData = z.infer<typeof consolidationSchema>;
+type ConsolidationFormData = {
+  description: string;
+  status: "pending" | "in_transit" | "delivered";
+  deliveryDate?: string;
+  comment?: string;
+  sendEmail?: boolean;
+};
 
 export function ConsolidationForm({
   selectedClient,
@@ -56,6 +64,7 @@ export function ConsolidationForm({
   packages,
   onBack,
 }: ConsolidationFormProps) {
+  const t = useTranslations("adminPackages.consolidationForm");
   const router = useRouter();
 
   // React Hook Form with Zod validation
@@ -66,7 +75,7 @@ export function ConsolidationForm({
     setValue,
     formState: { errors },
   } = useForm<ConsolidationFormData>({
-    resolver: zodResolver(consolidationSchema),
+    resolver: zodResolver(getConsolidationSchema(t)),
     defaultValues: {
       description: "",
       status: "pending",
@@ -83,17 +92,17 @@ export function ConsolidationForm({
     CreateConsolidateVariables
   >(CREATE_CONSOLIDATE, {
     onCompleted: () => {
-      toast.success("Consolidation Created", {
-        description: `Successfully created consolidation for ${selectedClient.fullName}`,
+      toast.success(t("successTitle"), {
+        description: t("successDescription", {
+          fullName: selectedClient.fullName,
+        }),
       });
       // Redirect to packages page (until consolidations list exists)
       router.push("/admin/packages");
     },
     onError: (error) => {
-      toast.error("Failed to Create Consolidation", {
-        description:
-          error.message ||
-          "An error occurred while creating the consolidation.",
+      toast.error(t("errorTitle"), {
+        description: error.message || t("errorDescription"),
       });
     },
   });
@@ -130,7 +139,7 @@ export function ConsolidationForm({
       {/* Client Info */}
       <Alert>
         <AlertDescription>
-          Creating consolidation for:{" "}
+          {t("creatingFor")}{" "}
           <span className="font-semibold">{selectedClient.fullName}</span> (
           {selectedClient.email})
         </AlertDescription>
@@ -141,9 +150,9 @@ export function ConsolidationForm({
         {/* Left: Form */}
         <Card>
           <CardHeader>
-            <CardTitle>Consolidation Details</CardTitle>
+            <CardTitle>{t("detailsTitle")}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Enter the details for this consolidation package.
+              {t("detailsDescription")}
             </p>
           </CardHeader>
           <CardContent>
@@ -151,11 +160,12 @@ export function ConsolidationForm({
               {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="description">
-                  Description <span className="text-destructive">*</span>
+                  {t("descriptionLabel")}{" "}
+                  <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="description"
-                  placeholder="Enter consolidation description"
+                  placeholder={t("descriptionPlaceholder")}
                   {...register("description")}
                   disabled={loading}
                 />
@@ -169,7 +179,7 @@ export function ConsolidationForm({
               {/* Status */}
               <div className="space-y-2">
                 <Label htmlFor="status">
-                  Status <span className="text-destructive">*</span>
+                  {t("statusLabel")} <span className="text-destructive">*</span>
                 </Label>
                 <Select
                   defaultValue="pending"
@@ -182,12 +192,18 @@ export function ConsolidationForm({
                   disabled={loading}
                 >
                   <SelectTrigger id="status">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder={t("statusPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in_transit">In Transit</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
+                    <SelectItem value="pending">
+                      {t("statusPending")}
+                    </SelectItem>
+                    <SelectItem value="in_transit">
+                      {t("statusInTransit")}
+                    </SelectItem>
+                    <SelectItem value="delivered">
+                      {t("statusDelivered")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.status && (
@@ -199,7 +215,7 @@ export function ConsolidationForm({
 
               {/* Delivery Date */}
               <div className="space-y-2">
-                <Label htmlFor="deliveryDate">Delivery Date (Optional)</Label>
+                <Label htmlFor="deliveryDate">{t("deliveryDateLabel")}</Label>
                 <Input
                   id="deliveryDate"
                   type="date"
@@ -215,10 +231,10 @@ export function ConsolidationForm({
 
               {/* Comment */}
               <div className="space-y-2">
-                <Label htmlFor="comment">Comment (Optional)</Label>
+                <Label htmlFor="comment">{t("commentLabel")}</Label>
                 <Textarea
                   id="comment"
-                  placeholder="Add any additional notes..."
+                  placeholder={t("commentPlaceholder")}
                   rows={4}
                   {...register("comment")}
                   disabled={loading}
@@ -244,7 +260,7 @@ export function ConsolidationForm({
                   htmlFor="sendEmail"
                   className="text-sm font-normal cursor-pointer"
                 >
-                  Send email notification to client
+                  {t("sendEmailLabel")}
                 </Label>
               </div>
 
@@ -252,7 +268,7 @@ export function ConsolidationForm({
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>
-                    {error.message || "Failed to create consolidation"}
+                    {error.message || t("errorMessage")}
                   </AlertDescription>
                 </Alert>
               )}
@@ -267,18 +283,18 @@ export function ConsolidationForm({
                   className="gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Back to Packages
+                  {t("backToPackages")}
                 </Button>
                 <Button type="submit" disabled={loading} className="gap-2">
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Creating...
+                      {t("creating")}
                     </>
                   ) : (
                     <>
                       <Send className="h-4 w-4" />
-                      Create Consolidation
+                      {t("createButton")}
                     </>
                   )}
                 </Button>
@@ -290,10 +306,12 @@ export function ConsolidationForm({
         {/* Right: Package Summary */}
         <Card className="h-fit sticky top-4">
           <CardHeader>
-            <CardTitle>Selected Packages</CardTitle>
+            <CardTitle>{t("selectedPackagesTitle")}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              {selectedPackages.size} package
-              {selectedPackages.size !== 1 ? "s" : ""} to consolidate
+              {t("packagesCount", {
+                count: selectedPackages.size,
+                plural: selectedPackages.size !== 1 ? "s" : "",
+              })}
             </p>
           </CardHeader>
           <CardContent>

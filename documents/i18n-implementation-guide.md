@@ -4,6 +4,24 @@
 
 ---
 
+## ⚠️ IMPORTANT: Spanish is the Primary Language
+
+**Spanish (`es`) is the default and primary language of this application.**
+
+### Translation Priority Rules
+
+1. **Always create Spanish translations FIRST** - Spanish is the primary language
+2. **English is secondary** - Create English translations second
+3. **Show Spanish first** in all code examples and documentation
+4. **Use Spanish values** for placeholders, defaults, and inline text examples
+
+When working with translations, always present them in this order:
+
+- ✅ Spanish first: `messages/es.json`
+- ✅ English second: `messages/en.json`
+
+---
+
 ## Claude Code Prompts (Step by Step)
 
 Use these prompts in Claude Code to set up internationalization:
@@ -35,7 +53,7 @@ Update next.config.js to use createNextIntlPlugin from next-intl/plugin, pointin
 ### Prompt 5: Create Translation Files
 
 ```
-Create two files: messages/es.json and messages/en.json. Include namespaces for common, navigation, buttons, and forms with appropriate translations in Spanish and English.
+Create two translation files. SPANISH FIRST: messages/es.json (primary language), then messages/en.json (secondary). Include namespaces for common, navigation, buttons, and forms with appropriate translations. Spanish is the default language.
 ```
 
 ### Prompt 6: Restructure App Directory
@@ -114,7 +132,9 @@ export default function MyComponent() {
 
 ## Translation File Structure
 
-### messages/es.json
+**Note:** Spanish is listed first as it is the primary language.
+
+### messages/es.json (PRIMARY LANGUAGE)
 
 ```json
 {
@@ -149,7 +169,7 @@ export default function MyComponent() {
 }
 ```
 
-### messages/en.json
+### messages/en.json (SECONDARY LANGUAGE)
 
 ```json
 {
