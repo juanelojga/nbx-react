@@ -78,11 +78,9 @@ import { getLocale, getMessages } from "@/lib/i18n/cached-translations";
 ```typescript
 allClients: {
   keyArgs: ["search", "orderBy"], // Cache by search/sort parameters
-  merge(existing, incoming, { args }) {
-    // Smart merge strategy for pagination
-    if (!existing || args?.page !== existing?.page) {
-      return incoming;
-    }
+  merge(_existing, incoming) {
+    // For pagination, always replace with incoming data
+    // Each page is treated as independent for simplicity
     return incoming;
   },
 }

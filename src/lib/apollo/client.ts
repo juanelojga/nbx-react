@@ -201,7 +201,7 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
             allClients: {
               // Cache clients list with merge strategy
               keyArgs: ["search", "orderBy"], // Cache based on search and sort parameters
-              merge(existing, incoming) {
+              merge(_existing, incoming) {
                 // For pagination, always replace with incoming data
                 // Each page is treated as independent for simplicity
                 return incoming;
@@ -210,7 +210,7 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
             allPackages: {
               // Cache packages list
               keyArgs: ["search", "orderBy", "status"],
-              merge(existing, incoming) {
+              merge(_existing, incoming) {
                 // For pagination, always replace with incoming data
                 return incoming;
               },
