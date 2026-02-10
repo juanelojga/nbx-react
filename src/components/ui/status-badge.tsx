@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Package, Truck, CheckCircle2, Clock } from "lucide-react";
+import { Truck, CheckCircle2, Clock } from "lucide-react";
 
 /**
  * Status Badge Component

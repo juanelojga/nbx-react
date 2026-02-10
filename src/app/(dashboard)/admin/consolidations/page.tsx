@@ -118,7 +118,7 @@ const ConsolidationRow = memo(function ConsolidationRow({
   };
 
   return (
-    <TableRow key={consolidation.id} className="table-row-optimized">
+    <TableRow key={consolidation.id}>
       <TableCell className="font-mono font-medium">
         <div className="max-w-[100px] truncate" title={consolidation.id}>
           {consolidation.id}
