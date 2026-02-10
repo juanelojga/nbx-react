@@ -344,6 +344,7 @@
       "dimensionPlaceholder": "0.00",
       "positiveNumberError": "Must be a positive number.",
       "weightTitle": "Weight",
+      "weightLabel": "Weight",
       "weightPlaceholder": "0.00",
       "unitKg": "kg",
       "unitLb": "lb",
