@@ -52,6 +52,7 @@ async function performTokenRefresh(): Promise<string | null> {
       const refreshToken = getRefreshToken();
 
       if (!refreshToken) {
+        logger.error("Token refresh failed: No refresh token in localStorage");
         throw new Error("No refresh token available");
       }
 
@@ -78,8 +79,10 @@ async function performTokenRefresh(): Promise<string | null> {
         if (result.data?.refreshWithToken) {
           const newAccessToken = result.data.refreshWithToken.token;
           const newRefreshToken = result.data.refreshWithToken.refreshToken;
+          const refreshExpiresIn =
+            result.data.refreshWithToken.refreshExpiresIn;
           // Save new access token and new refresh token (token rotation)
-          saveTokens(newAccessToken, newRefreshToken);
+          saveTokens(newAccessToken, newRefreshToken, refreshExpiresIn);
           return newAccessToken;
         }
 

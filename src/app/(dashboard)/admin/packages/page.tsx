@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@apollo/client";
 import dynamic from "next/dynamic";
 import { PageHeader } from "@/components/ui/page-header";
@@ -28,6 +28,7 @@ const AddPackageDialog = dynamic(
   { ssr: false }
 );
 
+// Rule 5.4: Extract default non-primitive values to constants
 const CONSOLIDATION_STEPS = [
   { number: 1, label: "Select Client" },
   { number: 2, label: "Group Packages" },
@@ -42,61 +43,70 @@ export default function AdminPackages() {
   const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
   const [isAddPackageDialogOpen, setIsAddPackageDialogOpen] = useState(false);
 
-  // GraphQL query for packages - only execute when on step 2 and client is selected
-  const { data, loading, error, refetch } = useQuery<
-    ResolveAllPackagesResponse,
-    ResolveAllPackagesVariables
-  >(RESOLVE_ALL_PACKAGES, {
-    variables: {
+  // Rule 5.8: Subscribe to derived state with useMemo for GraphQL variables
+  const queryVariables = useMemo(
+    () => ({
       client_id: selectedClient ? parseInt(selectedClient.id) : 0,
       page: 1,
       page_size: 20,
       order_by: "-created_at",
       search: "",
-    },
+    }),
+    [selectedClient]
+  );
+
+  // GraphQL query for packages - only execute when on step 2 and client is selected
+  const { data, loading, error, refetch } = useQuery<
+    ResolveAllPackagesResponse,
+    ResolveAllPackagesVariables
+  >(RESOLVE_ALL_PACKAGES, {
+    variables: queryVariables,
     skip: currentStep !== 2 || !selectedClient,
     fetchPolicy: "network-only",
   });
 
+  // Rule 5.1: Calculate derived state during rendering
   const packages = data?.allPackages.results || [];
   const hasError = !!error;
 
-  const handleClientSelect = (client: ClientType | null) => {
+  // Rule 5.7: Put interaction logic in event handlers with useCallback
+  const handleClientSelect = useCallback((client: ClientType | null) => {
     setSelectedClient(client);
-  };
+  }, []);
 
-  const handleContinueToStep2 = () => {
+  const handleContinueToStep2 = useCallback(() => {
     if (selectedClient) {
       setCurrentStep(2);
     }
-  };
+  }, [selectedClient]);
 
-  const handleBackToStep1 = () => {
+  const handleBackToStep1 = useCallback(() => {
     setCurrentStep(1);
     setSelectedPackages([]);
-  };
+  }, []);
 
-  const handleSelectionChange = (packageIds: string[]) => {
+  const handleSelectionChange = useCallback((packageIds: string[]) => {
     setSelectedPackages(packageIds);
-  };
+  }, []);
 
-  const handleRemovePackage = (packageId: string) => {
-    setSelectedPackages(selectedPackages.filter((id) => id !== packageId));
-  };
+  const handleRemovePackage = useCallback((packageId: string) => {
+    // Rule 5.9: Use functional setState updates
+    setSelectedPackages((prev) => prev.filter((id) => id !== packageId));
+  }, []);
 
-  const handleClearAll = () => {
+  const handleClearAll = useCallback(() => {
     setSelectedPackages([]);
-  };
+  }, []);
 
-  const handleRetryLoad = () => {
+  const handleRetryLoad = useCallback(() => {
     if (refetch) {
       refetch();
     }
-  };
+  }, [refetch]);
 
-  const handleRefetchPackages = async () => {
+  const handleRefetchPackages = useCallback(async () => {
     await refetch();
-  };
+  }, [refetch]);
 
   return (
     <div className="space-y-6">

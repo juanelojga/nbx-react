@@ -102,7 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         const { data } = await refreshTokenMutation({
-          variables: { token: refreshToken },
+          variables: { refreshToken },
         });
 
         if (data?.refreshWithToken) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useMutation } from "@apollo/client";
 import { useTranslations } from "next-intl";
 import {
@@ -46,25 +46,29 @@ interface ValidationErrors {
   [key: string]: string | undefined;
 }
 
+// Rule 5.4: Extract default non-primitive values to constants
+const INITIAL_FORM_DATA: FormData = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  identificationNumber: "",
+  mobilePhoneNumber: "",
+  phoneNumber: "",
+  state: "",
+  city: "",
+  mainStreet: "",
+  secondaryStreet: "",
+  buildingNumber: "",
+};
+
 export function AddClientDialog({
   open,
   onOpenChange,
   onClientCreated,
 }: AddClientDialogProps) {
   const t = useTranslations("adminClients.addDialog");
-  const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    identificationNumber: "",
-    mobilePhoneNumber: "",
-    phoneNumber: "",
-    state: "",
-    city: "",
-    mainStreet: "",
-    secondaryStreet: "",
-    buildingNumber: "",
-  });
+
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
     {}
@@ -93,37 +97,31 @@ export function AddClientDialog({
     },
   });
 
-  const handleClose = () => {
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      identificationNumber: "",
-      mobilePhoneNumber: "",
-      phoneNumber: "",
-      state: "",
-      city: "",
-      mainStreet: "",
-      secondaryStreet: "",
-      buildingNumber: "",
-    });
+  // Rule 5.7: Put interaction logic in event handlers with useCallback
+  const handleClose = useCallback(() => {
+    setFormData(INITIAL_FORM_DATA);
     setValidationErrors({});
     onOpenChange(false);
-  };
+  }, [onOpenChange]);
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear validation error for this field
-    if (validationErrors[field]) {
+  const handleInputChange = useCallback(
+    (field: keyof FormData, value: string) => {
+      // Rule 5.9: Use functional setState updates
+      setFormData((prev) => ({ ...prev, [field]: value }));
+      // Clear validation error for this field
       setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
+    },
+    []
+  );
 
-  const handlePhoneInputChange = (field: keyof FormData, value: string) => {
-    // Allow only numeric values
-    const numericValue = value.replace(/\D/g, "");
-    handleInputChange(field, numericValue);
-  };
+  const handlePhoneInputChange = useCallback(
+    (field: keyof FormData, value: string) => {
+      // Allow only numeric values
+      const numericValue = value.replace(/\D/g, "");
+      handleInputChange(field, numericValue);
+    },
+    [handleInputChange]
+  );
 
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};

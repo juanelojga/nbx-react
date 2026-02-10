@@ -40,7 +40,7 @@ interface TokenCache {
 }
 
 let tokenCache: TokenCache | null = null;
-const CACHE_TTL_MS = 1000; // Cache valid for 1 second (in milliseconds)
+const CACHE_TTL_MS = 5000; // Cache valid for 5 seconds (in milliseconds)
 
 /**
  * Check if the cache is still valid
@@ -144,8 +144,9 @@ export function saveTokens(
       localStorage.setItem(REFRESH_TOKEN_EXPIRES_AT_KEY, expiresAt.toString());
     }
 
-    // Invalidate cache when tokens are updated
+    // Invalidate and immediately update cache when tokens are updated
     invalidateCache();
+    updateCache();
   } catch (error) {
     logger.error("Failed to save tokens:", error);
   }

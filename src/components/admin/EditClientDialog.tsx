@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation } from "@apollo/client";
 import { useTranslations } from "next-intl";
 import {
@@ -136,24 +136,30 @@ export function EditClientDialog({
     },
   });
 
-  const handleClose = () => {
+  // Rule 5.7: Put interaction logic in event handlers with useCallback
+  const handleClose = useCallback(() => {
     setValidationErrors({});
     onOpenChange(false);
-  };
+  }, [onOpenChange]);
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear validation error for this field
-    if (validationErrors[field]) {
+  const handleInputChange = useCallback(
+    (field: keyof FormData, value: string) => {
+      // Rule 5.9: Use functional setState updates
+      setFormData((prev) => ({ ...prev, [field]: value }));
+      // Clear validation error for this field
       setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
+    },
+    []
+  );
 
-  const handlePhoneInputChange = (field: keyof FormData, value: string) => {
-    // Allow only numeric values
-    const numericValue = value.replace(/\D/g, "");
-    handleInputChange(field, numericValue);
-  };
+  const handlePhoneInputChange = useCallback(
+    (field: keyof FormData, value: string) => {
+      // Allow only numeric values
+      const numericValue = value.replace(/\D/g, "");
+      handleInputChange(field, numericValue);
+    },
+    [handleInputChange]
+  );
 
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
