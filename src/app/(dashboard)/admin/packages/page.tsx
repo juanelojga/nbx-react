@@ -39,8 +39,10 @@ export default function AdminPackages() {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedClient, setSelectedClient] = useState<ClientType | null>(null);
 
-  // Step 2 state
-  const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
+  // Step 2 state - Rule 7.11: Use Set for O(1) lookups instead of Array
+  const [selectedPackages, setSelectedPackages] = useState<Set<string>>(
+    new Set()
+  );
   const [isAddPackageDialogOpen, setIsAddPackageDialogOpen] = useState(false);
 
   // Rule 5.8: Subscribe to derived state with useMemo for GraphQL variables
@@ -82,20 +84,24 @@ export default function AdminPackages() {
 
   const handleBackToStep1 = useCallback(() => {
     setCurrentStep(1);
-    setSelectedPackages([]);
+    setSelectedPackages(new Set());
   }, []);
 
-  const handleSelectionChange = useCallback((packageIds: string[]) => {
+  const handleSelectionChange = useCallback((packageIds: Set<string>) => {
     setSelectedPackages(packageIds);
   }, []);
 
   const handleRemovePackage = useCallback((packageId: string) => {
-    // Rule 5.9: Use functional setState updates
-    setSelectedPackages((prev) => prev.filter((id) => id !== packageId));
+    // Rule 5.9: Use functional setState updates with Set
+    setSelectedPackages((prev) => {
+      const next = new Set(prev);
+      next.delete(packageId);
+      return next;
+    });
   }, []);
 
   const handleClearAll = useCallback(() => {
-    setSelectedPackages([]);
+    setSelectedPackages(new Set());
   }, []);
 
   const handleRetryLoad = useCallback(() => {
@@ -281,7 +287,7 @@ export default function AdminPackages() {
                 </Button>
                 <Button
                   onClick={() => setCurrentStep(3)}
-                  disabled={selectedPackages.length === 0}
+                  disabled={selectedPackages.size === 0}
                   className="gap-2"
                 >
                   Continue to Review

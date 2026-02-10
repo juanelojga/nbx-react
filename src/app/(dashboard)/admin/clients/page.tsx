@@ -86,6 +86,9 @@ type SortField = "full_name" | "email" | "created_at";
 
 const DEBOUNCE_DELAY = 400; // milliseconds
 
+// Rule 7.9: Hoist RegExp creation to module level
+const DANGEROUS_CHARS_REGEX = /[<>{};\\\[\]]/g;
+
 // Rule 6.3: Hoist static JSX elements to module-level constants
 const EMPTY_STATE_ICON = (
   <svg
@@ -238,7 +241,7 @@ interface PaginationButtonProps {
   pageNumber: number;
   isActive: boolean;
   onClick: (page: number) => void;
-  t: (key: string, values?: Record<string, unknown>) => string;
+  t: (key: string, values?: Record<string, string | number | Date>) => string;
 }
 
 const PaginationButton = memo(function PaginationButton({
@@ -310,10 +313,10 @@ export default function AdminClients() {
 
   const orderBy = getOrderBy();
 
-  // Input sanitization function
+  // Rule 7.9: Input sanitization function using hoisted regex
   const sanitizeInput = (input: string): string => {
     // Remove potentially dangerous characters
-    return input.replace(/[<>{};\\\[\]]/g, "").trim();
+    return input.replace(DANGEROUS_CHARS_REGEX, "").trim();
   };
 
   // Sync search input from URL when it changes (e.g., browser back/forward)

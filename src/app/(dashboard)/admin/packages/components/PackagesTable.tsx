@@ -154,8 +154,8 @@ const PackageRow = memo(function PackageRow({
 
 interface PackagesTableProps {
   packages: Package[];
-  selectedPackages: string[];
-  onSelectionChange: (packageIds: string[]) => void;
+  selectedPackages: Set<string>; // Rule 7.11: Use Set for O(1) lookups
+  onSelectionChange: (packageIds: Set<string>) => void;
   isLoading: boolean;
   onRefetch?: () => void | Promise<void>;
 }
@@ -179,37 +179,39 @@ export function PackagesTable({
     barcode: string;
   } | null>(null);
 
-  // Rule 5.8: Subscribe to derived state with useMemo
+  // Rule 5.8: Subscribe to derived state with useMemo - Rule 7.11: Using Set.size
   const allSelected = useMemo(() => {
-    return packages.length > 0 && selectedPackages.length === packages.length;
-  }, [packages.length, selectedPackages.length]);
+    return packages.length > 0 && selectedPackages.size === packages.length;
+  }, [packages.length, selectedPackages.size]);
 
   const someSelected = useMemo(() => {
-    return selectedPackages.length > 0 && !allSelected;
-  }, [selectedPackages.length, allSelected]);
+    return selectedPackages.size > 0 && !allSelected;
+  }, [selectedPackages.size, allSelected]);
 
   // Rule 5.7: Put interaction logic in event handlers with useCallback
   const handleSelectAll = useCallback(() => {
     if (allSelected) {
-      onSelectionChange([]);
+      onSelectionChange(new Set());
     } else {
-      onSelectionChange(packages.map((pkg) => pkg.id));
+      onSelectionChange(new Set(packages.map((pkg) => pkg.id)));
     }
   }, [allSelected, onSelectionChange, packages]);
 
   const handleSelectPackage = useCallback(
     (packageId: string) => {
-      if (selectedPackages.includes(packageId)) {
-        onSelectionChange(selectedPackages.filter((id) => id !== packageId));
+      const newSelection = new Set(selectedPackages);
+      if (selectedPackages.has(packageId)) {
+        newSelection.delete(packageId);
       } else {
-        onSelectionChange([...selectedPackages, packageId]);
+        newSelection.add(packageId);
       }
+      onSelectionChange(newSelection);
     },
     [onSelectionChange, selectedPackages]
   );
 
   const handleClearSelection = useCallback(() => {
-    onSelectionChange([]);
+    onSelectionChange(new Set());
   }, [onSelectionChange]);
 
   const handleViewPackage = useCallback((packageId: string) => {
@@ -238,11 +240,11 @@ export function PackagesTable({
   }, [onRefetch]);
 
   const handlePackageDeleted = useCallback(async () => {
-    // Clear selection if the deleted package was selected
-    if (packageToDelete && selectedPackages.includes(packageToDelete.id)) {
-      onSelectionChange(
-        selectedPackages.filter((id) => id !== packageToDelete.id)
-      );
+    // Clear selection if the deleted package was selected - Rule 7.11: Use Set.has()
+    if (packageToDelete && selectedPackages.has(packageToDelete.id)) {
+      const newSelection = new Set(selectedPackages);
+      newSelection.delete(packageToDelete.id);
+      onSelectionChange(newSelection);
     }
     // Refetch packages to update the table
     if (onRefetch) {
@@ -333,7 +335,7 @@ export function PackagesTable({
                 <PackageRow
                   key={pkg.id}
                   pkg={pkg}
-                  isSelected={selectedPackages.includes(pkg.id)}
+                  isSelected={selectedPackages.has(pkg.id)}
                   onSelect={handleSelectPackage}
                   onView={handleViewPackage}
                   onEdit={handleEditPackage}
@@ -345,12 +347,12 @@ export function PackagesTable({
         </div>
 
         {/* Selection Actions Bar */}
-        {selectedPackages.length > 0 && (
+        {selectedPackages.size > 0 && (
           <div className="sticky bottom-4 z-10 flex items-center justify-between rounded-lg border bg-background p-4 shadow-lg">
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium">
-                {selectedPackages.length} package
-                {selectedPackages.length !== 1 ? "s" : ""} selected
+                {selectedPackages.size} package
+                {selectedPackages.size !== 1 ? "s" : ""} selected
               </span>
               <Button
                 variant="outline"

@@ -10,7 +10,7 @@ import { Package as PackageType } from "../types";
 import { cn } from "@/lib/utils";
 
 interface CurrentConsolidatePanelProps {
-  selectedPackages: string[];
+  selectedPackages: Set<string>; // Rule 7.11: Use Set for O(1) lookups
   packages: PackageType[];
   onRemovePackage: (packageId: string) => void;
   onClearAll: () => void;
@@ -23,10 +23,11 @@ export function CurrentConsolidatePanel({
   onClearAll,
 }: CurrentConsolidatePanelProps) {
   const selectedPackageDetails = useMemo(() => {
-    return packages.filter((pkg) => selectedPackages.includes(pkg.id));
+    // Rule 7.11: Use Set.has() for O(1) lookup instead of Array.includes()
+    return packages.filter((pkg) => selectedPackages.has(pkg.id));
   }, [packages, selectedPackages]);
 
-  const isEmpty = selectedPackages.length === 0;
+  const isEmpty = selectedPackages.size === 0;
 
   return (
     <Card className="sticky top-6 h-fit">
@@ -62,7 +63,7 @@ export function CurrentConsolidatePanel({
             <div className="rounded-lg bg-primary/5 p-3 space-y-1">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Total Packages:</span>
-                <span className="font-semibold">{selectedPackages.length}</span>
+                <span className="font-semibold">{selectedPackages.size}</span>
               </div>
             </div>
 
