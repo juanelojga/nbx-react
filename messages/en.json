@@ -4,6 +4,28 @@
     "spanish": "Spanish",
     "english": "English"
   },
+  "navigation": {
+    "admin": {
+      "dashboard": "Dashboard",
+      "allPackages": "All Packages",
+      "clients": "Clients",
+      "consolidations": "Consolidations",
+      "usersManagement": "Users Management",
+      "reports": "Reports",
+      "settings": "Settings"
+    },
+    "client": {
+      "dashboard": "Dashboard",
+      "myPackages": "My Packages",
+      "trackPackage": "Track Package",
+      "newShipment": "New Shipment",
+      "profile": "Profile"
+    },
+    "role": {
+      "admin": "Admin",
+      "client": "Client"
+    }
+  },
   "home": {
     "title": "Welcome",
     "description": "This is a Next.js application with multi-language support using next-intl"

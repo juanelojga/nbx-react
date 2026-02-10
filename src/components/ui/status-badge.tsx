@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Truck, CheckCircle2, Clock } from "lucide-react";
+import { Truck, CheckCircle2, Clock, HelpCircle } from "lucide-react";
 
 /**
  * Status Badge Component
@@ -49,8 +49,17 @@ const statusConfig: Record<
   },
 };
 
+// Fallback configuration for unknown statuses
+const defaultStatusConfig = {
+  color: "gray",
+  icon: HelpCircle,
+  bgClass: "bg-gray-100 dark:bg-gray-950",
+  textClass: "text-gray-800 dark:text-gray-200",
+  borderClass: "border-gray-300 dark:border-gray-800",
+};
+
 export function StatusBadge({ status, label, className }: StatusBadgeProps) {
-  const config = statusConfig[status];
+  const config = statusConfig[status] || defaultStatusConfig;
   const Icon = config.icon;
 
   return (

@@ -4,6 +4,28 @@
     "spanish": "Español",
     "english": "Inglés"
   },
+  "navigation": {
+    "admin": {
+      "dashboard": "Panel de Control",
+      "allPackages": "Todos los Paquetes",
+      "clients": "Clientes",
+      "consolidations": "Consolidaciones",
+      "usersManagement": "Gestión de Usuarios",
+      "reports": "Reportes",
+      "settings": "Configuración"
+    },
+    "client": {
+      "dashboard": "Panel de Control",
+      "myPackages": "Mis Paquetes",
+      "trackPackage": "Rastrear Paquete",
+      "newShipment": "Nuevo Envío",
+      "profile": "Perfil"
+    },
+    "role": {
+      "admin": "Administrador",
+      "client": "Cliente"
+    }
+  },
   "home": {
     "title": "Bienvenido",
     "description": "Esta es una aplicación Next.js con soporte multiidioma usando next-intl"
