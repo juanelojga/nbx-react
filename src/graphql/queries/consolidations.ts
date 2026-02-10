@@ -1,30 +1,48 @@
 import { gql } from "@apollo/client";
 
 /**
- * Get all consolidations query
- * Returns a list of all consolidations (no pagination in backend schema)
+ * Get all consolidations query with pagination, filtering, and sorting
  */
 export const GET_ALL_CONSOLIDATES = gql`
-  query GetAllConsolidates {
-    allConsolidates {
-      id
-      description
-      status
-      deliveryDate
-      comment
-      extraAttributes
-      client {
+  query GetAllConsolidates(
+    $search: String
+    $page: Int
+    $pageSize: Int
+    $orderBy: String
+    $status: String
+  ) {
+    allConsolidates(
+      search: $search
+      page: $page
+      pageSize: $pageSize
+      orderBy: $orderBy
+      status: $status
+    ) {
+      results {
         id
-        fullName
-        email
-      }
-      packages {
-        id
-        barcode
         description
+        status
+        deliveryDate
+        comment
+        extraAttributes
+        client {
+          id
+          fullName
+          email
+        }
+        packages {
+          id
+          barcode
+          description
+        }
+        createdAt
+        updatedAt
       }
-      createdAt
-      updatedAt
+      totalCount
+      page
+      pageSize
+      hasNext
+      hasPrevious
     }
   }
 `;
@@ -109,8 +127,25 @@ export interface ConsolidateType {
   updatedAt: string;
 }
 
+export interface ConsolidateConnection {
+  results: ConsolidateType[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
 export interface GetAllConsolidatesResponse {
-  allConsolidates: ConsolidateType[];
+  allConsolidates: ConsolidateConnection;
+}
+
+export interface GetAllConsolidatesVariables {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+  orderBy?: string;
+  status?: string;
 }
 
 export interface GetConsolidateByIdVariables {

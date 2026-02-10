@@ -398,3 +398,83 @@ npx shadcn add <component-name>
 ```
 
 This installs to `src/components/ui/` with proper configuration.
+
+## Table Design Standards
+
+**MANDATORY:** All data tables in the application MUST follow the standardized design patterns defined in `/docs/TABLE_DESIGN_SPEC.md`.
+
+### Core Requirements
+
+When creating or modifying any table component:
+
+1. **Visual Consistency**: Use the exact styling patterns from PackagesTable.tsx
+2. **Reference Implementation**: `/src/app/(dashboard)/admin/packages/components/PackagesTable.tsx`
+3. **Full Specification**: `/docs/TABLE_DESIGN_SPEC.md`
+
+### Quick Checklist
+
+Before committing any table changes, verify:
+
+- [ ] Container: `rounded-2xl` border with `backdrop-blur-sm` glassmorphism
+- [ ] Header: Gradient background (`from-muted/40 to-muted/20`) with uppercase labels
+- [ ] Rows: Left border (`border-l-4`) and hover gradient effect
+- [ ] Action Buttons: Color-coded gradients (blue/amber/red) with ring borders
+- [ ] Animations: Row entrance with 50ms stagger, pulse for selected rows
+- [ ] Loading State: 5 skeleton rows with shimmer effect
+- [ ] Empty State: Decorative blurs with hover effects
+- [ ] Typography: Mono font for IDs/barcodes, proper weights and sizes
+- [ ] Accessibility: All ARIA labels present and correct
+- [ ] Performance: Memoized components, useCallback handlers, useMemo for derived state
+
+### Action Button Pattern (Required)
+
+All table action buttons MUST use this exact pattern:
+
+```tsx
+// View (Blue)
+<Button className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-600 shadow-sm ring-1 ring-blue-200/50 transition-all duration-300 hover:scale-110 hover:from-blue-100 hover:to-blue-200/50 hover:text-blue-700 hover:shadow-md hover:ring-blue-300/50 active:scale-95 dark:from-blue-950/30 dark:to-blue-900/20 dark:ring-blue-800/30">
+  <Eye className="h-4 w-4" />
+</Button>
+
+// Edit (Amber)
+<Button className="h-9 w-9 rounded-lg bg-gradient-to-br from-amber-50 to-amber-100/50 text-amber-600 shadow-sm ring-1 ring-amber-200/50 transition-all duration-300 hover:scale-110 hover:from-amber-100 hover:to-amber-200/50 hover:text-amber-700 hover:shadow-md hover:ring-amber-300/50 active:scale-95 dark:from-amber-950/30 dark:to-amber-900/20 dark:ring-amber-800/30">
+  <Pencil className="h-4 w-4" />
+</Button>
+
+// Delete (Red)
+<Button className="h-9 w-9 rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 text-red-600 shadow-sm ring-1 ring-red-200/50 transition-all duration-300 hover:scale-110 hover:from-red-100 hover:to-red-200/50 hover:text-red-700 hover:shadow-md hover:ring-red-300/50 active:scale-95 dark:from-red-950/30 dark:to-red-900/20 dark:ring-red-800/30">
+  <Trash2 className="h-4 w-4" />
+</Button>
+```
+
+### Common Mistakes to Avoid
+
+❌ **DO NOT:**
+
+- Use custom fonts or color schemes different from the standard
+- Skip animations or use different timing functions
+- Implement custom loading/empty states that don't match the standard
+- Use different button styles for actions
+- Skip glassmorphism effects (backdrop-blur)
+- Use sharp corners instead of `rounded-2xl`
+- Forget left border on rows
+- Skip animation staggering
+
+✅ **DO:**
+
+- Copy exact class names from PackagesTable.tsx
+- Preserve all animation keyframes and timing
+- Use standard color palette (primary, muted, border)
+- Follow the exact action button gradient pattern
+- Include all accessibility features
+- Test all interactive states (hover, selected, loading, empty)
+
+### When to Consult the Spec
+
+- Creating a new table from scratch
+- Updating/refactoring an existing table
+- Debugging visual inconsistencies
+- Adding new table features (sorting, filtering, etc.)
+- Questions about styling or interaction patterns
+
+**Remember:** Consistency across all tables is critical for a professional, polished application. Always reference the spec document when in doubt.
