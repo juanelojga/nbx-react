@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
 import { useClientTableState } from "@/hooks/useClientTableState";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,10 +51,36 @@ import {
   X,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AddClientDialog } from "@/components/admin/AddClientDialog";
-import { DeleteClientDialog } from "@/components/admin/DeleteClientDialog";
-import { EditClientDialog } from "@/components/admin/EditClientDialog";
-import { ViewClientDialog } from "@/components/admin/ViewClientDialog";
+
+// Dynamically import dialog components for better bundle splitting
+const AddClientDialog = dynamic(
+  () =>
+    import("@/components/admin/AddClientDialog").then((mod) => ({
+      default: mod.AddClientDialog,
+    })),
+  { ssr: false }
+);
+const DeleteClientDialog = dynamic(
+  () =>
+    import("@/components/admin/DeleteClientDialog").then((mod) => ({
+      default: mod.DeleteClientDialog,
+    })),
+  { ssr: false }
+);
+const EditClientDialog = dynamic(
+  () =>
+    import("@/components/admin/EditClientDialog").then((mod) => ({
+      default: mod.EditClientDialog,
+    })),
+  { ssr: false }
+);
+const ViewClientDialog = dynamic(
+  () =>
+    import("@/components/admin/ViewClientDialog").then((mod) => ({
+      default: mod.ViewClientDialog,
+    })),
+  { ssr: false }
+);
 
 type SortField = "full_name" | "email" | "created_at";
 
