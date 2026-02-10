@@ -197,19 +197,47 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
       typePolicies: {
         Query: {
           fields: {
-            // Add any custom cache policies here
+            // Cache policies for better performance (Vercel Best Practices 3.3)
+            allClients: {
+              // Cache clients list with merge strategy
+              keyArgs: ["search", "orderBy"], // Cache based on search and sort parameters
+              merge(_existing, incoming) {
+                // For pagination, always replace with incoming data
+                // Each page is treated as independent for simplicity
+                return incoming;
+              },
+            },
+            allPackages: {
+              // Cache packages list
+              keyArgs: ["search", "orderBy", "status"],
+              merge(_existing, incoming) {
+                // For pagination, always replace with incoming data
+                return incoming;
+              },
+            },
           },
+        },
+        // Cache individual entities by ID for better normalization
+        Client: {
+          keyFields: ["id"],
+        },
+        Package: {
+          keyFields: ["id"],
+        },
+        User: {
+          keyFields: ["id"],
         },
       },
     }),
     defaultOptions: {
       watchQuery: {
-        fetchPolicy: "cache-and-network",
+        // Use cache-first for better performance, fallback to network
+        fetchPolicy: "cache-first",
+        nextFetchPolicy: "cache-and-network", // Refresh in background
         errorPolicy: "all",
       },
       query: {
-        // Use cache-first for better deduplication and performance
-        // Queries will check cache before making network requests
+        // Use cache-first instead of network-only for better performance
         fetchPolicy: "cache-first",
         errorPolicy: "all",
       },
