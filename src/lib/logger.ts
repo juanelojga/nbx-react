@@ -15,6 +15,10 @@ const isDevelopment = process.env.NODE_ENV === "development";
 /**
  * Helper to run code after response is sent (only in server components)
  * Falls back to immediate execution in client components
+ *
+ * Note: Dynamic require() is intentional here to avoid importing next/server
+ * in client components, which would cause a build error. This pattern allows
+ * the logger to work seamlessly in both server and client contexts.
  */
 function runAfterResponse(fn: () => void) {
   // Check if we're in a server environment and after() is available
