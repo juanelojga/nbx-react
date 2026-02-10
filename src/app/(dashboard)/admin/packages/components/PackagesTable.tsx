@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import {
   Table,
@@ -43,6 +43,98 @@ const UpdatePackageDialog = dynamic(
     })),
   { ssr: false }
 );
+
+// Rule 5.5: Extract to memoized components - PackageRow
+interface PackageRowProps {
+  pkg: Package;
+  isSelected: boolean;
+  onSelect: (packageId: string) => void;
+  onView: (packageId: string) => void;
+  onEdit: (packageId: string) => void;
+  onDelete: (pkg: Package) => void;
+}
+
+const PackageRow = memo(function PackageRow({
+  pkg,
+  isSelected,
+  onSelect,
+  onView,
+  onEdit,
+  onDelete,
+}: PackageRowProps) {
+  return (
+    <TableRow
+      className={
+        isSelected ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/50"
+      }
+    >
+      <TableCell>
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={() => onSelect(pkg.id)}
+          aria-label={`Select package ${pkg.barcode}`}
+        />
+      </TableCell>
+      <TableCell className="font-medium">{pkg.barcode}</TableCell>
+      <TableCell className="text-muted-foreground">
+        {pkg.description || "—"}
+      </TableCell>
+      <TableCell>{new Date(pkg.createdAt).toLocaleDateString()}</TableCell>
+      <TableCell>
+        <div className="flex items-center justify-end gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                onClick={() => onView(pkg.id)}
+                aria-label={`View package ${pkg.barcode}`}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>View Package Details</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                onClick={() => onEdit(pkg.id)}
+                aria-label={`Edit package ${pkg.barcode}`}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Edit Package</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                onClick={() => onDelete(pkg)}
+                aria-label={`Delete package ${pkg.barcode}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete Package</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
 
 interface PackagesTableProps {
   packages: Package[];
@@ -231,86 +323,17 @@ export function PackagesTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {packages.map((pkg) => {
-                const isSelected = selectedPackages.includes(pkg.id);
-                return (
-                  <TableRow
-                    key={pkg.id}
-                    className={
-                      isSelected
-                        ? "bg-primary/5 hover:bg-primary/10"
-                        : "hover:bg-muted/50"
-                    }
-                  >
-                    <TableCell>
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => handleSelectPackage(pkg.id)}
-                        aria-label={`Select package ${pkg.barcode}`}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">{pkg.barcode}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {pkg.description || "—"}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(pkg.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
-                              onClick={() => handleViewPackage(pkg.id)}
-                              aria-label={`View package ${pkg.barcode}`}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>View Package Details</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
-                              onClick={() => handleEditPackage(pkg.id)}
-                              aria-label={`Edit package ${pkg.barcode}`}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Edit Package</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                              onClick={() => handleDeletePackage(pkg)}
-                              aria-label={`Delete package ${pkg.barcode}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Delete Package</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {packages.map((pkg) => (
+                <PackageRow
+                  key={pkg.id}
+                  pkg={pkg}
+                  isSelected={selectedPackages.includes(pkg.id)}
+                  onSelect={handleSelectPackage}
+                  onView={handleViewPackage}
+                  onEdit={handleEditPackage}
+                  onDelete={handleDeletePackage}
+                />
+              ))}
             </TableBody>
           </Table>
         </div>

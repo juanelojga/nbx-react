@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
@@ -85,6 +85,164 @@ const ViewClientDialog = dynamic(
 type SortField = "full_name" | "email" | "created_at";
 
 const DEBOUNCE_DELAY = 400; // milliseconds
+
+// Rule 5.5: Extract to memoized components - ClientRow
+interface ClientRowProps {
+  client: {
+    id: string;
+    fullName: string;
+    email: string;
+    mobilePhoneNumber: string | null;
+    phoneNumber: string | null;
+    city: string | null;
+    state: string | null;
+    createdAt: string;
+    user: {
+      id: string;
+      firstName: string | null;
+      lastName: string | null;
+      email: string;
+    };
+    identificationNumber: string | null;
+    mainStreet: string | null;
+    secondaryStreet: string | null;
+    buildingNumber: string | null;
+  };
+  onView: (clientId: string) => void;
+  onEdit: (client: ClientRowProps["client"]) => void;
+  onDelete: (client: ClientRowProps["client"]) => void;
+  t: (key: string) => string;
+}
+
+const ClientRow = memo(function ClientRow({
+  client,
+  onView,
+  onEdit,
+  onDelete,
+  t,
+}: ClientRowProps) {
+  return (
+    <TableRow key={client.id}>
+      <TableCell className="font-medium">
+        <div className="max-w-[200px] truncate" title={client.fullName || "-"}>
+          {client.fullName || "-"}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="max-w-[250px] truncate" title={client.email}>
+          {client.email}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div
+          className="max-w-[150px] truncate"
+          title={client.mobilePhoneNumber || client.phoneNumber || "-"}
+        >
+          {client.mobilePhoneNumber || client.phoneNumber || "-"}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div
+          className="max-w-[200px] truncate"
+          title={
+            client.city && client.state
+              ? `${client.city}, ${client.state}`
+              : client.city || client.state || "-"
+          }
+        >
+          {client.city && client.state
+            ? `${client.city}, ${client.state}`
+            : client.city || client.state || "-"}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="whitespace-nowrap">
+          {new Date(client.createdAt).toLocaleDateString()}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center justify-end gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                onClick={() => onView(client.id)}
+                aria-label={`View ${client.fullName || client.email}`}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("viewClient")}</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                onClick={() => onEdit(client)}
+                aria-label={`Edit ${client.fullName || client.email}`}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("editClient")}</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                onClick={() => onDelete(client)}
+                aria-label={`Delete ${client.fullName || client.email}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("deleteClient")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
+
+// Rule 5.5: Extract to memoized components - PaginationButton
+interface PaginationButtonProps {
+  pageNumber: number;
+  isActive: boolean;
+  onClick: (page: number) => void;
+  t: (key: string, values?: Record<string, unknown>) => string;
+}
+
+const PaginationButton = memo(function PaginationButton({
+  pageNumber,
+  isActive,
+  onClick,
+  t,
+}: PaginationButtonProps) {
+  return (
+    <Button
+      variant={isActive ? "default" : "outline"}
+      size="sm"
+      onClick={() => onClick(pageNumber)}
+      className="h-8 w-8 p-0"
+      aria-label={t("goToPage", { page: pageNumber })}
+      aria-current={isActive ? "page" : undefined}
+    >
+      {pageNumber}
+    </Button>
+  );
+});
 
 export default function AdminClients() {
   const t = useTranslations("adminClients");
@@ -609,109 +767,14 @@ export default function AdminClients() {
                     </TableHeader>
                     <TableBody>
                       {clients.map((client) => (
-                        <TableRow key={client.id}>
-                          <TableCell className="font-medium">
-                            <div
-                              className="max-w-[200px] truncate"
-                              title={client.fullName || "-"}
-                            >
-                              {client.fullName || "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              className="max-w-[250px] truncate"
-                              title={client.email}
-                            >
-                              {client.email}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              className="max-w-[150px] truncate"
-                              title={
-                                client.mobilePhoneNumber ||
-                                client.phoneNumber ||
-                                "-"
-                              }
-                            >
-                              {client.mobilePhoneNumber ||
-                                client.phoneNumber ||
-                                "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              className="max-w-[200px] truncate"
-                              title={
-                                client.city && client.state
-                                  ? `${client.city}, ${client.state}`
-                                  : client.city || client.state || "-"
-                              }
-                            >
-                              {client.city && client.state
-                                ? `${client.city}, ${client.state}`
-                                : client.city || client.state || "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="whitespace-nowrap">
-                              {new Date(client.createdAt).toLocaleDateString()}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-end gap-2">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
-                                    onClick={() => handleViewClient(client.id)}
-                                    aria-label={`View ${client.fullName || client.email}`}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{t("viewClient")}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
-                                    onClick={() => handleEditClient(client)}
-                                    aria-label={`Edit ${client.fullName || client.email}`}
-                                  >
-                                    <Pencil className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{t("editClient")}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                                    onClick={() => handleDeleteClient(client)}
-                                    aria-label={`Delete ${client.fullName || client.email}`}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{t("deleteClient")}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                        <ClientRow
+                          key={client.id}
+                          client={client}
+                          onView={handleViewClient}
+                          onEdit={handleEditClient}
+                          onDelete={handleDeleteClient}
+                          t={t}
+                        />
                       ))}
                     </TableBody>
                   </Table>
@@ -785,17 +848,13 @@ export default function AdminClients() {
                         const isActive = pageNumber === page;
 
                         return (
-                          <Button
+                          <PaginationButton
                             key={pageNumber}
-                            variant={isActive ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => updateURL({ page: pageNumber })}
-                            className="h-8 w-8 p-0"
-                            aria-label={t("goToPage", { page: pageNumber })}
-                            aria-current={isActive ? "page" : undefined}
-                          >
-                            {pageNumber}
-                          </Button>
+                            pageNumber={pageNumber}
+                            isActive={isActive}
+                            onClick={(p) => updateURL({ page: p })}
+                            t={t}
+                          />
                         );
                       })}
                     </div>
