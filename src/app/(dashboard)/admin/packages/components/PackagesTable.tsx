@@ -85,9 +85,13 @@ const PackageRow = memo(function PackageRow({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        animation: isSelected
-          ? "subtle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-          : "fade-in 0.4s ease-out forwards",
+        animationName: isSelected ? "subtle-pulse" : "fade-in",
+        animationDuration: isSelected ? "2s" : "0.4s",
+        animationTimingFunction: isSelected
+          ? "cubic-bezier(0.4, 0, 0.6, 1)"
+          : "ease-out",
+        animationIterationCount: isSelected ? "infinite" : "1",
+        animationFillMode: isSelected ? "none" : "forwards",
         animationDelay: `${animationDelay}ms`,
       }}
     >

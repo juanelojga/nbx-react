@@ -230,6 +230,7 @@
       "step1Description": "Choose a client to consolidate their packages. You can search by name or email address.",
       "step2Title": "Group Packages",
       "step3Title": "Review & Finalize",
+      "step4Title": "Success",
       "clientLabel": "Client",
       "selectedClientTitle": "Selected Client",
       "nameLabel": "Name:",
@@ -426,6 +427,32 @@
       "errorDescription": "An error occurred while creating the consolidation.",
       "selectedPackagesTitle": "Selected Packages",
       "packagesCount": "{count} package{plural} to consolidate"
+    },
+    "success": {
+      "title": "Consolidation Created Successfully!",
+      "description": "Your consolidation has been created and is ready for processing.",
+      "consolidationId": "Consolidation ID",
+      "detailsTitle": "Consolidation Details",
+      "clientLabel": "Client",
+      "descriptionLabel": "Description",
+      "statusLabel": "Status",
+      "deliveryDateLabel": "Delivery Date",
+      "commentLabel": "Comment",
+      "packagesLabel": "Packages",
+      "weightLabel": "Weight",
+      "realPriceLabel": "Real Price",
+      "servicePriceLabel": "Service Price",
+      "packagesTitle": "Consolidated Packages",
+      "package": "package",
+      "packages": "packages",
+      "viewDetailsButton": "View Consolidation Details",
+      "createAnotherButton": "Create Another",
+      "backToPackagesButton": "Back to Packages",
+      "status": {
+        "pending": "Pending",
+        "in_transit": "In Transit",
+        "delivered": "Delivered"
+      }
     },
     "clientSelect": {
       "placeholder": "Select a client...",

@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@apollo/client";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { Work_Sans, Inter } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   ArrowRight,
@@ -18,12 +20,14 @@ import { ClientSelect } from "./components/ClientSelect";
 import { PackagesTable } from "./components/PackagesTable";
 import { CurrentConsolidatePanel } from "./components/CurrentConsolidatePanel";
 import { ConsolidationForm } from "./components/ConsolidationForm";
+import { ConsolidationSuccess } from "./components/ConsolidationSuccess";
 import { ClientType } from "@/graphql/queries/clients";
 import {
   RESOLVE_ALL_PACKAGES,
   ResolveAllPackagesResponse,
   ResolveAllPackagesVariables,
 } from "@/graphql/queries/packages";
+import { ConsolidateType } from "@/graphql/queries/consolidations";
 
 const workSansFont = Work_Sans({
   subsets: ["latin"],
@@ -50,6 +54,7 @@ const AddPackageDialog = dynamic(
 
 export default function AdminPackages() {
   const t = useTranslations("adminPackages.page");
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedClient, setSelectedClient] = useState<ClientType | null>(null);
 
@@ -59,12 +64,17 @@ export default function AdminPackages() {
   );
   const [isAddPackageDialogOpen, setIsAddPackageDialogOpen] = useState(false);
 
+  // Step 4 state - Store created consolidation data
+  const [createdConsolidation, setCreatedConsolidation] =
+    useState<ConsolidateType | null>(null);
+
   // Rule 5.4: Extract default non-primitive values to constants
   const consolidationSteps = useMemo(
     () => [
       { number: 1, label: t("step1Title") },
       { number: 2, label: t("step2Title") },
       { number: 3, label: t("step3Title") },
+      { number: 4, label: t("step4Title") },
     ],
     [t]
   );
@@ -140,6 +150,27 @@ export default function AdminPackages() {
 
   const handleBackToStep2 = useCallback(() => {
     setCurrentStep(2);
+  }, []);
+
+  const handleConsolidationCreated = useCallback(
+    (consolidation: ConsolidateType) => {
+      setCreatedConsolidation(consolidation);
+      setCurrentStep(4);
+    },
+    []
+  );
+
+  const handleCreateAnother = useCallback(() => {
+    setCurrentStep(1);
+    setSelectedClient(null);
+    setSelectedPackages(new Set());
+    setCreatedConsolidation(null);
+  }, []);
+
+  const handleViewDetails = useCallback(() => {
+    // TODO: Navigate to consolidation details page when it exists
+    // For now, show a toast notification
+    toast.info("Consolidation details view coming soon");
   }, []);
 
   return (
@@ -528,6 +559,20 @@ export default function AdminPackages() {
               selectedPackages={selectedPackages}
               packages={packages}
               onBack={handleBackToStep2}
+              onSuccess={handleConsolidationCreated}
+            />
+          </div>
+        )}
+
+        {/* Step 4: Success Confirmation */}
+        {currentStep === 4 && createdConsolidation && (
+          <div className="animate-in fade-in slide-in-from-right-8 duration-500">
+            <ConsolidationSuccess
+              consolidation={createdConsolidation}
+              packages={packages}
+              onViewDetails={handleViewDetails}
+              onCreateAnother={handleCreateAnother}
+              onBackToPackages={() => router.push("/admin/packages")}
             />
           </div>
         )}

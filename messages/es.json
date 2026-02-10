@@ -230,6 +230,7 @@
       "step1Description": "Elige un cliente para consolidar sus paquetes. Puedes buscar por nombre o correo electrónico.",
       "step2Title": "Agrupar Paquetes",
       "step3Title": "Revisar y Finalizar",
+      "step4Title": "Éxito",
       "clientLabel": "Cliente",
       "selectedClientTitle": "Cliente Seleccionado",
       "nameLabel": "Nombre:",
@@ -426,6 +427,32 @@
       "errorDescription": "Ocurrió un error al crear la consolidación.",
       "selectedPackagesTitle": "Paquetes Seleccionados",
       "packagesCount": "{count} paquete{plural} para consolidar"
+    },
+    "success": {
+      "title": "¡Consolidación Creada Exitosamente!",
+      "description": "Tu consolidación ha sido creada y está lista para ser procesada.",
+      "consolidationId": "ID de Consolidación",
+      "detailsTitle": "Detalles de Consolidación",
+      "clientLabel": "Cliente",
+      "descriptionLabel": "Descripción",
+      "statusLabel": "Estado",
+      "deliveryDateLabel": "Fecha de Entrega",
+      "commentLabel": "Comentario",
+      "packagesLabel": "Paquetes",
+      "weightLabel": "Peso",
+      "realPriceLabel": "Precio Real",
+      "servicePriceLabel": "Precio de Servicio",
+      "packagesTitle": "Paquetes Consolidados",
+      "package": "paquete",
+      "packages": "paquetes",
+      "viewDetailsButton": "Ver Detalles de Consolidación",
+      "createAnotherButton": "Crear Otra",
+      "backToPackagesButton": "Volver a Paquetes",
+      "status": {
+        "pending": "Pendiente",
+        "in_transit": "En Tránsito",
+        "delivered": "Entregado"
+      }
     },
     "clientSelect": {
       "placeholder": "Selecciona un cliente...",
