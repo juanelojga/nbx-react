@@ -109,12 +109,7 @@ export function AddClientDialog({
       // Rule 5.9: Use functional setState updates
       setFormData((prev) => ({ ...prev, [field]: value }));
       // Clear validation error for this field
-      setValidationErrors((prev) => {
-        if (prev[field]) {
-          return { ...prev, [field]: undefined };
-        }
-        return prev;
-      });
+      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
     },
     []
   );
@@ -128,7 +123,7 @@ export function AddClientDialog({
     [handleInputChange]
   );
 
-  const validateForm = useCallback((): boolean => {
+  const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
 
     // Required fields
@@ -157,53 +152,50 @@ export function AddClientDialog({
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [formData, t]);
+  };
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-      if (!validateForm()) {
-        return;
-      }
+    if (!validateForm()) {
+      return;
+    }
 
-      // Prepare variables - only include non-empty optional fields
-      const variables: CreateClientVariables = {
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        email: formData.email.trim(),
-      };
+    // Prepare variables - only include non-empty optional fields
+    const variables: CreateClientVariables = {
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim(),
+    };
 
-      // Add optional fields only if they have values
-      if (formData.identificationNumber.trim()) {
-        variables.identificationNumber = formData.identificationNumber.trim();
-      }
-      if (formData.mobilePhoneNumber.trim()) {
-        variables.mobilePhoneNumber = formData.mobilePhoneNumber.trim();
-      }
-      if (formData.phoneNumber.trim()) {
-        variables.phoneNumber = formData.phoneNumber.trim();
-      }
-      if (formData.state.trim()) {
-        variables.state = formData.state.trim();
-      }
-      if (formData.city.trim()) {
-        variables.city = formData.city.trim();
-      }
-      if (formData.mainStreet.trim()) {
-        variables.mainStreet = formData.mainStreet.trim();
-      }
-      if (formData.secondaryStreet.trim()) {
-        variables.secondaryStreet = formData.secondaryStreet.trim();
-      }
-      if (formData.buildingNumber.trim()) {
-        variables.buildingNumber = formData.buildingNumber.trim();
-      }
+    // Add optional fields only if they have values
+    if (formData.identificationNumber.trim()) {
+      variables.identificationNumber = formData.identificationNumber.trim();
+    }
+    if (formData.mobilePhoneNumber.trim()) {
+      variables.mobilePhoneNumber = formData.mobilePhoneNumber.trim();
+    }
+    if (formData.phoneNumber.trim()) {
+      variables.phoneNumber = formData.phoneNumber.trim();
+    }
+    if (formData.state.trim()) {
+      variables.state = formData.state.trim();
+    }
+    if (formData.city.trim()) {
+      variables.city = formData.city.trim();
+    }
+    if (formData.mainStreet.trim()) {
+      variables.mainStreet = formData.mainStreet.trim();
+    }
+    if (formData.secondaryStreet.trim()) {
+      variables.secondaryStreet = formData.secondaryStreet.trim();
+    }
+    if (formData.buildingNumber.trim()) {
+      variables.buildingNumber = formData.buildingNumber.trim();
+    }
 
-      await createClient({ variables });
-    },
-    [createClient, formData, validateForm]
-  );
+    await createClient({ variables });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

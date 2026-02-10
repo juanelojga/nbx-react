@@ -183,7 +183,6 @@ export function PackagesTable({
 
   const handleSelectPackage = useCallback(
     (packageId: string) => {
-      // Rule 5.9: Use functional setState pattern through callback
       if (selectedPackages.includes(packageId)) {
         onSelectionChange(selectedPackages.filter((id) => id !== packageId));
       } else {
