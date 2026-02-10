@@ -26,13 +26,15 @@ jest.mock("jwt-decode", () => ({
 }));
 
 // Test constants
-const CACHE_TTL_MS = 1000; // Must match the implementation
+const CACHE_TTL_MS = 5000; // Must match the implementation
 const CACHE_WAIT_MS = CACHE_TTL_MS + 100; // Wait time to ensure cache expires
 
 describe("tokens", () => {
   let mockLocalStorage: { [key: string]: string };
 
   beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2024-01-01T00:00:00Z"));
     // Reset mock localStorage before each test
     mockLocalStorage = {};
 
@@ -59,6 +61,7 @@ describe("tokens", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.useRealTimers();
   });
 
   describe("saveTokens", () => {
@@ -125,7 +128,7 @@ describe("tokens", () => {
       expect(token2).toBe("test-token"); // Still returns old cached value
 
       // After cache TTL expires, should read new value
-      await new Promise((resolve) => setTimeout(resolve, CACHE_WAIT_MS));
+      jest.advanceTimersByTime(CACHE_WAIT_MS);
       const token3 = getAccessToken();
       expect(token3).toBe("new-token"); // Now returns new value
     });
@@ -270,7 +273,7 @@ describe("tokens", () => {
       expect(isRefreshTokenExpired()).toBe(false); // Still false due to cache
 
       // After cache expires, should reflect new value
-      await new Promise((resolve) => setTimeout(resolve, CACHE_WAIT_MS));
+      jest.advanceTimersByTime(CACHE_WAIT_MS);
       expect(isRefreshTokenExpired()).toBe(true); // Now true
     });
   });
