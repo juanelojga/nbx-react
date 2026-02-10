@@ -18,15 +18,16 @@ export function LoadingSpinner({
   };
 
   const spinner = (
-    <div
-      className={cn(
-        "border-[#1976D2] border-t-transparent rounded-full animate-spin",
-        sizeClasses[size],
-        className
-      )}
-      role="status"
-      aria-label="Loading"
-    />
+    // Rule 6.1: Animate wrapper div instead of SVG for better performance
+    <div className="animate-spin" role="status" aria-label="Loading">
+      <div
+        className={cn(
+          "border-[#1976D2] border-t-transparent rounded-full",
+          sizeClasses[size],
+          className
+        )}
+      />
+    </div>
   );
 
   if (fullScreen) {

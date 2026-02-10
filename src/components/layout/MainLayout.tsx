@@ -11,15 +11,21 @@ interface MainLayoutProps {
 
 const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";
 
-// Helper to get initial sidebar state from localStorage
+// Rule 6.5: Prevent hydration mismatch with safe localStorage access
 const getInitialSidebarState = (): boolean => {
+  // Only access localStorage on client-side
   if (typeof window === "undefined") return false;
-  const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-  return stored === "true";
+  try {
+    const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    return stored === "true";
+  } catch {
+    return false;
+  }
 };
 
 export function MainLayout({ children, userRole }: MainLayoutProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  // Rule 6.5: Use lazy initialization to safely read localStorage without hydration mismatch
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(
     getInitialSidebarState
   );

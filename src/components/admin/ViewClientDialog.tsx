@@ -77,7 +77,10 @@ export function ViewClientDialog({
         {loading && (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              {/* Rule 6.1: Animate wrapper instead of icon */}
+              <div className="animate-spin">
+                <Loader2 className="h-12 w-12 text-primary" />
+              </div>
               <p className="text-sm text-muted-foreground">{t("loading")}</p>
             </div>
           </div>
