@@ -12,6 +12,7 @@ import { StepHeader } from "./components/StepHeader";
 import { ClientSelect } from "./components/ClientSelect";
 import { PackagesTable } from "./components/PackagesTable";
 import { CurrentConsolidatePanel } from "./components/CurrentConsolidatePanel";
+import { ConsolidationForm } from "./components/ConsolidationForm";
 import { ClientType } from "@/graphql/queries/clients";
 import {
   RESOLVE_ALL_PACKAGES,
@@ -113,6 +114,10 @@ export default function AdminPackages() {
   const handleRefetchPackages = useCallback(async () => {
     await refetch();
   }, [refetch]);
+
+  const handleBackToStep2 = useCallback(() => {
+    setCurrentStep(2);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -300,27 +305,13 @@ export default function AdminPackages() {
       )}
 
       {/* Step 3: Review & Finalize */}
-      {currentStep === 3 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Review & Finalize</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Step 3 implementation coming soon...
-            </p>
-            <div className="mt-4">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentStep(2)}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Group Packages
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      {currentStep === 3 && selectedClient && (
+        <ConsolidationForm
+          selectedClient={selectedClient}
+          selectedPackages={selectedPackages}
+          packages={packages}
+          onBack={handleBackToStep2}
+        />
       )}
 
       {/* Add Package Dialog */}
