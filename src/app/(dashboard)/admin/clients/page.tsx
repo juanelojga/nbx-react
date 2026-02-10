@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
@@ -187,40 +187,48 @@ export default function AdminClients() {
     notifyOnNetworkStatusChange: true, // Show loading state on refetch
   });
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      // Toggle sort order
-      const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
-      updateURL({ sortOrder: newSortOrder });
-    } else {
-      // Change sort field, default to ascending
-      updateURL({ sortField: field, sortOrder: "asc" });
-    }
-  };
+  // Rule 5.9: Use functional setState updates & Rule 5.6: Narrow effect dependencies with useCallback
+  const handleSort = useCallback(
+    (field: SortField) => {
+      if (sortField === field) {
+        // Toggle sort order
+        const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
+        updateURL({ sortOrder: newSortOrder });
+      } else {
+        // Change sort field, default to ascending
+        updateURL({ sortField: field, sortOrder: "asc" });
+      }
+    },
+    [sortField, sortOrder, updateURL]
+  );
 
-  const handlePageSizeChange = (newSize: number) => {
-    // Update page size and reset to page 1
-    updateURL({ pageSize: newSize, page: 1 });
-  };
+  const handlePageSizeChange = useCallback(
+    (newSize: number) => {
+      // Update page size and reset to page 1
+      updateURL({ pageSize: newSize, page: 1 });
+    },
+    [updateURL]
+  );
 
-  const handleClearSearch = () => {
+  const handleClearSearch = useCallback(() => {
     setSearchInput("");
     setDebouncedSearch("");
     updateURL({ search: "", page: 1 });
-  };
+  }, [updateURL]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     await refetch();
-  };
+  }, [refetch]);
 
+  // Rule 5.1: Calculate derived state during rendering
   const clients = data?.allClients.results || [];
   const totalCount = data?.allClients.totalCount || 0;
   const hasNext = data?.allClients.hasNext || false;
   const hasPrevious = data?.allClients.hasPrevious || false;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  // Generate page numbers for pagination
-  const generatePageNumbers = () => {
+  // Rule 5.8: Subscribe to derived state with useMemo
+  const pageNumbers = useMemo(() => {
     const pages: (number | string)[] = [];
     const maxVisiblePages = 5;
     const ellipsis = "...";
@@ -260,9 +268,7 @@ export default function AdminClients() {
     }
 
     return pages;
-  };
-
-  const pageNumbers = generatePageNumbers();
+  }, [page, totalPages]);
 
   // Helper function to get sort icon for a column
   const getSortIcon = (field: SortField) => {
@@ -284,60 +290,66 @@ export default function AdminClients() {
     return sortOrder === "asc" ? "ascending" : "descending";
   };
 
-  // Action handlers
-  const handleViewClient = (clientId: string) => {
+  // Rule 5.7: Put interaction logic in event handlers (with useCallback for stability)
+  const handleViewClient = useCallback((clientId: string) => {
     setClientIdToView(clientId);
     setIsViewDialogOpen(true);
-  };
+  }, []);
 
-  const handleEditClient = (client: {
-    id: string;
-    user: {
-      firstName: string | null;
-      lastName: string | null;
+  const handleEditClient = useCallback(
+    (client: {
+      id: string;
+      user: {
+        firstName: string | null;
+        lastName: string | null;
+        email: string;
+      };
       email: string;
-    };
-    email: string;
-    identificationNumber: string | null;
-    mobilePhoneNumber: string | null;
-    phoneNumber: string | null;
-    state: string | null;
-    city: string | null;
-    mainStreet: string | null;
-    secondaryStreet: string | null;
-    buildingNumber: string | null;
-  }) => {
-    setClientToEdit({
-      id: client.id,
-      firstName: client.user.firstName || "",
-      lastName: client.user.lastName || "",
-      email: client.email,
-      identificationNumber: client.identificationNumber,
-      mobilePhoneNumber: client.mobilePhoneNumber,
-      phoneNumber: client.phoneNumber,
-      state: client.state,
-      city: client.city,
-      mainStreet: client.mainStreet,
-      secondaryStreet: client.secondaryStreet,
-      buildingNumber: client.buildingNumber,
-    });
-    setIsEditDialogOpen(true);
-  };
+      identificationNumber: string | null;
+      mobilePhoneNumber: string | null;
+      phoneNumber: string | null;
+      state: string | null;
+      city: string | null;
+      mainStreet: string | null;
+      secondaryStreet: string | null;
+      buildingNumber: string | null;
+    }) => {
+      setClientToEdit({
+        id: client.id,
+        firstName: client.user.firstName || "",
+        lastName: client.user.lastName || "",
+        email: client.email,
+        identificationNumber: client.identificationNumber,
+        mobilePhoneNumber: client.mobilePhoneNumber,
+        phoneNumber: client.phoneNumber,
+        state: client.state,
+        city: client.city,
+        mainStreet: client.mainStreet,
+        secondaryStreet: client.secondaryStreet,
+        buildingNumber: client.buildingNumber,
+      });
+      setIsEditDialogOpen(true);
+    },
+    []
+  );
 
-  const handleDeleteClient = (client: {
-    id: string;
-    user: { id: string };
-    fullName: string;
-    email: string;
-  }) => {
-    setClientToDelete({
-      id: client.id,
-      userId: client.user.id,
-      fullName: client.fullName,
-      email: client.email,
-    });
-    setIsDeleteDialogOpen(true);
-  };
+  const handleDeleteClient = useCallback(
+    (client: {
+      id: string;
+      user: { id: string };
+      fullName: string;
+      email: string;
+    }) => {
+      setClientToDelete({
+        id: client.id,
+        userId: client.user.id,
+        fullName: client.fullName,
+        email: client.email,
+      });
+      setIsDeleteDialogOpen(true);
+    },
+    []
+  );
 
   return (
     <TooltipProvider>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import {
   Table,
@@ -71,6 +71,7 @@ export function PackagesTable({
     barcode: string;
   } | null>(null);
 
+  // Rule 5.8: Subscribe to derived state with useMemo
   const allSelected = useMemo(() => {
     return packages.length > 0 && selectedPackages.length === packages.length;
   }, [packages.length, selectedPackages.length]);
@@ -79,52 +80,57 @@ export function PackagesTable({
     return selectedPackages.length > 0 && !allSelected;
   }, [selectedPackages.length, allSelected]);
 
-  const handleSelectAll = () => {
+  // Rule 5.7: Put interaction logic in event handlers with useCallback
+  const handleSelectAll = useCallback(() => {
     if (allSelected) {
       onSelectionChange([]);
     } else {
       onSelectionChange(packages.map((pkg) => pkg.id));
     }
-  };
+  }, [allSelected, onSelectionChange, packages]);
 
-  const handleSelectPackage = (packageId: string) => {
-    if (selectedPackages.includes(packageId)) {
-      onSelectionChange(selectedPackages.filter((id) => id !== packageId));
-    } else {
-      onSelectionChange([...selectedPackages, packageId]);
-    }
-  };
+  const handleSelectPackage = useCallback(
+    (packageId: string) => {
+      // Rule 5.9: Use functional setState pattern through callback
+      if (selectedPackages.includes(packageId)) {
+        onSelectionChange(selectedPackages.filter((id) => id !== packageId));
+      } else {
+        onSelectionChange([...selectedPackages, packageId]);
+      }
+    },
+    [onSelectionChange, selectedPackages]
+  );
 
-  const handleClearSelection = () => {
+  const handleClearSelection = useCallback(() => {
     onSelectionChange([]);
-  };
+  }, [onSelectionChange]);
 
-  const handleViewPackage = (packageId: string) => {
+  const handleViewPackage = useCallback((packageId: string) => {
     setSelectedPackageId(packageId);
     setViewModalOpen(true);
-  };
+  }, []);
 
-  const handleEditPackage = (packageId: string) => {
+  const handleEditPackage = useCallback((packageId: string) => {
     setPackageToEdit(packageId);
     setEditModalOpen(true);
-  };
+  }, []);
 
-  const handleDeletePackage = (pkg: Package) => {
+  const handleDeletePackage = useCallback((pkg: Package) => {
     setPackageToDelete({
       id: pkg.id,
       barcode: pkg.barcode,
     });
     setDeleteModalOpen(true);
-  };
+  }, []);
 
-  const handlePackageUpdated = async () => {
+  const handlePackageUpdated = useCallback(async () => {
     // Refetch packages to update the table
     if (onRefetch) {
       await onRefetch();
     }
-  };
+  }, [onRefetch]);
 
-  const handlePackageDeleted = async () => {
+  const handlePackageDeleted = useCallback(async () => {
     // Clear selection if the deleted package was selected
     if (packageToDelete && selectedPackages.includes(packageToDelete.id)) {
       onSelectionChange(
@@ -135,7 +141,7 @@ export function PackagesTable({
     if (onRefetch) {
       await onRefetch();
     }
-  };
+  }, [onRefetch, onSelectionChange, packageToDelete, selectedPackages]);
 
   // Loading skeleton
   if (isLoading) {
