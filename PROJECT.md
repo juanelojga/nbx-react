@@ -68,6 +68,7 @@ Limited access to view and manage their own packages.
 ### Typography & Design
 
 - **Follow the typography guidelines**: See [documents/TYPOGRAPHY_GUIDELINES.md](./documents/TYPOGRAPHY_GUIDELINES.md)
+- **Table Design System**: See [docs/TABLE_DESIGN_SYSTEM.md](./docs/TABLE_DESIGN_SYSTEM.md)
 - Use **Work Sans** for titles/headings, **Inter** for body/data
 - Apply the compact typography scale (main title: text-2xl, sections: text-lg/text-base)
 - Rely on font-weight for visual hierarchy
