@@ -203,7 +203,10 @@ export default function LoginPage() {
             <span className="relative z-10 flex items-center justify-center gap-2">
               {loading ? (
                 <>
-                  <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                  {/* Rule 6.1: Animate wrapper span instead of inner element */}
+                  <span className="animate-spin">
+                    <span className="block h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                  </span>
                   {t("signingIn")}
                 </>
               ) : (

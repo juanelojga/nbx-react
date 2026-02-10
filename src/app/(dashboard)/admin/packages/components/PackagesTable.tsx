@@ -64,9 +64,9 @@ const PackageRow = memo(function PackageRow({
 }: PackageRowProps) {
   return (
     <TableRow
-      className={
+      className={`table-row-optimized ${
         isSelected ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/50"
-      }
+      }`}
     >
       <TableCell>
         <Checkbox

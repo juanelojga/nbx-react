@@ -294,4 +294,10 @@
   .animate-slide-up {
     animation: slide-up 0.6s ease-out;
   }
+
+  /* Rule 6.2: content-visibility for long lists - improves scroll performance */
+  .table-row-optimized {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 57px; /* approximate table row height */
+  }
 }

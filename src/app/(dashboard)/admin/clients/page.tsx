@@ -86,6 +86,23 @@ type SortField = "full_name" | "email" | "created_at";
 
 const DEBOUNCE_DELAY = 400; // milliseconds
 
+// Rule 6.3: Hoist static JSX elements to module-level constants
+const EMPTY_STATE_ICON = (
+  <svg
+    className="h-16 w-16 text-primary/60"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+    />
+  </svg>
+);
+
 // Rule 5.5: Extract to memoized components - ClientRow
 interface ClientRowProps {
   client: {
@@ -122,7 +139,7 @@ const ClientRow = memo(function ClientRow({
   t,
 }: ClientRowProps) {
   return (
-    <TableRow key={client.id}>
+    <TableRow key={client.id} className="table-row-optimized">
       <TableCell className="font-medium">
         <div className="max-w-[200px] truncate" title={client.fullName || "-"}>
           {client.fullName || "-"}
@@ -521,9 +538,10 @@ export default function AdminClients() {
               disabled={loading}
               className="sm:w-auto"
             >
-              <RefreshCw
-                className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
-              />
+              {/* Rule 6.1: Animate wrapper div instead of SVG icon */}
+              <div className={loading ? "animate-spin mr-2" : "mr-2"}>
+                <RefreshCw className="h-4 w-4" />
+              </div>
               {t("refresh")}
             </Button>
             <Button
@@ -666,19 +684,7 @@ export default function AdminClients() {
             {!loading && !error && clients.length === 0 && (
               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-16 text-center">
                 <div className="mb-6 rounded-full bg-primary/10 p-6">
-                  <svg
-                    className="h-16 w-16 text-primary/60"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
-                  </svg>
+                  {EMPTY_STATE_ICON}
                 </div>
                 <h3 className="text-xl font-semibold text-foreground">
                   {debouncedSearch
