@@ -1,11 +1,12 @@
 # Design System Documentation
 
-_Last updated: 2025-10-08_
+_Last updated: 2026-02-10_
 
 ---
 
 ## Table of Contents
 
+- [Typography](#typography)
 - [Color Palette](#color-palette)
 - [Components](#components)
 - [Pages](#pages)
@@ -13,12 +14,52 @@ _Last updated: 2025-10-08_
 
 ---
 
+## Typography
+
+### Font Families
+
+The application uses a two-font system optimized for modern UI and data-heavy interfaces:
+
+#### Primary Fonts
+
+| Font          | Purpose                             | Weights                 | CSS Variable       |
+| ------------- | ----------------------------------- | ----------------------- | ------------------ |
+| **Work Sans** | Titles, headings, labels            | 400, 500, 600, 700, 800 | `--font-work-sans` |
+| **Inter**     | Body text, data fields, UI elements | 400, 500, 600           | `--font-inter`     |
+
+### Typography Scale
+
+We use a **compact, data-focused scale** for professional business applications:
+
+| Size        | Pixels | Primary Use                          | Font                     |
+| ----------- | ------ | ------------------------------------ | ------------------------ |
+| `text-2xl`  | 24px   | Main page titles                     | Work Sans Bold/Extrabold |
+| `text-lg`   | 18px   | Section headings                     | Work Sans Bold           |
+| `text-base` | 16px   | Subsection headings, body text, data | Work Sans Bold / Inter   |
+| `text-sm`   | 14px   | Minor headings, small text           | Work Sans Bold / Inter   |
+| `text-xs`   | 12px   | Labels, metadata                     | Work Sans Bold / Inter   |
+
+### Key Principles
+
+1. **Aggressive Reduction**: Titles are 3 sizes smaller than typical (main title: 24px vs 48px)
+2. **Weight-Based Hierarchy**: Visual distinction via font-weight (800, 700) > size
+3. **Data-Focused**: Content takes priority over decorative typography
+4. **Font Pairing**: Work Sans for emphasis, Inter for content
+
+📖 **For detailed typography guidelines, code examples, and migration instructions, see:**  
+[TYPOGRAPHY_GUIDELINES.md](./TYPOGRAPHY_GUIDELINES.md)
+
+---
+
 ## Color Palette
+
+### CSS Custom Properties
 
 - **color-background**: `var(--background)`
 - **color-foreground**: `var(--foreground)`
-- **font-sans**: `var(--font-geist-sans)`
-- **font-mono**: `var(--font-geist-mono)`
+- **font-sans**: `var(--font-work-sans)` - Primary heading font
+- **font-body**: `var(--font-inter)` - Primary body font
+- **font-mono**: `var(--font-geist-mono)` - Monospace (if needed)
 - **color-sidebar-ring**: `var(--sidebar-ring)`
 - **color-sidebar-border**: `var(--sidebar-border)`
 - **color-sidebar-accent-foreground**: `var(--sidebar-accent-foreground)`

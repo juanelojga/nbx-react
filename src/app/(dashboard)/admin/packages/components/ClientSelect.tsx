@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@apollo/client";
+import { useTranslations } from "next-intl";
 import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ export function ClientSelect({
   onClientSelect,
   selectedClient,
 }: ClientSelectProps) {
+  const t = useTranslations("adminPackages.clientSelect");
   const [open, setOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 300);
@@ -93,7 +95,7 @@ export function ClientSelect({
               </span>
             </div>
           ) : (
-            <span className="text-muted-foreground">Select a client...</span>
+            <span className="text-muted-foreground">{t("placeholder")}</span>
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -103,7 +105,7 @@ export function ClientSelect({
           <div className="flex items-center border-b px-3">
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <CommandInput
-              placeholder="Search clients by name or email..."
+              placeholder={t("searchPlaceholder")}
               value={searchInput}
               onValueChange={setSearchInput}
               className="border-0 focus:ring-0"
@@ -114,7 +116,7 @@ export function ClientSelect({
               <div className="flex items-center justify-center py-6">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 <span className="ml-2 text-sm text-muted-foreground">
-                  Loading clients...
+                  {t("loading")}
                 </span>
               </div>
             )}
@@ -122,7 +124,7 @@ export function ClientSelect({
             {error && (
               <div className="py-6 px-4 text-center">
                 <p className="text-sm text-destructive">
-                  Error loading clients: {error.message}
+                  {t("error", { message: error.message })}
                 </p>
               </div>
             )}
@@ -131,11 +133,11 @@ export function ClientSelect({
               <CommandEmpty>
                 <div className="py-6 text-center">
                   <p className="text-sm text-muted-foreground">
-                    No clients found.
+                    {t("noClientsFound")}
                   </p>
                   {searchInput && (
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Try a different search term
+                      {t("tryDifferentSearch")}
                     </p>
                   )}
                 </div>

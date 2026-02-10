@@ -20,6 +20,51 @@ Report any linting errors or warnings that cannot be auto-fixed.
 - Use Tailwind CSS v4 for styling
 - Prefer server components by default; use "use client" only when necessary
 
+## Internationalization (i18n) - SPANISH FIRST
+
+**IMPORTANT:** Spanish (`es`) is the primary language of this application.
+
+### Translation Priority Rules
+
+1. **Always show Spanish translations FIRST** in all code examples and discussions
+2. **English is secondary** - show English translations second, if needed
+3. **New components** - Create translations in BOTH `messages/es.json` and `messages/en.json`, but present Spanish first in code and conversation
+4. **Default text values** - Use Spanish for placeholders, default messages, and inline text examples
+5. **Translation examples** - When demonstrating translation usage, show Spanish output before English
+
+### Translation File Order
+
+When adding new translation keys:
+
+**1. First: Spanish (`messages/es.json`)**
+```json
+{
+  "newFeature": {
+    "title": "Título en Español",
+    "description": "Descripción en español"
+  }
+}
+```
+
+**2. Second: English (`messages/en.json`)**
+```json
+{
+  "newFeature": {
+    "title": "Title in English",
+    "description": "Description in English"
+  }
+}
+```
+
+### Code Examples
+
+Always demonstrate with Spanish first:
+```typescript
+const t = useTranslations('namespace');
+t('key') // "Texto en español" ← Show Spanish first
+t('key') // "Text in English" ← Then English if needed
+```
+
 ## Code Style
 
 - Double quotes for strings
@@ -27,6 +72,89 @@ Report any linting errors or warnings that cannot be auto-fixed.
 - 2-space indentation
 - 80 character line width
 - ES5 trailing commas
+
+## Typography Standards (MANDATORY)
+
+**CRITICAL:** All components MUST follow the typography guidelines defined in `documents/TYPOGRAPHY_GUIDELINES.md`.
+
+### Font Selection Rules
+
+**When creating or refactoring ANY component:**
+
+1. **Import fonts at page/layout level:**
+   ```typescript
+   import { Work_Sans, Inter } from "next/font/google";
+   
+   const workSansFont = Work_Sans({
+     subsets: ["latin"],
+     weight: ["400", "500", "600", "700", "800"],
+     variable: "--font-work-sans",
+     display: "swap",
+   });
+   
+   const interFont = Inter({
+     subsets: ["latin"],
+     weight: ["400", "500", "600"],
+     variable: "--font-inter",
+     display: "swap",
+   });
+   ```
+
+2. **Apply CSS variables to root element:**
+   ```typescript
+   <div className={`${workSansFont.variable} ${interFont.variable}`}>
+   ```
+
+3. **Use Work Sans for titles/headings:**
+   ```typescript
+   // Main page title
+   <h1 className="font-[family-name:var(--font-work-sans)] text-2xl font-extrabold tracking-tight">
+   
+   // Section headings
+   <h2 className="font-[family-name:var(--font-work-sans)] text-lg font-bold">
+   <h3 className="font-[family-name:var(--font-work-sans)] text-base font-bold">
+   
+   // Minor headings
+   <h4 className="font-[family-name:var(--font-work-sans)] text-sm font-bold">
+   ```
+
+4. **Use Inter for body text and data:**
+   ```typescript
+   // Data fields
+   <div className="font-[family-name:var(--font-inter)] text-base font-medium">
+   
+   // Body text
+   <p className="text-base">  {/* Inter is implicit for body */}
+   ```
+
+### Typography Scale (Compact)
+
+**REQUIRED sizes for headings:**
+- Main page title: `text-2xl` (24px) + `font-extrabold` (800)
+- Major sections: `text-lg` (18px) + `font-bold` (700)
+- Subsections: `text-base` (16px) + `font-bold` (700)
+- Minor headings: `text-sm` (14px) + `font-bold` (700)
+- Labels: `text-xs` (12px) + `font-bold` (700) + `uppercase` + `tracking-wider`
+
+**DO NOT use:**
+- ❌ `text-3xl`, `text-4xl`, `text-5xl`, `text-6xl` for any headings
+- ❌ `text-xl` (reserved, not currently in use)
+- ❌ Generic fonts without CSS variables
+- ❌ Font sizes without appropriate weight
+
+### Pre-Component Checklist
+
+Before writing any component code, verify:
+
+- [ ] Fonts imported at appropriate level (page/layout)
+- [ ] CSS variables applied to root element
+- [ ] All headings use Work Sans with bold/extrabold
+- [ ] All body text uses Inter (or default)
+- [ ] Size matches role: h1=2xl, h2=lg, h3=base, h4=sm
+- [ ] Labels use text-xs + uppercase + tracking-wider
+- [ ] No use of prohibited large sizes (3xl+)
+
+**Reference:** Full guidelines at `documents/TYPOGRAPHY_GUIDELINES.md`
 
 ## Git Commits
 

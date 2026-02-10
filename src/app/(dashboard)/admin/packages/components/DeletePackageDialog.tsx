@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@apollo/client";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -34,14 +35,17 @@ export function DeletePackageDialog({
   package_,
   onPackageDeleted,
 }: DeletePackageDialogProps) {
+  const t = useTranslations("adminPackages.deleteDialog");
   const [deletePackage, { loading }] = useMutation<
     DeletePackageResponse,
     DeletePackageVariables
   >(DELETE_PACKAGE, {
     onCompleted: async (data) => {
       if (data.deletePackage.success) {
-        toast.success("Package Deleted", {
-          description: `Package ${package_?.barcode || ""} has been successfully deleted.`,
+        toast.success(t("successTitle"), {
+          description: t("successDescription", {
+            barcode: package_?.barcode || "",
+          }),
         });
         onOpenChange(false);
         // Trigger table refresh
@@ -49,16 +53,15 @@ export function DeletePackageDialog({
           await onPackageDeleted();
         }
       } else {
-        toast.error("Deletion Failed", {
-          description: "Failed to delete the package. Please try again.",
+        toast.error(t("errorTitle"), {
+          description: t("errorDescription"),
         });
         onOpenChange(false);
       }
     },
     onError: (error) => {
-      toast.error("Deletion Error", {
-        description:
-          error.message || "An error occurred while deleting the package.",
+      toast.error(t("errorTitleGeneric"), {
+        description: error.message || t("errorDescriptionGeneric"),
       });
       onOpenChange(false);
     },
@@ -92,11 +95,10 @@ export function DeletePackageDialog({
             </div>
             <div className="flex-1">
               <DialogTitle className="text-xl text-left">
-                Delete Package?
+                {t("title")}
               </DialogTitle>
               <DialogDescription className="text-left mt-2">
-                This action cannot be undone. The selected package will be
-                permanently removed from the system.
+                {t("description")}
               </DialogDescription>
             </div>
           </div>
@@ -107,7 +109,7 @@ export function DeletePackageDialog({
           <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-2">
             <div className="flex justify-between items-start">
               <span className="text-sm font-medium text-muted-foreground">
-                Barcode
+                {t("barcodeLabel")}
               </span>
               <span className="text-sm font-semibold text-foreground text-right">
                 {package_.barcode}
@@ -118,8 +120,7 @@ export function DeletePackageDialog({
           {/* Warning Message */}
           <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
             <p className="text-sm text-destructive font-medium">
-              <strong>Warning:</strong> This will permanently delete the package
-              and all associated data. This action cannot be reversed.
+              <strong>{t("warningLabel")}</strong> {t("warningMessage")}
             </p>
           </div>
         </div>
@@ -131,7 +132,7 @@ export function DeletePackageDialog({
             onClick={handleCancel}
             disabled={loading}
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             type="button"
@@ -142,10 +143,10 @@ export function DeletePackageDialog({
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deleting...
+                {t("deleting")}
               </>
             ) : (
-              "Delete Package"
+              t("deleteButton")
             )}
           </Button>
         </DialogFooter>
