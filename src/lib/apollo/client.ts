@@ -208,7 +208,9 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
         errorPolicy: "all",
       },
       query: {
-        fetchPolicy: "network-only",
+        // Use cache-first for better deduplication and performance
+        // Queries will check cache before making network requests
+        fetchPolicy: "cache-first",
         errorPolicy: "all",
       },
       mutate: {
