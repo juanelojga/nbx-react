@@ -28,6 +28,7 @@ export const CREATE_CONSOLIDATE = gql`
         status
         deliveryDate
         comment
+        extraAttributes
         client {
           id
           fullName
@@ -124,6 +125,7 @@ export interface CreateConsolidateResponse {
       status: string;
       deliveryDate: string | null;
       comment: string | null;
+      extraAttributes: string | null;
       client: {
         id: string;
         fullName: string;
