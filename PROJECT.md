@@ -57,11 +57,55 @@ Limited access to view and manage their own packages.
 
 ## Development Guidelines
 
+### Code Quality
+
 - Follow TypeScript strict mode
-- Use ESLint and Prettier configurations
+- Use ESLint and Prettier configurations (pre-commit hooks via Husky)
 - Write clean, maintainable code
 - Add comments for complex logic
 - Follow Next.js best practices
+
+### Typography & Design
+
+- **Follow the typography guidelines**: See [documents/TYPOGRAPHY_GUIDELINES.md](./documents/TYPOGRAPHY_GUIDELINES.md)
+- Use **Work Sans** for titles/headings, **Inter** for body/data
+- Apply the compact typography scale (main title: text-2xl, sections: text-lg/text-base)
+- Rely on font-weight for visual hierarchy
+- Reference the design system: [documents/DESIGN_SYSTEM.md](./documents/DESIGN_SYSTEM.md)
+
+### Font Loading Pattern
+
+When creating new pages or layouts that need custom typography:
+
+```typescript
+import { Work_Sans, Inter } from "next/font/google";
+
+const workSansFont = Work_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-work-sans",
+  display: "swap",
+});
+
+const interFont = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+// Apply to root element
+<div className={`${workSansFont.variable} ${interFont.variable}`}>
+  {/* Your content */}
+</div>
+```
+
+### Code Style
+
+- Use semantic color classes (`text-foreground`, `text-muted-foreground`)
+- Prefer Tailwind utility classes over custom CSS
+- Keep components small and focused
+- Extract reusable patterns into shared components
 
 ## Getting Started
 

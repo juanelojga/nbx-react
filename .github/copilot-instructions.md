@@ -194,6 +194,75 @@ const { data, loading, error } = useQuery<GetClientsResponse>(GET_CLIENTS);
 - 80 character line width
 - ES5 trailing commas
 
+### Typography Standards (MANDATORY)
+
+**CRITICAL REQUIREMENT:** All components MUST follow the typography guidelines defined in `documents/TYPOGRAPHY_GUIDELINES.md`.
+
+#### Font System
+
+The application uses a two-font system:
+
+- **Work Sans**: Titles, headings, labels (bold/extrabold weights)
+- **Inter**: Body text, data fields, UI elements
+
+#### Enforcement Rules
+
+When creating or refactoring ANY component, you MUST:
+
+1. **Import fonts at page/layout level**
+2. **Apply CSS variables to root element**
+3. **Use Work Sans for ALL headings** (h1-h4) with appropriate bold weight
+4. **Use Inter for ALL data fields and body text**
+5. **Follow the compact typography scale**
+
+#### Typography Scale (Required)
+
+```typescript
+// Main page title (h1)
+<h1 className="font-[family-name:var(--font-work-sans)] text-2xl font-extrabold tracking-tight">
+
+// Section heading (h2)
+<h2 className="font-[family-name:var(--font-work-sans)] text-lg font-bold">
+
+// Subsection heading (h3)
+<h3 className="font-[family-name:var(--font-work-sans)] text-base font-bold">
+
+// Minor heading (h4)
+<h4 className="font-[family-name:var(--font-work-sans)] text-sm font-bold">
+
+// Label (uppercase)
+<label className="text-xs font-bold uppercase tracking-wider">
+
+// Data field
+<div className="font-[family-name:var(--font-inter)] text-base font-medium">
+
+// Body text
+<p className="text-base">  {/* Inter implicit for body */}
+```
+
+#### Prohibited Patterns
+
+**DO NOT USE:**
+
+- ❌ `text-3xl`, `text-4xl`, `text-5xl`, `text-6xl` for headings
+- ❌ `text-xl` (reserved, not in use)
+- ❌ Headings without Work Sans font family
+- ❌ Headings without bold (700) or extrabold (800) weight
+- ❌ Main title without `font-extrabold` (800)
+
+#### Pre-Component Checklist
+
+Before writing component code:
+
+- [ ] Fonts imported: `Work_Sans` and `Inter` from `next/font/google`
+- [ ] Variables applied: `className={workSansFont.variable} ${interFont.variable}`
+- [ ] All headings: Work Sans + appropriate size + bold weight
+- [ ] All data/body: Inter (explicit for data, implicit for body)
+- [ ] Sizes correct: h1=2xl, h2=lg, h3=base, h4=sm, labels=xs
+- [ ] No prohibited large sizes used
+
+**Full Reference:** `documents/TYPOGRAPHY_GUIDELINES.md` - Read this before creating any component
+
 ## React/Next.js Best Practices
 
 ### Mandatory Skill Usage
