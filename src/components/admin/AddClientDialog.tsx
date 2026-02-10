@@ -67,22 +67,8 @@ export function AddClientDialog({
   onClientCreated,
 }: AddClientDialogProps) {
   const t = useTranslations("adminClients.addDialog");
-  // Rule 5.4: Extract default non-primitive values to constants
-  const initialFormData: FormData = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    identificationNumber: "",
-    mobilePhoneNumber: "",
-    phoneNumber: "",
-    state: "",
-    city: "",
-    mainStreet: "",
-    secondaryStreet: "",
-    buildingNumber: "",
-  };
 
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
     {}
