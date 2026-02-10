@@ -40,14 +40,14 @@ interface TokenCache {
 }
 
 let tokenCache: TokenCache | null = null;
-const CACHE_TTL = 1000; // Cache valid for 1 second
+const CACHE_TTL_MS = 1000; // Cache valid for 1 second (in milliseconds)
 
 /**
  * Check if the cache is still valid
  */
 function isCacheValid(): boolean {
   if (!tokenCache) return false;
-  return Date.now() - tokenCache.lastUpdated < CACHE_TTL;
+  return Date.now() - tokenCache.lastUpdated < CACHE_TTL_MS;
 }
 
 /**
