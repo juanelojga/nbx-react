@@ -387,12 +387,17 @@
     "panel": {
       "title": "Current Consolidate",
       "clearAll": "Clear All",
+      "currencyLabel": "USD",
       "emptyMessage": "Select packages from the table to start grouping.",
+      "selectedPackagesTitle": "Selected Packages",
+      "statusActive": "ACTIVE",
+      "statusStandby": "STANDBY",
       "totalPackages": "Total Packages:",
       "totalRealPrice": "Total Real Price:",
       "totalServicePrice": "Total Service Price:",
       "totalWeight": "Total Weight:",
-      "selectedPackagesTitle": "Selected Packages"
+      "unitsLabel": "UNITS",
+      "weightUnitDefault": "KG"
     },
     "consolidationForm": {
       "creatingFor": "Creating consolidation for:",
