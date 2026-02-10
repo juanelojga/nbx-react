@@ -78,12 +78,11 @@ export function ConsolidationForm({
 
   const sendEmail = watch("sendEmail");
 
-  // CREATE_CONSOLIDATE mutation
   const [createConsolidate, { loading, error }] = useMutation<
     CreateConsolidateResponse,
     CreateConsolidateVariables
   >(CREATE_CONSOLIDATE, {
-    onCompleted: (data) => {
+    onCompleted: () => {
       toast.success("Consolidation Created", {
         description: `Successfully created consolidation for ${selectedClient.fullName}`,
       });
@@ -92,7 +91,9 @@ export function ConsolidationForm({
     },
     onError: (error) => {
       toast.error("Failed to Create Consolidation", {
-        description: error.message || "An error occurred while creating the consolidation.",
+        description:
+          error.message ||
+          "An error occurred while creating the consolidation.",
       });
     },
   });
@@ -172,7 +173,12 @@ export function ConsolidationForm({
                 </Label>
                 <Select
                   defaultValue="pending"
-                  onValueChange={(value) => setValue("status", value as any)}
+                  onValueChange={(value) =>
+                    setValue(
+                      "status",
+                      value as "pending" | "in_transit" | "delivered"
+                    )
+                  }
                   disabled={loading}
                 >
                   <SelectTrigger id="status">
@@ -286,8 +292,8 @@ export function ConsolidationForm({
           <CardHeader>
             <CardTitle>Selected Packages</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              {selectedPackages.size} package{selectedPackages.size !== 1 ? "s" : ""}{" "}
-              to consolidate
+              {selectedPackages.size} package
+              {selectedPackages.size !== 1 ? "s" : ""} to consolidate
             </p>
           </CardHeader>
           <CardContent>
