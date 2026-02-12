@@ -29,6 +29,7 @@ import {
   UpdateConsolidateResponse,
 } from "@/graphql/mutations/consolidations";
 import { toast } from "sonner";
+import { ConsolidationStatus } from "@/lib/validation/status";
 
 interface EditConsolidationDialogProps {
   open: boolean;
@@ -36,7 +37,7 @@ interface EditConsolidationDialogProps {
   consolidation: {
     id: string;
     description: string;
-    status: string;
+    status: ConsolidationStatus;
     deliveryDate: string | null;
     comment: string | null;
   } | null;
@@ -45,7 +46,7 @@ interface EditConsolidationDialogProps {
 
 interface FormData {
   description: string;
-  status: string;
+  status: ConsolidationStatus;
   deliveryDate: string;
   comment: string;
 }
@@ -63,7 +64,7 @@ export function EditConsolidationDialog({
   const t = useTranslations("adminConsolidations.editDialog");
   const [formData, setFormData] = useState<FormData>({
     description: "",
-    status: "",
+    status: "pending",
     deliveryDate: "",
     comment: "",
   });
@@ -83,7 +84,7 @@ export function EditConsolidationDialog({
         queueMicrotask(() => {
           setFormData({
             description: consolidation.description || "",
-            status: consolidation.status || "",
+            status: consolidation.status,
             deliveryDate: consolidation.deliveryDate || "",
             comment: consolidation.comment || "",
           });
@@ -212,7 +213,10 @@ export function EditConsolidationDialog({
             <Select
               value={formData.status}
               onValueChange={(value) =>
-                setFormData({ ...formData, status: value })
+                setFormData({
+                  ...formData,
+                  status: value as ConsolidationStatus,
+                })
               }
               disabled={loading}
             >

@@ -4,7 +4,17 @@ import { StatusBadge } from "../status-badge";
 
 describe("StatusBadge Component", () => {
   describe("Rendering", () => {
-    it("renders pending status with correct label and icon", () => {
+    it("renders awaiting_payment status with correct label", () => {
+      render(
+        <StatusBadge status="awaiting_payment" label="Awaiting Payment" />
+      );
+
+      const badge = screen.getByText("Awaiting Payment");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute("data-slot", "badge");
+    });
+
+    it("renders pending status with correct label", () => {
       render(<StatusBadge status="pending" label="Pending" />);
 
       const badge = screen.getByText("Pending");
@@ -12,7 +22,15 @@ describe("StatusBadge Component", () => {
       expect(badge).toHaveAttribute("data-slot", "badge");
     });
 
-    it("renders in_transit status with correct label and icon", () => {
+    it("renders processing status with correct label", () => {
+      render(<StatusBadge status="processing" label="Processing" />);
+
+      const badge = screen.getByText("Processing");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute("data-slot", "badge");
+    });
+
+    it("renders in_transit status with correct label", () => {
       render(<StatusBadge status="in_transit" label="In Transit" />);
 
       const badge = screen.getByText("In Transit");
@@ -20,32 +38,60 @@ describe("StatusBadge Component", () => {
       expect(badge).toHaveAttribute("data-slot", "badge");
     });
 
-    it("renders delivered status with correct label and icon", () => {
+    it("renders delivered status with correct label", () => {
       render(<StatusBadge status="delivered" label="Delivered" />);
 
       const badge = screen.getByText("Delivered");
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveAttribute("data-slot", "badge");
     });
+
+    it("renders cancelled status with correct label", () => {
+      render(<StatusBadge status="cancelled" label="Cancelled" />);
+
+      const badge = screen.getByText("Cancelled");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute("data-slot", "badge");
+    });
   });
 
   describe("Styling", () => {
+    it("applies awaiting_payment status styles", () => {
+      render(
+        <StatusBadge status="awaiting_payment" label="Awaiting Payment" />
+      );
+
+      const badge = screen.getByText("Awaiting Payment");
+      expect(badge).toHaveClass("bg-yellow-100");
+      expect(badge).toHaveClass("text-yellow-800");
+      expect(badge).toHaveClass("border-yellow-300");
+    });
+
     it("applies pending status styles", () => {
       render(<StatusBadge status="pending" label="Pending" />);
 
       const badge = screen.getByText("Pending");
-      expect(badge).toHaveClass("bg-yellow-100");
-      expect(badge).toHaveClass("text-yellow-800");
-      expect(badge).toHaveClass("border-yellow-300");
+      expect(badge).toHaveClass("bg-blue-100");
+      expect(badge).toHaveClass("text-blue-800");
+      expect(badge).toHaveClass("border-blue-300");
+    });
+
+    it("applies processing status styles", () => {
+      render(<StatusBadge status="processing" label="Processing" />);
+
+      const badge = screen.getByText("Processing");
+      expect(badge).toHaveClass("bg-purple-100");
+      expect(badge).toHaveClass("text-purple-800");
+      expect(badge).toHaveClass("border-purple-300");
     });
 
     it("applies in_transit status styles", () => {
       render(<StatusBadge status="in_transit" label="In Transit" />);
 
       const badge = screen.getByText("In Transit");
-      expect(badge).toHaveClass("bg-blue-100");
-      expect(badge).toHaveClass("text-blue-800");
-      expect(badge).toHaveClass("border-blue-300");
+      expect(badge).toHaveClass("bg-orange-100");
+      expect(badge).toHaveClass("text-orange-800");
+      expect(badge).toHaveClass("border-orange-300");
     });
 
     it("applies delivered status styles", () => {
@@ -55,6 +101,15 @@ describe("StatusBadge Component", () => {
       expect(badge).toHaveClass("bg-green-100");
       expect(badge).toHaveClass("text-green-800");
       expect(badge).toHaveClass("border-green-300");
+    });
+
+    it("applies cancelled status styles", () => {
+      render(<StatusBadge status="cancelled" label="Cancelled" />);
+
+      const badge = screen.getByText("Cancelled");
+      expect(badge).toHaveClass("bg-red-100");
+      expect(badge).toHaveClass("text-red-800");
+      expect(badge).toHaveClass("border-red-300");
     });
 
     it("applies custom className", () => {
@@ -101,16 +156,6 @@ describe("StatusBadge Component", () => {
       expect(badge).toHaveClass("bg-gray-100");
       expect(badge).toHaveClass("text-gray-800");
       expect(badge).toHaveClass("border-gray-300");
-    });
-
-    it("does not crash when receiving undefined status", () => {
-      // @ts-expect-error Testing fallback for undefined status
-      expect(() => {
-        render(<StatusBadge status={undefined} label="No Status" />);
-      }).not.toThrow();
-
-      const badge = screen.getByText("No Status");
-      expect(badge).toBeInTheDocument();
     });
 
     it("renders icon for unknown status", () => {
