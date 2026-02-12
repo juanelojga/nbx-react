@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import { ConsolidationStatus } from "@/lib/validation/status";
 
 /**
  * Create consolidation mutation
@@ -110,7 +111,7 @@ export const DELETE_CONSOLIDATE = gql`
  */
 export interface CreateConsolidateVariables {
   description: string;
-  status: string;
+  status: ConsolidationStatus;
   packageIds: string[];
   deliveryDate?: string;
   comment?: string;
@@ -122,7 +123,7 @@ export interface CreateConsolidateResponse {
     consolidate: {
       id: string;
       description: string;
-      status: string;
+      status: ConsolidationStatus;
       deliveryDate: string | null;
       comment: string | null;
       extraAttributes: string | null;
@@ -148,7 +149,7 @@ export interface CreateConsolidateResponse {
 export interface UpdateConsolidateVariables {
   id: string;
   description?: string;
-  status?: string;
+  status?: ConsolidationStatus;
   deliveryDate?: string;
   comment?: string;
   packageIds?: string[];
@@ -159,7 +160,7 @@ export interface UpdateConsolidateResponse {
     consolidate: {
       id: string;
       description: string;
-      status: string;
+      status: ConsolidationStatus;
       deliveryDate: string | null;
       comment: string | null;
       extraAttributes: string | null;

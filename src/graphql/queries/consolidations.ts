@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import { ConsolidationStatus } from "@/lib/validation/status";
 
 /**
  * Get all consolidations query with pagination, filtering, and sorting
@@ -117,7 +118,7 @@ export interface ConsolidatePackageType {
 export interface ConsolidateType {
   id: string;
   description: string;
-  status: string;
+  status: ConsolidationStatus;
   deliveryDate: string | null;
   comment: string | null;
   extraAttributes: string | null;

@@ -29,6 +29,7 @@ import {
 } from "@/graphql/mutations/consolidations";
 import { ClientType } from "@/graphql/queries/clients";
 import { Package } from "../types";
+import { ConsolidationStatus } from "@/lib/validation/status";
 
 interface ConsolidationFormProps {
   selectedClient: ClientType;
@@ -64,7 +65,7 @@ const getConsolidationSchema = (t: (key: string) => string) =>
 
 type ConsolidationFormData = {
   description: string;
-  status: "pending" | "in_transit" | "delivered";
+  status: ConsolidationStatus;
   deliveryDate?: string;
   comment?: string;
   sendEmail?: boolean;
@@ -373,10 +374,7 @@ export function ConsolidationForm({
                   <Select
                     defaultValue="pending"
                     onValueChange={(value) =>
-                      setValue(
-                        "status",
-                        value as "pending" | "in_transit" | "delivered"
-                      )
+                      setValue("status", value as ConsolidationStatus)
                     }
                     disabled={loading}
                   >

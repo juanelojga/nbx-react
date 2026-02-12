@@ -180,9 +180,7 @@ const ConsolidationRow = memo(function ConsolidationRow({
       </TableCell>
       <TableCell>
         <StatusBadge
-          status={
-            consolidation.status as "pending" | "in_transit" | "delivered"
-          }
+          status={consolidation.status}
           label={getStatusLabel(consolidation.status)}
         />
       </TableCell>

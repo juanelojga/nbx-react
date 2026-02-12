@@ -33,8 +33,7 @@ import { LucideIcon } from "lucide-react";
  * EnhancedTable - Main table wrapper with premium styling
  * ========================================================================== */
 
-export interface EnhancedTableProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface EnhancedTableProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Optional loading state shimmer effect
    */
@@ -106,8 +105,7 @@ EnhancedTableHeader.displayName = "EnhancedTableHeader";
  * EnhancedTableHead - Table header cell with proper typography
  * ========================================================================== */
 
-export interface EnhancedTableHeadProps
-  extends React.ThHTMLAttributes<HTMLTableCellElement> {
+export interface EnhancedTableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
   /**
    * Optional icon to display before the header text
    */
@@ -144,8 +142,7 @@ EnhancedTableHead.displayName = "EnhancedTableHead";
  * EnhancedTableRow - Table row with animations and interactions
  * ========================================================================== */
 
-export interface EnhancedTableRowProps
-  extends React.HTMLAttributes<HTMLTableRowElement> {
+export interface EnhancedTableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   /**
    * Row index for staggered animation delay
    */
@@ -219,8 +216,10 @@ EnhancedTableRow.displayName = "EnhancedTableRow";
 
 export type ActionButtonVariant = "view" | "edit" | "delete" | "custom";
 
-export interface EnhancedTableActionButtonProps
-  extends Omit<React.ComponentProps<typeof Button>, "variant" | "size"> {
+export interface EnhancedTableActionButtonProps extends Omit<
+  React.ComponentProps<typeof Button>,
+  "variant" | "size"
+> {
   /**
    * Visual variant of the button
    */
