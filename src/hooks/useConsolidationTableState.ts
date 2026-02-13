@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
+import { useSearchParams } from "next/navigation";
 
 type SortField = "created_at" | "delivery_date" | "status";
 type SortOrder = "asc" | "desc";

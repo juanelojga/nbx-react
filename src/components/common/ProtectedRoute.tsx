@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageLoading } from "./PageLoading";
 import { canAccessRoute, getDefaultRoute } from "@/lib/auth/redirects";

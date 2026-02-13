@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
 import { useTransition } from "react";
 
 export default function LanguageSelector() {

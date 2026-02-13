@@ -11,6 +11,17 @@ import {
   Layers,
   type LucideIcon,
 } from "lucide-react";
+import { createNavigation } from "next-intl/navigation";
+import { routing } from "../../i18n/routing";
+
+/**
+ * Locale-aware navigation utilities
+ *
+ * These are created by next-intl and automatically handle locale prefixes
+ * Use these instead of next/navigation exports to ensure proper i18n routing
+ */
+export const { Link, redirect, usePathname, useRouter } =
+  createNavigation(routing);
 
 export interface NavItem {
   labelKey: string;
