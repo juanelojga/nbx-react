@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
+import { useSearchParams } from "next/navigation";
 
 type SortField = "full_name" | "email" | "created_at";
 type SortOrder = "asc" | "desc";

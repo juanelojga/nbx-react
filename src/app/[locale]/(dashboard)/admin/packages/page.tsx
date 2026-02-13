@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
 import { useQuery } from "@apollo/client";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
