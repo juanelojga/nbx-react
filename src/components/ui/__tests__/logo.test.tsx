@@ -7,6 +7,7 @@ jest.mock("next/image", () => ({
   __esModule: true,
   default: (props: React.ComponentProps<"img"> & { priority?: boolean }) => {
     const { priority, ...imgProps } = props;
+    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
     return <img {...imgProps} data-priority={priority ? "true" : undefined} />;
   },
 }));

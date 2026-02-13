@@ -182,7 +182,7 @@ describe("Badge Component", () => {
 
       render(
         <Badge asChild>
-          <a href="/test">Link badge</a>
+          <a href="https://example.com">Link badge</a>
         </Badge>
       );
 
@@ -230,7 +230,7 @@ describe("Badge Component", () => {
     it("maintains accessibility when rendered as link", () => {
       render(
         <Badge asChild>
-          <a href="/test" aria-label="Navigation badge">
+          <a href="https://example.com" aria-label="Navigation badge">
             Link badge
           </a>
         </Badge>
@@ -239,7 +239,7 @@ describe("Badge Component", () => {
       const badge = screen.getByLabelText("Navigation badge");
       expect(badge).toBeInTheDocument();
       expect(badge.tagName.toLowerCase()).toBe("a");
-      expect(badge).toHaveAttribute("href", "/test");
+      expect(badge).toHaveAttribute("href", "https://example.com");
     });
 
     it("supports ARIA attributes", () => {

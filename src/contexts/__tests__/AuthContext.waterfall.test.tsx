@@ -8,11 +8,18 @@ import { MockedProvider } from "@apollo/client/testing";
 import { useAuth, AuthProvider } from "@/contexts/AuthContext";
 import { LOGIN_MUTATION, LOGOUT_MUTATION } from "@/graphql/mutations/auth";
 import { GET_CURRENT_USER } from "@/graphql/queries/auth";
-import { useRouter } from "next/navigation";
 
-// Mock next/navigation
-jest.mock("next/navigation", () => ({
+// Mock custom navigation
+jest.mock("@/lib/navigation", () => ({
   useRouter: jest.fn(),
+  usePathname: jest.fn(() => "/"),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Link: ({ children, href, ...props }: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const React = require("react");
+    return React.createElement("a", { href, ...props }, children);
+  },
+  redirect: jest.fn(),
 }));
 
 // Mock token utilities
@@ -44,6 +51,8 @@ describe("AuthContext Waterfall Elimination", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useRouter } = require("@/lib/navigation");
     (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
   });
 

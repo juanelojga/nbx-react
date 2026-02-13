@@ -57,14 +57,14 @@ describe("Button Component", () => {
     it("renders with asChild prop using Slot", () => {
       render(
         <Button asChild>
-          <a href="/test">Link button</a>
+          <a href="https://example.com">Link button</a>
         </Button>
       );
 
       const button = screen.getByText("Link button");
       expect(button).toBeInTheDocument();
       expect(button.tagName.toLowerCase()).toBe("a");
-      expect(button).toHaveAttribute("href", "/test");
+      expect(button).toHaveAttribute("href", "https://example.com");
       expect(button).toHaveAttribute("data-slot", "button");
     });
 
@@ -240,7 +240,7 @@ describe("Button Component", () => {
     it("handles focus states when rendered as link", () => {
       render(
         <Button asChild>
-          <a href="/test">Focusable link</a>
+          <a href="https://example.com">Focusable link</a>
         </Button>
       );
 
@@ -279,7 +279,7 @@ describe("Button Component", () => {
     it("maintains accessibility when rendered as link", () => {
       render(
         <Button asChild>
-          <a href="/test" aria-label="Navigation button">
+          <a href="https://example.com" aria-label="Navigation button">
             Link button
           </a>
         </Button>
@@ -288,7 +288,7 @@ describe("Button Component", () => {
       const link = screen.getByLabelText("Navigation button");
       expect(link).toBeInTheDocument();
       expect(link.tagName.toLowerCase()).toBe("a");
-      expect(link).toHaveAttribute("href", "/test");
+      expect(link).toHaveAttribute("href", "https://example.com");
     });
 
     it("supports ARIA attributes", () => {

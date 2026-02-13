@@ -1,5 +1,31 @@
 import "@testing-library/jest-dom";
 
+// Mock next-intl navigation
+jest.mock("next-intl/navigation", () => ({
+  createNavigation: () => ({
+    Link: ({ children, href, ...props }) => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const React = require("react");
+      return React.createElement("a", { href, ...props }, children);
+    },
+    redirect: jest.fn(),
+    usePathname: jest.fn(() => "/"),
+    useRouter: jest.fn(() => ({
+      push: jest.fn(),
+      replace: jest.fn(),
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+      prefetch: jest.fn(),
+    })),
+  }),
+}));
+
+// Mock next-intl routing
+jest.mock("next-intl/routing", () => ({
+  defineRouting: jest.fn((config) => config),
+}));
+
 // Mock HTMLMediaElement for Radix UI components
 global.HTMLElement.prototype.scrollIntoView = jest.fn();
 global.HTMLElement.prototype.releasePointerCapture = jest.fn();
