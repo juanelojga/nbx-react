@@ -257,9 +257,9 @@ export default function AdminPackages() {
                         {step.label}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {currentStep === step.number && "In Progress"}
-                        {currentStep > step.number && "Completed"}
-                        {currentStep < step.number && "Pending"}
+                        {currentStep === step.number && t("stepInProgress")}
+                        {currentStep > step.number && t("stepCompleted")}
+                        {currentStep < step.number && t("stepPending")}
                       </div>
                     </div>
                   </div>

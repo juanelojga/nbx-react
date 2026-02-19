@@ -373,7 +373,10 @@
       "addPackage": "Agregar Paquete",
       "backToClientSelection": "Volver a Selección de Cliente",
       "continueToReview": "Continuar a Revisar",
-      "packagesSelected": "{count} paquete{plural} seleccionado{plural}"
+      "packagesSelected": "{count} paquete{plural} seleccionado{plural}",
+      "stepInProgress": "En Progreso",
+      "stepCompleted": "Completado",
+      "stepPending": "Pendiente"
     },
     "table": {
       "emptyTitle": "Sin Paquetes No Asignados",

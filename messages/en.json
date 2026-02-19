@@ -373,7 +373,10 @@
       "addPackage": "Add Package",
       "backToClientSelection": "Back to Client Selection",
       "continueToReview": "Continue to Review",
-      "packagesSelected": "{count} package{plural} selected"
+      "packagesSelected": "{count} package{plural} selected",
+      "stepInProgress": "In Progress",
+      "stepCompleted": "Completed",
+      "stepPending": "Pending"
     },
     "table": {
       "emptyTitle": "No Unassigned Packages",
