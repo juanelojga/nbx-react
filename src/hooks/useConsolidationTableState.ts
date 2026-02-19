@@ -162,14 +162,13 @@ export function useConsolidationTableState(
 
       // Update URL without reloading the page
       const queryString = params.toString();
-      const newURL = queryString
-        ? `${pathname}?${queryString}`
-        : pathname;
+      const newURL = queryString ? `${pathname}?${queryString}` : pathname;
 
       router.replace(newURL, { scroll: false });
     },
     [
       searchParams,
+      pathname,
       router,
       defaultPageSize,
       defaultSortField,
