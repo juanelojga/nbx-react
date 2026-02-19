@@ -61,7 +61,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [refreshTokenMutation] = useMutation<RefreshTokenResponse>(
     REFRESH_TOKEN_MUTATION
   );
-  const [logoutMutation] = useMutation(LOGOUT_MUTATION);
+  // revokeToken on the backend reads from cookies; tokens are in localStorage
   const [getCurrentUser, { loading: userLoading }] =
     useLazyQuery<GetCurrentUserResponse>(GET_CURRENT_USER);
 
@@ -266,17 +266,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const logout = useCallback(async (): Promise<void> => {
     try {
-      // Execute logout mutation and clear Apollo cache in parallel
-      await Promise.all([
-        logoutMutation().catch((err) => {
-          logger.error("Logout mutation error:", err);
-          // Continue with local logout even if backend fails
-        }),
-        apolloClient ? apolloClient.clearStore() : Promise.resolve(),
-      ]);
+      // revokeToken reads the refresh token from a cookie on the backend.
+      // Tokens are stored in localStorage (not cookies), so the revoke call
+      // will always fail with "Refresh token not found in cookies".
+      // We skip it and rely on local cleanup; the token expires naturally.
+      await (apolloClient ? apolloClient.clearStore() : Promise.resolve());
     } catch (err) {
       logger.error("Logout error:", err);
-      // Continue with local logout even if operations fail
     }
 
     // Clear local state
@@ -286,7 +282,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Redirect to login
     router.push("/login");
-  }, [logoutMutation, router]);
+  }, [router]);
 
   // Initialize auth on mount
   useEffect(() => {

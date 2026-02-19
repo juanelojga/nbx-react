@@ -28,6 +28,8 @@ npm run lint             # Check for remaining lint errors
 npm run type-check       # TypeScript type checking
 ```
 
+> **MANDATORY:** Before marking any implementation as complete, always check for TypeScript errors using the `get_errors` tool on every file that was created or modified. Fix all reported errors before finishing.
+
 ### Testing
 
 ```bash

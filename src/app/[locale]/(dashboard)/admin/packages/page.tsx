@@ -257,9 +257,9 @@ export default function AdminPackages() {
                         {step.label}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {currentStep === step.number && "In Progress"}
-                        {currentStep > step.number && "Completed"}
-                        {currentStep < step.number && "Pending"}
+                        {currentStep === step.number && t("stepInProgress")}
+                        {currentStep > step.number && t("stepCompleted")}
+                        {currentStep < step.number && t("stepPending")}
                       </div>
                     </div>
                   </div>
@@ -529,8 +529,10 @@ export default function AdminPackages() {
                       {selectedPackages.size > 0 && (
                         <div className="px-4 py-2 rounded-lg bg-primary/10 border border-primary/20 animate-in fade-in zoom-in duration-300">
                           <span className="font-[family-name:var(--font-inter)] text-sm font-medium text-primary">
-                            {selectedPackages.size} package
-                            {selectedPackages.size !== 1 ? "s" : ""} selected
+                            {t("packagesSelected", {
+                              count: selectedPackages.size,
+                              plural: selectedPackages.size !== 1 ? "s" : "",
+                            })}
                           </span>
                         </div>
                       )}

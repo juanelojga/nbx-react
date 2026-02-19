@@ -1,24 +1,21 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/lib/navigation";
+import { usePathname, useRouter } from "@/lib/navigation";
 import { useTransition } from "react";
 
 export default function LanguageSelector() {
   const t = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
+  const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
   const handleLocaleChange = (newLocale: string) => {
     if (newLocale === locale) return;
 
     startTransition(() => {
-      // Set cookie for locale preference
-      document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
-
-      // Refresh to apply new locale
-      router.refresh();
+      router.replace(pathname, { locale: newLocale });
     });
   };
 

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useRouter } from "@/lib/navigation";
+import { useRouter, usePathname } from "@/lib/navigation";
 import { useSearchParams } from "next/navigation";
 
 type SortField = "full_name" | "email" | "created_at";
@@ -35,6 +35,7 @@ export function useClientTableState(
   options: UseClientTableStateOptions = {}
 ): UseClientTableStateReturn {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const {
@@ -147,14 +148,13 @@ export function useClientTableState(
 
       // Update URL without reloading the page
       const queryString = params.toString();
-      const newURL = queryString
-        ? `${window.location.pathname}?${queryString}`
-        : window.location.pathname;
+      const newURL = queryString ? `${pathname}?${queryString}` : pathname;
 
       router.replace(newURL, { scroll: false });
     },
     [
       searchParams,
+      pathname,
       router,
       defaultPageSize,
       defaultSortField,
