@@ -529,8 +529,10 @@ export default function AdminPackages() {
                       {selectedPackages.size > 0 && (
                         <div className="px-4 py-2 rounded-lg bg-primary/10 border border-primary/20 animate-in fade-in zoom-in duration-300">
                           <span className="font-[family-name:var(--font-inter)] text-sm font-medium text-primary">
-                            {selectedPackages.size} package
-                            {selectedPackages.size !== 1 ? "s" : ""} selected
+                            {t("packagesSelected", {
+                              count: selectedPackages.size,
+                              plural: selectedPackages.size !== 1 ? "s" : "",
+                            })}
                           </span>
                         </div>
                       )}
