@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useRouter } from "@/lib/navigation";
+import { useRouter, usePathname } from "@/lib/navigation";
 import { useSearchParams } from "next/navigation";
 
 type SortField = "created_at" | "delivery_date" | "status";
@@ -36,6 +36,7 @@ export function useConsolidationTableState(
   options: UseConsolidationTableStateOptions = {}
 ): UseConsolidationTableStateReturn {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const {
@@ -162,8 +163,8 @@ export function useConsolidationTableState(
       // Update URL without reloading the page
       const queryString = params.toString();
       const newURL = queryString
-        ? `${window.location.pathname}?${queryString}`
-        : window.location.pathname;
+        ? `${pathname}?${queryString}`
+        : pathname;
 
       router.replace(newURL, { scroll: false });
     },
