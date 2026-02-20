@@ -10,7 +10,7 @@ describe("PageHeader Component", () => {
       const title = screen.getByText("Test Page Title");
       expect(title).toBeInTheDocument();
       expect(title.tagName.toLowerCase()).toBe("h1");
-      expect(title).toHaveClass("text-4xl", "font-bold", "tracking-tight");
+      expect(title).toHaveClass("text-2xl", "font-extrabold", "tracking-tight");
     });
 
     it("renders with title and description", () => {
@@ -130,7 +130,7 @@ describe("PageHeader Component", () => {
 
       const title = screen.getByText(longTitle);
       expect(title).toBeInTheDocument();
-      expect(title).toHaveClass("text-4xl", "font-bold", "tracking-tight");
+      expect(title).toHaveClass("text-2xl", "font-extrabold", "tracking-tight");
     });
 
     it("renders with long description", () => {

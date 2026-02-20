@@ -19,7 +19,9 @@ export function PageHeader({
     <div className={cn("space-y-4", className)}>
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2 flex-1">
-          <h1 className="text-4xl font-bold tracking-tight">{title}</h1>
+          <h1 className="font-[family-name:var(--font-work-sans)] text-2xl font-extrabold tracking-tight">
+            {title}
+          </h1>
           {description && (
             <p className="text-muted-foreground text-base leading-relaxed max-w-2xl">
               {description}

@@ -348,6 +348,27 @@
     "errorTitle": "Failed to Create Consolidation",
     "errorDescription": "An error occurred while creating the consolidation."
   },
+  "adminDashboard": {
+    "title": "Dashboard",
+    "description": "Overview of all system activities and metrics",
+    "refresh": "Refresh",
+    "loadingError": "Failed to load dashboard: {error}",
+    "statTotalPackages": "Total Packages",
+    "statTotalClients": "Total Clients",
+    "statPackagesPending": "Pending Packages",
+    "statPackagesInTransit": "In Transit",
+    "recentPackagesTitle": "Recent Packages",
+    "recentPackagesDescription": "Latest packages registered in the system",
+    "viewAllPackages": "View All",
+    "recentConsolidationsTitle": "Recent Consolidations",
+    "recentConsolidationsDescription": "Latest consolidations in the system",
+    "viewAllConsolidations": "View All",
+    "noRecentPackages": "No recent packages",
+    "noRecentConsolidations": "No recent consolidations",
+    "packagesCount": "{count, plural, one {# package} other {# packages}}",
+    "clientLabel": "Client",
+    "dateLabel": "Date"
+  },
   "adminPackages": {
     "page": {
       "title": "Package Consolidation",
