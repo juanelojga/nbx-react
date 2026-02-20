@@ -348,6 +348,26 @@
     "errorTitle": "Error al Crear Consolidación",
     "errorDescription": "Ocurrió un error al crear la consolidación."
   },
+  "adminDashboard": {
+    "title": "Panel de Control",
+    "description": "Resumen de todas las actividades y métricas del sistema",
+    "refresh": "Actualizar",
+    "loadingError": "Error al cargar el panel: {error}",
+    "statTotalPackages": "Total de Paquetes",
+    "statTotalClients": "Total de Clientes",
+    "statPackagesPending": "Paquetes Pendientes",
+    "statPackagesInTransit": "En Tránsito",
+    "recentPackagesTitle": "Paquetes Recientes",
+    "recentPackagesDescription": "Últimos paquetes registrados en el sistema",
+    "viewAllPackages": "Ver Todos",
+    "recentConsolidationsTitle": "Consolidaciones Recientes",
+    "recentConsolidationsDescription": "Últimas consolidaciones en el sistema",
+    "viewAllConsolidations": "Ver Todas",
+    "noRecentPackages": "No hay paquetes recientes",
+    "noRecentConsolidations": "No hay consolidaciones recientes",
+    "packagesCount": "{count, plural, one {# paquete} other {# paquetes}}",
+    "dateLabel": "Fecha"
+  },
   "adminPackages": {
     "page": {
       "title": "Consolidación de Paquetes",

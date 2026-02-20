@@ -1,3 +1,9 @@
+"use client";
+
+import { useCallback } from "react";
+import { useQuery } from "@apollo/client";
+import { useTranslations } from "next-intl";
+import { Work_Sans, Inter } from "next/font/google";
 import { PageHeader } from "@/components/ui/page-header";
 import {
   Card,
@@ -7,115 +13,123 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/stat-card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Link } from "@/lib/navigation";
+import {
+  GET_DASHBOARD,
+  GetDashboardResponse,
+  GetDashboardVariables,
+} from "@/graphql/queries/dashboard";
+import { ConsolidationStatus } from "@/lib/validation/status";
 import {
   Package,
-  TrendingUp,
   Users,
   AlertCircle,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Package2,
+  Layers,
+  RefreshCw,
+  AlertTriangle,
 } from "lucide-react";
 
-export default function AdminDashboard() {
-  // Mock data - replace with real data from API
-  const recentPackages = [
-    {
-      id: "PKG-2024-001",
-      customer: "John Doe",
-      status: "in_transit",
-      destination: "San Francisco, CA",
-      date: "2024-01-15",
-    },
-    {
-      id: "PKG-2024-002",
-      customer: "Jane Smith",
-      status: "delivered",
-      destination: "New York, NY",
-      date: "2024-01-14",
-    },
-    {
-      id: "PKG-2024-003",
-      customer: "Mike Johnson",
-      status: "pending",
-      destination: "Los Angeles, CA",
-      date: "2024-01-15",
-    },
-    {
-      id: "PKG-2024-004",
-      customer: "Sarah Williams",
-      status: "in_transit",
-      destination: "Chicago, IL",
-      date: "2024-01-15",
-    },
-  ];
+const workSansFont = Work_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-work-sans",
+  display: "swap",
+});
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "delivered":
-        return (
-          <Badge className="bg-success text-success-foreground">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
-            Delivered
-          </Badge>
-        );
-      case "in_transit":
-        return (
-          <Badge variant="secondary">
-            <Package2 className="h-3 w-3 mr-1" />
-            In Transit
-          </Badge>
-        );
-      case "pending":
-        return (
-          <Badge className="bg-warning text-warning-foreground">
-            <Clock className="h-3 w-3 mr-1" />
-            Pending
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
+const interFont = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const RECENT_LIMIT = 5;
+
+export default function AdminDashboard() {
+  const t = useTranslations("adminDashboard");
+
+  const { data, loading, error, refetch } = useQuery<
+    GetDashboardResponse,
+    GetDashboardVariables
+  >(GET_DASHBOARD, {
+    variables: {
+      recentPackagesLimit: RECENT_LIMIT,
+      recentConsolidationsLimit: RECENT_LIMIT,
+    },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const handleRefresh = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const stats = data?.dashboard?.stats;
+  const recentPackages = data?.dashboard?.recentPackages ?? [];
+  const recentConsolidations = data?.dashboard?.recentConsolidations ?? [];
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div
+      className={`${workSansFont.variable} ${interFont.variable} space-y-8 animate-fade-in`}
+    >
       <PageHeader
-        title="Dashboard"
-        description="Overview of all system activities and metrics"
+        title={
+          <h1 className="font-[family-name:var(--font-work-sans)] text-2xl font-extrabold tracking-tight">
+            {t("title")}
+          </h1>
+        }
+        description={t("description")}
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={loading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+            />
+            {t("refresh")}
+          </Button>
+        }
       />
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            {t("loadingError", { error: error.message })}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          label="Total Packages"
-          value="1,284"
+          label={t("statTotalPackages")}
+          value={loading ? "—" : (stats?.totalPackages ?? 0)}
           icon={Package}
           variant="primary"
-          trend={{ value: 12, isPositive: true }}
         />
         <StatCard
-          label="Active Users"
-          value="892"
+          label={t("statTotalClients")}
+          value={loading ? "—" : (stats?.totalClients ?? 0)}
           icon={Users}
           variant="success"
-          trend={{ value: 8, isPositive: true }}
         />
         <StatCard
-          label="Pending Deliveries"
-          value="47"
+          label={t("statPackagesPending")}
+          value={loading ? "—" : (stats?.packagesPending ?? 0)}
           icon={AlertCircle}
           variant="warning"
         />
         <StatCard
-          label="Revenue (MTD)"
-          value="$28,450"
-          icon={TrendingUp}
+          label={t("statPackagesInTransit")}
+          value={loading ? "—" : (stats?.packagesInTransit ?? 0)}
+          icon={Layers}
           variant="default"
-          trend={{ value: 15, isPositive: true }}
         />
       </div>
 
@@ -126,90 +140,144 @@ export default function AdminDashboard() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Recent Packages</CardTitle>
-                <CardDescription>Latest package shipments</CardDescription>
+                <CardTitle>
+                  <h2 className="font-[family-name:var(--font-work-sans)] text-lg font-bold">
+                    {t("recentPackagesTitle")}
+                  </h2>
+                </CardTitle>
+                <CardDescription>
+                  {t("recentPackagesDescription")}
+                </CardDescription>
               </div>
-              <Button variant="outline" size="sm">
-                View All
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/admin/packages">{t("viewAllPackages")}</Link>
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentPackages.map((pkg) => (
-                <div
-                  key={pkg.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-all duration-200 hover:shadow-sm"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Package className="h-5 w-5 text-primary" />
+            {loading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-16 rounded-lg bg-muted/50 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : recentPackages.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                {t("noRecentPackages")}
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {recentPackages.map((pkg) => (
+                  <Link
+                    key={pkg.id}
+                    href="/admin/packages"
+                    className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-all duration-200 hover:shadow-sm block"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Package className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="space-y-0.5 min-w-0">
+                        <p className="font-[family-name:var(--font-inter)] font-semibold text-sm font-mono">
+                          {pkg.barcode}
+                        </p>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {pkg.client.fullName}
+                        </p>
+                        {pkg.description && (
+                          <p className="text-xs text-muted-foreground truncate">
+                            {pkg.description}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <p className="font-semibold text-sm">{pkg.id}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {pkg.customer}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {pkg.destination}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right space-y-2">
-                    {getStatusBadge(pkg.status)}
-                    <p className="text-xs text-muted-foreground">{pkg.date}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    <p className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                      {new Date(pkg.createdAt).toLocaleDateString()}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Quick Stats */}
+        {/* Recent Consolidations */}
         <Card>
           <CardHeader>
-            <CardTitle>System Overview</CardTitle>
-            <CardDescription>Real-time system metrics</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                    <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
-                  </div>
-                  <span className="font-medium">Delivered Today</span>
-                </div>
-                <span className="text-2xl font-bold">127</span>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>
+                  <h2 className="font-[family-name:var(--font-work-sans)] text-lg font-bold">
+                    {t("recentConsolidationsTitle")}
+                  </h2>
+                </CardTitle>
+                <CardDescription>
+                  {t("recentConsolidationsDescription")}
+                </CardDescription>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/5">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center">
-                    <Package2 className="h-4 w-4 text-secondary-foreground" />
-                  </div>
-                  <span className="font-medium">In Transit</span>
-                </div>
-                <span className="text-2xl font-bold">234</span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-warning/5">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-warning flex items-center justify-center">
-                    <Clock className="h-4 w-4 text-warning-foreground" />
-                  </div>
-                  <span className="font-medium">Processing</span>
-                </div>
-                <span className="text-2xl font-bold">47</span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-destructive/5">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-destructive flex items-center justify-center">
-                    <XCircle className="h-4 w-4 text-destructive-foreground" />
-                  </div>
-                  <span className="font-medium">Failed Deliveries</span>
-                </div>
-                <span className="text-2xl font-bold">3</span>
-              </div>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/admin/consolidations">
+                  {t("viewAllConsolidations")}
+                </Link>
+              </Button>
             </div>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-16 rounded-lg bg-muted/50 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : recentConsolidations.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                {t("noRecentConsolidations")}
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {recentConsolidations.map((con) => (
+                  <Link
+                    key={con.id}
+                    href="/admin/consolidations"
+                    className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-all duration-200 hover:shadow-sm block"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Layers className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="space-y-0.5 min-w-0">
+                        <p className="font-[family-name:var(--font-inter)] font-semibold text-sm">
+                          {con.description}
+                        </p>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {con.client.fullName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {t("packagesCount", {
+                            count: con.packages.length,
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0 ml-2">
+                      <StatusBadge
+                        status={con.status as ConsolidationStatus}
+                        label={con.status}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(con.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
