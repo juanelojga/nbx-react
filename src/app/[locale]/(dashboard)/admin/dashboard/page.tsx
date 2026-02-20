@@ -75,11 +75,7 @@ export default function AdminDashboard() {
       className={`${workSansFont.variable} ${interFont.variable} space-y-8 animate-fade-in`}
     >
       <PageHeader
-        title={
-          <h1 className="font-[family-name:var(--font-work-sans)] text-2xl font-extrabold tracking-tight">
-            {t("title")}
-          </h1>
-        }
+        title={t("title")}
         description={t("description")}
         actions={
           <Button
