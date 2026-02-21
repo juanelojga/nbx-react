@@ -7,7 +7,7 @@
   "navigation": {
     "admin": {
       "dashboard": "Dashboard",
-      "allPackages": "All Packages",
+      "consolidatePackages": "Consolidate Packages",
       "clients": "Clients",
       "consolidations": "Consolidations",
       "usersManagement": "Users Management",

@@ -7,7 +7,7 @@
   "navigation": {
     "admin": {
       "dashboard": "Panel de Control",
-      "allPackages": "Todos los Paquetes",
+      "consolidatePackages": "Consolidar Paquetes",
       "clients": "Clientes",
       "consolidations": "Consolidaciones",
       "usersManagement": "Gestión de Usuarios",
