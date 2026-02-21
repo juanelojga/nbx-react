@@ -27,13 +27,29 @@ export function Header({
 }: HeaderProps) {
   const { user, logout } = useAuth();
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  const isValidName = (value: string | null | undefined) =>
+    !!value && value.trim().length > 0 && value.toLowerCase() !== "null";
+
+  const getDisplayName = () => {
+    if (!user) return "User";
+    const first = isValidName(user.firstName) ? user.firstName.trim() : "";
+    const last = isValidName(user.lastName) ? user.lastName.trim() : "";
+    const full = [first, last].filter(Boolean).join(" ");
+    return full || user.email;
+  };
+
+  const getInitials = () => {
+    if (!user) return "U";
+    const first = isValidName(user.firstName) ? user.firstName.trim() : "";
+    const last = isValidName(user.lastName) ? user.lastName.trim() : "";
+    if (first || last) {
+      return [first[0], last[0]]
+        .filter(Boolean)
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return user.email.slice(0, 2).toUpperCase();
   };
 
   const isAdmin =
@@ -93,14 +109,12 @@ export function Header({
             <button className="flex items-center gap-2.5 rounded-full border border-border/60 bg-muted/40 px-2.5 py-1.5 hover:bg-muted transition-all duration-200 active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <Avatar className="h-7 w-7 ring-2 ring-[#1976D2]/20 transition-all duration-200">
                 <AvatarFallback className="bg-[#1976D2] text-white text-xs font-semibold">
-                  {user
-                    ? getInitials(`${user.firstName} ${user.lastName}`)
-                    : "U"}
+                  {getInitials()}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start">
-                <span className="text-sm font-semibold text-foreground leading-tight">
-                  {user ? `${user.firstName} ${user.lastName}` : "User"}
+                <span className="text-sm font-semibold text-foreground leading-tight max-w-40 truncate">
+                  {getDisplayName()}
                 </span>
                 <span
                   className={`text-[10px] font-semibold uppercase tracking-wider leading-tight ${
@@ -120,16 +134,14 @@ export function Header({
               <div className="flex items-center gap-3 py-1">
                 <Avatar className="h-9 w-9 ring-2 ring-[#1976D2]/20">
                   <AvatarFallback className="bg-[#1976D2] text-white text-sm font-semibold">
-                    {user
-                      ? getInitials(`${user.firstName} ${user.lastName}`)
-                      : "U"}
+                    {getInitials()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex flex-col">
-                  <p className="text-sm font-semibold leading-none">
-                    {user ? `${user.firstName} ${user.lastName}` : "User"}
+                <div className="flex flex-col min-w-0">
+                  <p className="text-sm font-semibold leading-none truncate">
+                    {getDisplayName()}
                   </p>
-                  <p className="text-xs leading-none text-muted-foreground mt-1">
+                  <p className="text-xs leading-none text-muted-foreground mt-1 truncate">
                     {user?.email}
                   </p>
                 </div>
