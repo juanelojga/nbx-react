@@ -1,9 +1,7 @@
 import {
   Home,
   Package,
-  Users,
   BarChart3,
-  Settings,
   Search,
   Plus,
   User,
@@ -31,16 +29,18 @@ export interface NavItem {
 
 export const adminNavItems: NavItem[] = [
   { labelKey: "admin.dashboard", href: "/admin/dashboard", icon: Home },
-  { labelKey: "admin.allPackages", href: "/admin/packages", icon: Package },
+  {
+    labelKey: "admin.consolidatePackages",
+    href: "/admin/packages",
+    icon: Package,
+  },
   { labelKey: "admin.clients", href: "/admin/clients", icon: UserCog },
   {
     labelKey: "admin.consolidations",
     href: "/admin/consolidations",
     icon: Layers,
   },
-  { labelKey: "admin.usersManagement", href: "/admin/users", icon: Users },
   { labelKey: "admin.reports", href: "/admin/reports", icon: BarChart3 },
-  { labelKey: "admin.settings", href: "/admin/settings", icon: Settings },
 ];
 
 export const clientNavItems: NavItem[] = [
