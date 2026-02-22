@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing, type Locale } from "../../../i18n/routing";
 import { Providers } from "../providers";
@@ -42,6 +42,9 @@ export default async function LocaleLayout({
   if (!routing.locales.includes(locale as Locale)) {
     notFound();
   }
+
+  // Set the locale for next-intl server components
+  setRequestLocale(locale);
 
   // Get messages for the locale from URL params
   const messages = await getMessages({ locale });

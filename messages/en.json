@@ -26,9 +26,55 @@
       "client": "Client"
     }
   },
-  "home": {
-    "title": "Welcome",
-    "description": "This is a Next.js application with multi-language support using next-intl"
+  "landing": {
+    "hero": {
+      "title": "Bring your purchases from the USA to Panama hassle-free.",
+      "subtitle": "Maritime and air courier service with over 20 years of customs experience, home deliveries throughout Panama.",
+      "bullet1": "Online shopping, Miami P.O. box, and shipping to Panama.",
+      "bullet2": "Maritime and air freight depending on cargo type.",
+      "bullet3": "Importing cars and merchandise for your business.",
+      "primaryBtn": "Message us on WhatsApp",
+      "secondaryBtn": "I want my Miami P.O. Box",
+      "trustText": "Customs agents with 20 years of service. Serving clients across Panama City."
+    },
+    "howItWorks": {
+      "title": "How does Narbox work?",
+      "subtitle": "Shop at your favorite US stores, send to our Miami P.O. box, and receive in Panama via ocean or air freight.",
+      "step1Title": "Shop Online",
+      "step1Text": "Make your online purchases at US stores (Amazon, Shein, Walmart, etc.) and use our Miami locker address.",
+      "step2Title": "We Ship to Panama",
+      "step2Text": "We receive your packages in Miami, consolidate if necessary, and ship them via ocean or air freight to Panama.",
+      "step3Title": "Receive your Order",
+      "step3Text": "Pick up at our offices or get home delivery in Panama City."
+    },
+    "services": {
+      "title": "Our Services",
+      "subtitle": "Tailored solutions for every type of cargo or purchase.",
+      "card1Title": "Online Shopping & P.O. Box",
+      "card1Text": "We provide a Miami address for your US purchases and handle the rest.",
+      "card2Title": "Ocean and Air Freight",
+      "card2Text": "We choose the best option tailored to the load type, volume, and urgency.",
+      "card3Title": "Vehicle & Heavy Cargo Import",
+      "card3Text": "We assist with logistics and customs to bring in vehicles and oversized merchandise.",
+      "card4Title": "Support for Entrepreneurs",
+      "card4Text": "Ideal for businesses importing goods for resale and in need of a reliable partner."
+    },
+    "faq": {
+      "q1": "How often do ocean and air shipments depart?",
+      "a1": "We have weekly departures to ensure your purchases arrive on time.",
+      "q2": "How long does it take for my package to arrive from Miami?",
+      "a2": "Air shipping takes approximately 3-5 business days, while ocean freight takes about 10-15 days.",
+      "q3": "Can I bring commercial merchandise or just personal purchases?",
+      "a3": "We handle both personal purchases, commercial imports, and heavy cargo."
+    },
+    "contact": {
+      "title": "Ready for your next shipment?",
+      "text": "Write to us and we’ll help you quote your package, open your P.O. box, or answer any questions about your online purchases.",
+      "whatsappBtn": "Chat on WhatsApp",
+      "whatsapp": "+507 6612-6130",
+      "instagram": "@narboxcourier",
+      "address": "Panama City, Panama – Nation-wide home deliveries."
+    }
   },
   "login": {
     "title": "Welcome Back",
