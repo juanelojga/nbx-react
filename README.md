@@ -92,16 +92,25 @@ The project includes a Docker development setup that lets you run this app (and 
 3. Build the image and start the container:
 
    ```bash
-   docker compose up --build
+   docker compose --env-file .env.docker up --build
    ```
 
    The app will be available at `http://localhost:3001` (or whichever `HOST_PORT` you set).
 
+   > **Important:** The `--env-file .env.docker` flag is required so Docker Compose can read `HOST_PORT` for the port mapping. Without it, the port always falls back to `3000`.
+
 ### Subsequent runs
 
 ```bash
-docker compose up    # start
-docker compose down  # stop and remove containers
+docker compose --env-file .env.docker up    # start
+docker compose --env-file .env.docker down  # stop and remove containers
+```
+
+Or use the npm scripts:
+
+```bash
+npm run docker:up
+npm run docker:down
 ```
 
 ### Running multiple projects in parallel
@@ -113,11 +122,11 @@ Each project has its own `.env.docker`. To avoid port collisions, assign a uniqu
 | nbx-react | `3001`      | http://localhost:3001 |
 | other-app | `3002`      | http://localhost:3002 |
 
-Both `docker compose up` commands can run simultaneously in separate terminals.
+Both `docker compose --env-file .env.docker up` commands can run simultaneously in separate terminals.
 
 ### How it works
 
 - **Source code** is mounted as a volume into the container — Turbopack hot-reload works exactly as in local dev.
 - **`node_modules` and `.next`** live inside the container to prevent conflicts with host-installed packages.
-- **`.env.local`** is loaded first (your app variables); **`.env.docker`** is loaded second and overrides Docker-specific values (`HOST_PORT`, `NEXT_PUBLIC_GRAPHQL_ENDPOINT`).
+- **`.env.local`** is loaded first (your app variables); **`.env.docker`** is loaded second and overrides Docker-specific values (`NEXT_PUBLIC_GRAPHQL_ENDPOINT`). The `--env-file .env.docker` flag is also passed to `docker compose` so that `HOST_PORT` is available for the port mapping interpolation at parse time.
 - **`host.docker.internal`** resolves to your host machine inside the container, allowing the Django backend running on `localhost:8000` to be reached from Docker (works on Linux, macOS, and Windows).
