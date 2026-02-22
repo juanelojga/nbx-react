@@ -4,8 +4,16 @@ import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ServicesSection } from "@/components/landing/ServicesSection";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { ContactSection } from "@/components/landing/ContactSection";
+import { setRequestLocale } from "next-intl/server";
 
-export default function LandingPage() {
+export default async function LandingPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-[#1976D2]/20 selection:text-[#1976D2]">
       <LandingHeader />

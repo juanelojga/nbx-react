@@ -10,18 +10,18 @@ export function LandingHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between py-3">
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center gap-3">
+          <Link href="/" className="flex-shrink-0 flex items-center gap-3">
             <Image
               src="/images/narbox-logo.png"
               alt="Narbox Logo"
-              width={120}
-              height={40}
-              className="object-contain"
+              width={455}
+              height={514}
+              className="w-16 h-auto sm:w-24 object-contain"
               priority
             />
-          </div>
+          </Link>
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">
