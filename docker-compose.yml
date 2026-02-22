@@ -1,0 +1,43 @@
+# docker-compose.yml — Development environment
+#
+# Usage:
+#   First run:      docker compose up --build
+#   Subsequent:     docker compose up
+#   Stop:           docker compose down
+#
+# To run multiple projects in parallel, set a different HOST_PORT in each
+# project's .env.docker file. Each project will be accessible on its own port.
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+
+    # Map HOST_PORT (from .env.docker) → container port 3000.
+    # Defaults to 3000 if HOST_PORT is not set.
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+
+    # Load app variables from .env.local first, then apply Docker-specific
+    # overrides from .env.docker. Values in .env.docker take precedence.
+    env_file:
+      - path: .env.local
+        required: false
+      - path: .env.docker
+        required: false
+
+    volumes:
+      # Mount the project source so hot-reload works without rebuilding the image.
+      - .:/app
+
+      # Keep node_modules and .next inside the container — prevents the host
+      # mount from shadowing the packages installed during `docker build`.
+      - /app/node_modules
+      - /app/.next
+
+    # Allow the container to reach services running on the host machine
+    # (e.g. Django backend on localhost:8000) via `host.docker.internal`.
+    # Works on Linux (docker adds host-gateway automatically), macOS, and Windows.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

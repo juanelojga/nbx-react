@@ -1,0 +1,47 @@
+# .dockerignore — Files excluded from the Docker build context.
+# Keeping the context small speeds up `docker compose up --build`.
+# Note: source code is mounted as a volume in dev mode, so it doesn't
+# need to be (and shouldn't be) copied into the build context.
+
+# Dependencies — installed fresh inside the container
+node_modules/
+
+# Next.js compiled output
+.next/
+out/
+dist/
+build/
+export/
+
+# Environment files — passed via env_file in docker-compose.yml instead
+.env
+.env.*
+
+# Test artifacts
+coverage/
+.nyc_output/
+e2e/
+
+# Version control
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Docs (not needed at build time)
+docs/
+documents/
+
+# CI / deployment configs
+.github/
+netlify.toml
