@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
@@ -21,12 +22,14 @@ export function HeroSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
           {/* Mobile Image (Top on small screens) */}
-          <div className="lg:hidden w-full relative h-[300px] sm:h-[400px] rounded-2xl overflow-hidden shadow-xl">
-            {/* Using a placeholder for now, ideally an image of courier/boxes */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#1976D2] to-[#03A9F4] opacity-20 z-10" />
-            <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400">
-              [Hero Image Placeholder: Delivery / Narbox]
-            </div>
+          <div className="lg:hidden w-full relative h-[300px] sm:h-[400px] rounded-2xl overflow-hidden shadow-xl bg-white">
+            <Image
+              src="/images/hero-image.png"
+              alt="Narbox Delivery Illustration"
+              fill
+              className="object-contain p-4"
+              priority
+            />
           </div>
 
           {/* Text Content */}
@@ -78,12 +81,14 @@ export function HeroSection() {
           </div>
 
           {/* Desktop Image (Right side) */}
-          <div className="hidden lg:block relative w-full h-[500px] xl:h-[600px] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-border/50">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#1976D2] to-[#03A9F4] opacity-10 z-10" />
-            <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent z-10" />
-            <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400">
-              [Hero Image Placeholder: Delivery / Narbox]
-            </div>
+          <div className="hidden lg:block relative w-full h-[500px] xl:h-[600px] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-border/50 bg-white">
+            <Image
+              src="/images/hero-image.png"
+              alt="Narbox Delivery Illustration"
+              fill
+              className="object-contain p-8"
+              priority
+            />
           </div>
         </div>
       </div>
