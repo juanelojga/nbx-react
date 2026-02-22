@@ -26,9 +26,55 @@
       "client": "Cliente"
     }
   },
-  "home": {
-    "title": "Bienvenido",
-    "description": "Esta es una aplicación Next.js con soporte multiidioma usando next-intl"
+  "landing": {
+    "hero": {
+      "title": "Trae tus compras de USA a Panamá sin complicaciones.",
+      "subtitle": "Servicio courier marítimo y aéreo con más de 20 años de experiencia en aduanas, entregas a domicilio en todo Panamá.",
+      "bullet1": "Compras online, casillero en Miami y envíos a Panamá.",
+      "bullet2": "Marítimo y aéreo según el tipo de carga.",
+      "bullet3": "Importación de autos y mercancía para tu negocio.",
+      "primaryBtn": "Escríbenos por WhatsApp",
+      "secondaryBtn": "Quiero mi casillero en Miami",
+      "trustText": "Agentes aduanales con 20 años de servicio. Atendemos clientes en toda la ciudad de Panamá."
+    },
+    "howItWorks": {
+      "title": "¿Cómo funciona Narbox?",
+      "subtitle": "Compra en tus tiendas favoritas en USA, envía a nuestro casillero en Miami y recibe en Panamá por vía marítima o aérea.",
+      "step1Title": "Compra en línea",
+      "step1Text": "Haz tus compras online en tiendas de USA (Amazon, Shein, Walmart, etc.) y usa nuestra dirección de casillero en Miami.",
+      "step2Title": "Enviamos a Panamá",
+      "step2Text": "Recibimos tus paquetes en Miami, consolidamos si es necesario y los enviamos por vía marítima o aérea hacia Panamá.",
+      "step3Title": "Recibe tu pedido",
+      "step3Text": "Retira en nuestras oficinas o recibe entrega a domicilio en la ciudad de Panamá."
+    },
+    "services": {
+      "title": "Nuestros Servicios",
+      "subtitle": "Soluciones a medida para cada tipo de carga o compra.",
+      "card1Title": "Compras online y casillero",
+      "card1Text": "Te damos una dirección en Miami para tus compras en USA y nos encargamos del resto.",
+      "card2Title": "Envíos marítimos y aéreos",
+      "card2Text": "Escogemos la mejor opción según el tipo de carga, volumen y urgencia.",
+      "card3Title": "Importación de autos y carga pesada",
+      "card3Text": "Te ayudamos con la logística y aduana para traer vehículos y mercancía de mayor tamaño.",
+      "card4Title": "Apoyo a emprendedores",
+      "card4Text": "Ideal para negocios que importan mercancía para reventa y necesitan un aliado de confianza."
+    },
+    "faq": {
+      "q1": "¿Cada cuánto salen los envíos marítimos y aéreos?",
+      "a1": "Contamos con salidas semanales para garantizar que tus compras lleguen a tiempo.",
+      "q2": "¿Cuánto tarda en llegar mi paquete desde Miami?",
+      "a2": "El envío aéreo tarda aproximadamente 3-5 días hábiles, mientras que el marítimo toma alrededor de 10-15 días.",
+      "q3": "¿Puedo traer mercancía para mi negocio o solo compras personales?",
+      "a3": "Manejamos tanto compras personales como importación comercial y carga pesada."
+    },
+    "contact": {
+      "title": "¿Listo para tu próximo envío?",
+      "text": "Escríbenos y te ayudamos a cotizar tu paquete, abrir tu casillero o resolver cualquier duda sobre tus compras online.",
+      "whatsappBtn": "Chatear por WhatsApp",
+      "whatsapp": "+507 6612-6130",
+      "instagram": "@narboxcourier",
+      "address": "Panamá City, Panamá – Entregas a domicilio en todo el país."
+    }
   },
   "login": {
     "title": "Bienvenido de Nuevo",
