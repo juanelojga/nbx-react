@@ -22,6 +22,9 @@
     "docs:generate": "node scripts/generate-docs.js",
     "docs:update": "node scripts/generate-docs.js",
     "docs": "node scripts/generate-docs.js",
+    "docker:up": "docker compose --env-file .env.docker up",
+    "docker:up:build": "docker compose --env-file .env.docker up --build",
+    "docker:down": "docker compose --env-file .env.docker down",
     "deploy:netlify": "npm run build && netlify deploy --prod",
     "deploy:preview": "npm run build && netlify deploy"
   },
