@@ -156,17 +156,24 @@ const ConsolidationRow = memo(function ConsolidationRow({
           </p>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="whitespace-normal">
         <div className="relative max-w-xs">
-          <p
-            className={`text-sm transition-colors duration-300 line-clamp-2 ${
-              consolidation.description
-                ? "text-muted-foreground group-hover:text-foreground"
-                : "text-muted-foreground/40 italic"
-            }`}
-          >
-            {consolidation.description || "—"}
-          </p>
+          {consolidation.description ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-sm transition-colors duration-300 line-clamp-3 text-muted-foreground group-hover:text-foreground cursor-default">
+                  {consolidation.description}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-sm text-[11px]">
+                {consolidation.description}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <p className="text-sm transition-colors duration-300 text-muted-foreground/40 italic">
+              —
+            </p>
+          )}
         </div>
       </TableCell>
       <TableCell>
