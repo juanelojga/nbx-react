@@ -76,7 +76,7 @@ const DeleteConsolidationDialog = dynamic(
   { ssr: false }
 );
 
-type SortField = "created_at" | "delivery_date" | "status";
+type SortField = "delivery_date" | "status";
 
 const DEBOUNCE_DELAY = 400;
 const DANGEROUS_CHARS_REGEX = /[<>{};\\\[\]]/g;
@@ -134,28 +134,19 @@ const ConsolidationRow = memo(function ConsolidationRow({
       }}
     >
       <TableCell>
-        <div className="flex items-center gap-3">
+        <div className="relative">
           <div
-            className={`transition-all duration-500 ${
-              isHovered ? "scale-110 rotate-3" : "scale-100"
-            }`}
+            className="font-mono text-sm font-semibold tracking-wide text-foreground transition-colors duration-300"
+            style={{ fontVariantNumeric: "tabular-nums" }}
+            title={consolidation.id}
           >
-            <PackageIcon className="h-5 w-5 text-muted-foreground/60 group-hover:text-primary transition-colors duration-300" />
+            <div className="max-w-[120px] truncate">{consolidation.id}</div>
           </div>
-          <div className="relative">
-            <div
-              className="font-mono text-sm font-semibold tracking-wide text-foreground transition-colors duration-300"
-              style={{ fontVariantNumeric: "tabular-nums" }}
-              title={consolidation.id}
-            >
-              <div className="max-w-[120px] truncate">{consolidation.id}</div>
-            </div>
-            <div
-              className={`absolute -bottom-0.5 left-0 h-[2px] bg-gradient-to-r from-primary to-secondary transition-all duration-500 ${
-                isHovered ? "w-full opacity-100" : "w-0 opacity-0"
-              }`}
-            />
-          </div>
+          <div
+            className={`absolute -bottom-0.5 left-0 h-[2px] bg-gradient-to-r from-primary to-secondary transition-all duration-500 ${
+              isHovered ? "w-full opacity-100" : "w-0 opacity-0"
+            }`}
+          />
         </div>
       </TableCell>
       <TableCell>
@@ -166,9 +157,9 @@ const ConsolidationRow = memo(function ConsolidationRow({
         </div>
       </TableCell>
       <TableCell>
-        <div className="relative max-w-md">
+        <div className="relative max-w-xs">
           <p
-            className={`text-sm transition-colors duration-300 truncate ${
+            className={`text-sm transition-colors duration-300 line-clamp-2 ${
               consolidation.description
                 ? "text-muted-foreground group-hover:text-foreground"
                 : "text-muted-foreground/40 italic"
@@ -210,22 +201,6 @@ const ConsolidationRow = memo(function ConsolidationRow({
                     }
                   )
                 : "—"}
-            </time>
-          </div>
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
-            <time
-              className="text-xs font-medium text-foreground/80 whitespace-nowrap"
-              dateTime={consolidation.createdAt}
-            >
-              {new Date(consolidation.createdAt).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
             </time>
           </div>
         </div>
@@ -305,7 +280,7 @@ export default function AdminConsolidations() {
     getOrderBy,
   } = useConsolidationTableState({
     defaultPageSize: 10,
-    defaultSortField: "created_at",
+    defaultSortField: "delivery_date",
     defaultSortOrder: "desc",
   });
 
@@ -571,9 +546,6 @@ export default function AdminConsolidations() {
                     <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                       {t("deliveryDate")}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {t("createdAt")}
-                    </TableHead>
                     <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                       {t("actions")}
                     </TableHead>
@@ -590,25 +562,19 @@ export default function AdminConsolidations() {
                       }}
                     >
                       <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="h-5 w-5 animate-pulse rounded bg-muted/60"></div>
-                          <div className="h-4 w-32 animate-pulse rounded-md bg-muted/60"></div>
-                        </div>
+                        <div className="h-4 w-32 animate-pulse rounded-md bg-muted/60"></div>
                       </TableCell>
                       <TableCell>
                         <div className="h-4 w-36 animate-pulse rounded-md bg-muted/60"></div>
                       </TableCell>
                       <TableCell>
-                        <div className="h-4 w-48 animate-pulse rounded-md bg-muted/60"></div>
+                        <div className="h-4 w-40 animate-pulse rounded-md bg-muted/60"></div>
                       </TableCell>
                       <TableCell>
                         <div className="h-6 w-20 animate-pulse rounded-full bg-muted/60"></div>
                       </TableCell>
                       <TableCell>
                         <div className="h-8 w-12 animate-pulse rounded-md bg-muted/60"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="h-8 w-28 animate-pulse rounded-md bg-muted/60"></div>
                       </TableCell>
                       <TableCell>
                         <div className="h-8 w-28 animate-pulse rounded-md bg-muted/60"></div>
@@ -917,16 +883,6 @@ export default function AdminConsolidations() {
                         <div className="flex items-center gap-2">
                           {t("deliveryDate")}
                           {getSortIcon("delivery_date")}
-                        </div>
-                      </TableHead>
-                      <TableHead
-                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
-                        onClick={() => handleSort("created_at")}
-                        aria-sort={getAriaSort("created_at")}
-                      >
-                        <div className="flex items-center gap-2">
-                          {t("createdAt")}
-                          {getSortIcon("created_at")}
                         </div>
                       </TableHead>
                       <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">

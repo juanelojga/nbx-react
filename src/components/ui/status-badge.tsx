@@ -95,7 +95,7 @@ export function StatusBadge({ status, label, className }: StatusBadgeProps) {
   return (
     <Badge
       className={cn(
-        "border-2",
+        "border-2 hover:scale-105 transition-transform duration-200",
         config.bgClass,
         config.textClass,
         config.borderClass,
