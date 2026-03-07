@@ -303,7 +303,6 @@ export default function AdminConsolidations() {
     sortOrder,
     status: statusFilter,
   } = urlState;
-  const [clientFilter, setClientFilter] = useState<string>("all");
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -448,23 +447,7 @@ export default function AdminConsolidations() {
     [data?.allConsolidates.results]
   );
 
-  const filteredConsolidations = useMemo(() => {
-    if (clientFilter === "all") {
-      return consolidations;
-    }
-    return consolidations.filter((c) => c.client.id === clientFilter);
-  }, [consolidations, clientFilter]);
-
-  const uniqueClients = useMemo(() => {
-    if (!consolidations.length) return [];
-    const clientsMap = new Map();
-    consolidations.forEach((c) => {
-      if (!clientsMap.has(c.client.id)) {
-        clientsMap.set(c.client.id, c.client);
-      }
-    });
-    return Array.from(clientsMap.values());
-  }, [consolidations]);
+  const filteredConsolidations = consolidations;
 
   const pageNumbers = useMemo(() => {
     const pages: (number | string)[] = [];
@@ -676,20 +659,6 @@ export default function AdminConsolidations() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-
-                <Select value={clientFilter} onValueChange={setClientFilter}>
-                  <SelectTrigger className="w-full md:w-[200px]">
-                    <SelectValue placeholder={t("filterByClient")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("allClients")}</SelectItem>
-                    {uniqueClients.map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.fullName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-border/50 bg-gradient-to-br from-muted/30 via-background to-muted/20 py-24 text-center shadow-lg backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:shadow-xl">
@@ -700,9 +669,7 @@ export default function AdminConsolidations() {
                     <PackageIcon className="h-20 w-20 text-primary/60 transition-all duration-500 group-hover:text-primary" />
                   </div>
                   <h3 className="mb-3 text-2xl font-bold tracking-tight text-foreground transition-colors duration-300 group-hover:text-primary">
-                    {searchInput ||
-                    statusFilter !== "all" ||
-                    clientFilter !== "all"
+                    {searchInput || statusFilter !== "all"
                       ? t("noMatchingConsolidations")
                       : t("noConsolidationsFound")}
                   </h3>
@@ -713,15 +680,12 @@ export default function AdminConsolidations() {
                         })
                       : t("noConsolidationsFoundDescription")}
                   </p>
-                  {(searchInput ||
-                    statusFilter !== "all" ||
-                    clientFilter !== "all") && (
+                  {(searchInput || statusFilter !== "all") && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
                         setSearchInput("");
-                        setClientFilter("all");
                         updateURL({ search: "", status: "all", page: 1 });
                       }}
                       className="mt-8 gap-2"
@@ -829,20 +793,6 @@ export default function AdminConsolidations() {
                   <SelectItem value="cancelled">
                     {t("statusCancelled")}
                   </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={clientFilter} onValueChange={setClientFilter}>
-                <SelectTrigger className="w-full md:w-[200px]">
-                  <SelectValue placeholder={t("filterByClient")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("allClients")}</SelectItem>
-                  {uniqueClients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.fullName}
-                    </SelectItem>
-                  ))}
                 </SelectContent>
               </Select>
             </div>
