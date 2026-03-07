@@ -22,6 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { TableActionButtons } from "@/components/common/TableActionButtons";
 import {
   BaseTable,
   type ColumnDef,
@@ -36,15 +37,7 @@ import {
   GetAllConsolidatesVariables,
   ConsolidateType,
 } from "@/graphql/queries/consolidations";
-import {
-  Eye,
-  Pencil,
-  RefreshCw,
-  Search,
-  Trash2,
-  X,
-  Package as PackageIcon,
-} from "lucide-react";
+import { RefreshCw, Search, X, Package as PackageIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/status-badge";
 
@@ -207,67 +200,23 @@ const ConsolidationRow = memo(function ConsolidationRow({
           </div>
         </div>
       </TableCell>
-      <TableCell>
-        <div className="flex items-center justify-end gap-1.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-600 shadow-sm ring-1 ring-blue-200/50 transition-all duration-300 hover:scale-110 hover:from-blue-100 hover:to-blue-200/50 hover:text-blue-700 hover:shadow-md hover:ring-blue-300/50 active:scale-95 dark:from-blue-950/30 dark:to-blue-900/20 dark:ring-blue-800/30 dark:hover:from-blue-900/40"
-                onClick={() => onView(consolidation.id)}
-                aria-label={`View ${consolidation.description}`}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="rounded-lg bg-blue-950 px-3 py-1.5 text-xs font-medium text-blue-50"
-            >
-              <p>{t("viewConsolidation")}</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-lg bg-gradient-to-br from-amber-50 to-amber-100/50 text-amber-600 shadow-sm ring-1 ring-amber-200/50 transition-all duration-300 hover:scale-110 hover:from-amber-100 hover:to-amber-200/50 hover:text-amber-700 hover:shadow-md hover:ring-amber-300/50 active:scale-95 dark:from-amber-950/30 dark:to-amber-900/20 dark:ring-amber-800/30 dark:hover:from-amber-900/40"
-                onClick={() => onEdit(consolidation)}
-                aria-label={`Edit ${consolidation.description}`}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="rounded-lg bg-amber-950 px-3 py-1.5 text-xs font-medium text-amber-50"
-            >
-              <p>{t("editConsolidation")}</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 text-red-600 shadow-sm ring-1 ring-red-200/50 transition-all duration-300 hover:scale-110 hover:from-red-100 hover:to-red-200/50 hover:text-red-700 hover:shadow-md hover:ring-red-300/50 active:scale-95 dark:from-red-950/30 dark:to-red-900/20 dark:ring-red-800/30 dark:hover:from-red-900/40"
-                onClick={() => onDelete(consolidation)}
-                aria-label={`Delete ${consolidation.description}`}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="rounded-lg bg-red-950 px-3 py-1.5 text-xs font-medium text-red-50"
-            >
-              <p>{t("deleteConsolidation")}</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </TableCell>
+      <TableActionButtons
+        onView={{
+          onClick: () => onView(consolidation.id),
+          ariaLabel: `View ${consolidation.description}`,
+          tooltip: t("viewConsolidation"),
+        }}
+        onEdit={{
+          onClick: () => onEdit(consolidation),
+          ariaLabel: `Edit ${consolidation.description}`,
+          tooltip: t("editConsolidation"),
+        }}
+        onDelete={{
+          onClick: () => onDelete(consolidation),
+          ariaLabel: `Delete ${consolidation.description}`,
+          tooltip: t("deleteConsolidation"),
+        }}
+      />
     </TableRow>
   );
 });
