@@ -125,7 +125,7 @@ const PackageRow = memo(function PackageRow({
           </div>
           <div className="relative">
             <div
-              className={`font-mono text-sm font-semibold tracking-wide ${
+              className={`font-mono text-xs font-semibold tracking-wide ${
                 isSelected ? "text-primary" : "text-foreground"
               } transition-colors duration-300`}
               style={{ fontVariantNumeric: "tabular-nums" }}
@@ -143,7 +143,7 @@ const PackageRow = memo(function PackageRow({
       <TableCell>
         <div className="relative max-w-md">
           <p
-            className={`text-sm transition-colors duration-300 ${
+            className={`text-xs transition-colors duration-300 ${
               pkg.description
                 ? "text-muted-foreground group-hover:text-foreground"
                 : "text-muted-foreground/40 italic"

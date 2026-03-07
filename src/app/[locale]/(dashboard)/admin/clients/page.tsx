@@ -48,6 +48,7 @@ import {
   Search,
   Trash2,
   UserPlus,
+  Users,
   X,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -89,23 +90,6 @@ const DEBOUNCE_DELAY = 400; // milliseconds
 // Rule 7.9: Hoist RegExp creation to module level
 const DANGEROUS_CHARS_REGEX = /[<>{};\\\[\]]/g;
 
-// Rule 6.3: Hoist static JSX elements to module-level constants
-const EMPTY_STATE_ICON = (
-  <svg
-    className="h-16 w-16 text-primary/60"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={1.5}
-      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-    />
-  </svg>
-);
-
 // Rule 5.5: Extract to memoized components - ClientRow
 interface ClientRowProps {
   client: {
@@ -131,7 +115,7 @@ interface ClientRowProps {
   onView: (clientId: string) => void;
   onEdit: (client: ClientRowProps["client"]) => void;
   onDelete: (client: ClientRowProps["client"]) => void;
-  t: (key: string) => string;
+  animationDelay?: number;
 }
 
 const ClientRow = memo(function ClientRow({
@@ -139,23 +123,51 @@ const ClientRow = memo(function ClientRow({
   onView,
   onEdit,
   onDelete,
-  t,
+  animationDelay = 0,
 }: ClientRowProps) {
+  const t = useTranslations("adminClients");
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
-    <TableRow key={client.id} className="table-row-optimized">
-      <TableCell className="font-medium">
-        <div className="max-w-[200px] truncate" title={client.fullName || "-"}>
-          {client.fullName || "-"}
+    <TableRow
+      key={client.id}
+      className="group relative transition-all duration-300 hover:bg-gradient-to-r hover:from-muted/80 hover:to-transparent border-l-4 border-l-transparent hover:border-l-primary"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        animationName: "fade-in",
+        animationDuration: "0.4s",
+        animationTimingFunction: "ease-out",
+        animationFillMode: "forwards",
+        animationDelay: `${animationDelay}ms`,
+      }}
+    >
+      <TableCell>
+        <div className="relative">
+          <div
+            className="max-w-[200px] truncate text-xs font-medium text-foreground transition-colors duration-300"
+            title={client.fullName || "-"}
+          >
+            {client.fullName || "-"}
+          </div>
+          <div
+            className={`absolute -bottom-0.5 left-0 h-[2px] bg-gradient-to-r from-primary to-secondary transition-all duration-500 ${
+              isHovered ? "w-full opacity-100" : "w-0 opacity-0"
+            }`}
+          />
         </div>
       </TableCell>
       <TableCell>
-        <div className="max-w-[250px] truncate" title={client.email}>
+        <div
+          className="max-w-[250px] truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300"
+          title={client.email}
+        >
           {client.email}
         </div>
       </TableCell>
       <TableCell>
         <div
-          className="max-w-[150px] truncate"
+          className="max-w-[150px] truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300"
           title={client.mobilePhoneNumber || client.phoneNumber || "-"}
         >
           {client.mobilePhoneNumber || client.phoneNumber || "-"}
@@ -163,7 +175,7 @@ const ClientRow = memo(function ClientRow({
       </TableCell>
       <TableCell>
         <div
-          className="max-w-[200px] truncate"
+          className="max-w-[200px] truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300"
           title={
             client.city && client.state
               ? `${client.city}, ${client.state}`
@@ -176,25 +188,39 @@ const ClientRow = memo(function ClientRow({
         </div>
       </TableCell>
       <TableCell>
-        <div className="whitespace-nowrap">
-          {new Date(client.createdAt).toLocaleDateString()}
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
+            <time
+              className="text-xs font-medium text-foreground/80 whitespace-nowrap"
+              dateTime={client.createdAt}
+            >
+              {new Date(client.createdAt).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </time>
+          </div>
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1.5">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-600 shadow-sm ring-1 ring-blue-200/50 transition-all duration-300 hover:scale-110 hover:from-blue-100 hover:to-blue-200/50 hover:text-blue-700 hover:shadow-md hover:ring-blue-300/50 active:scale-95 dark:from-blue-950/30 dark:to-blue-900/20 dark:ring-blue-800/30 dark:hover:from-blue-900/40"
                 onClick={() => onView(client.id)}
                 aria-label={`View ${client.fullName || client.email}`}
               >
                 <Eye className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent
+              side="top"
+              className="rounded-lg bg-blue-950 px-3 py-1.5 text-xs font-medium text-blue-50"
+            >
               <p>{t("viewClient")}</p>
             </TooltipContent>
           </Tooltip>
@@ -203,14 +229,17 @@ const ClientRow = memo(function ClientRow({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                className="h-9 w-9 rounded-lg bg-gradient-to-br from-amber-50 to-amber-100/50 text-amber-600 shadow-sm ring-1 ring-amber-200/50 transition-all duration-300 hover:scale-110 hover:from-amber-100 hover:to-amber-200/50 hover:text-amber-700 hover:shadow-md hover:ring-amber-300/50 active:scale-95 dark:from-amber-950/30 dark:to-amber-900/20 dark:ring-amber-800/30 dark:hover:from-amber-900/40"
                 onClick={() => onEdit(client)}
                 aria-label={`Edit ${client.fullName || client.email}`}
               >
                 <Pencil className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent
+              side="top"
+              className="rounded-lg bg-amber-950 px-3 py-1.5 text-xs font-medium text-amber-50"
+            >
               <p>{t("editClient")}</p>
             </TooltipContent>
           </Tooltip>
@@ -219,48 +248,23 @@ const ClientRow = memo(function ClientRow({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                className="h-9 w-9 rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 text-red-600 shadow-sm ring-1 ring-red-200/50 transition-all duration-300 hover:scale-110 hover:from-red-100 hover:to-red-200/50 hover:text-red-700 hover:shadow-md hover:ring-red-300/50 active:scale-95 dark:from-red-950/30 dark:to-red-900/20 dark:ring-red-800/30 dark:hover:from-red-900/40"
                 onClick={() => onDelete(client)}
                 aria-label={`Delete ${client.fullName || client.email}`}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent
+              side="top"
+              className="rounded-lg bg-red-950 px-3 py-1.5 text-xs font-medium text-red-50"
+            >
               <p>{t("deleteClient")}</p>
             </TooltipContent>
           </Tooltip>
         </div>
       </TableCell>
     </TableRow>
-  );
-});
-
-// Rule 5.5: Extract to memoized components - PaginationButton
-interface PaginationButtonProps {
-  pageNumber: number;
-  isActive: boolean;
-  onClick: (page: number) => void;
-  t: (key: string, values?: Record<string, string | number | Date>) => string;
-}
-
-const PaginationButton = memo(function PaginationButton({
-  pageNumber,
-  isActive,
-  onClick,
-  t,
-}: PaginationButtonProps) {
-  return (
-    <Button
-      variant={isActive ? "default" : "outline"}
-      size="sm"
-      onClick={() => onClick(pageNumber)}
-      className="h-8 w-8 p-0"
-      aria-label={t("goToPage", { page: pageNumber })}
-      aria-current={isActive ? "page" : undefined}
-    >
-      {pageNumber}
-    </Button>
   );
 });
 
@@ -529,6 +533,206 @@ export default function AdminClients() {
     []
   );
 
+  // Loading skeleton
+  if (loading) {
+    return (
+      <TooltipProvider>
+        <div className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <PageHeader title={t("title")} description={t("description")} />
+          </div>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="mb-6">
+                <div className="relative max-w-md">
+                  <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder={t("searchPlaceholder")}
+                    value={searchInput}
+                    disabled
+                    className="pl-9 pr-9"
+                    aria-label={t("searchPlaceholder")}
+                  />
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
+                <div className="relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent shimmer" />
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20">
+                        <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          {t("fullName")}
+                        </TableHead>
+                        <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          {t("email")}
+                        </TableHead>
+                        <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          {t("phone")}
+                        </TableHead>
+                        <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          {t("location")}
+                        </TableHead>
+                        <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          {t("createdAt")}
+                        </TableHead>
+                        <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          {t("actions")}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[...Array(pageSize)].map((_, index) => (
+                        <TableRow
+                          key={index}
+                          style={{
+                            animationDelay: `${index * 100}ms`,
+                            animation: "fade-in 0.6s ease-out forwards",
+                            opacity: 0,
+                          }}
+                        >
+                          <TableCell>
+                            <div className="h-4 w-32 animate-pulse rounded-md bg-muted/60"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-40 animate-pulse rounded-md bg-muted/60"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-28 animate-pulse rounded-md bg-muted/60"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-36 animate-pulse rounded-md bg-muted/60"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-8 w-28 animate-pulse rounded-md bg-muted/60"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-end gap-1.5">
+                              {[...Array(3)].map((_, i) => (
+                                <div
+                                  key={i}
+                                  className="h-9 w-9 animate-pulse rounded-lg bg-muted/60"
+                                  style={{ animationDelay: `${i * 50}ms` }}
+                                ></div>
+                              ))}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </TooltipProvider>
+    );
+  }
+
+  // Empty state
+  if (!loading && !error && clients.length === 0) {
+    return (
+      <TooltipProvider>
+        <div className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <PageHeader title={t("title")} description={t("description")} />
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleRefresh}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                {t("refresh")}
+              </Button>
+              <Button onClick={() => setIsAddDialogOpen(true)}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                {t("addClient")}
+              </Button>
+            </div>
+          </div>
+
+          <AddClientDialog
+            open={isAddDialogOpen}
+            onOpenChange={setIsAddDialogOpen}
+            onClientCreated={handleRefresh}
+          />
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="mb-6">
+                <div className="relative max-w-md">
+                  {isDebouncing ? (
+                    <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                  ) : (
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  )}
+                  <Input
+                    type="text"
+                    placeholder={t("searchPlaceholder")}
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="pl-9 pr-9"
+                    aria-label={t("searchPlaceholder")}
+                  />
+                  {searchInput && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleClearSearch}
+                      className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                      aria-label={t("clearSearch")}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-border/50 bg-gradient-to-br from-muted/30 via-background to-muted/20 py-24 text-center shadow-lg backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:shadow-xl">
+                <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary/5 blur-3xl transition-all duration-1000 group-hover:scale-150" />
+                <div className="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-secondary/5 blur-3xl transition-all duration-1000 group-hover:scale-150" />
+                <div className="relative">
+                  <div className="mb-8 inline-flex rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 shadow-inner ring-1 ring-primary/10 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
+                    <Users className="h-20 w-20 text-primary/60 transition-all duration-500 group-hover:text-primary" />
+                  </div>
+                  <h3 className="mb-3 text-2xl font-bold tracking-tight text-foreground transition-colors duration-300 group-hover:text-primary">
+                    {debouncedSearch
+                      ? t("noMatchingClients")
+                      : t("noClientsFound")}
+                  </h3>
+                  <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted-foreground transition-colors duration-300 group-hover:text-foreground/80">
+                    {debouncedSearch
+                      ? t("noMatchingClientsDescription", {
+                          search: debouncedSearch,
+                        })
+                      : t("noClientsFoundDescription")}
+                  </p>
+                  {debouncedSearch && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleClearSearch}
+                      className="mt-8 gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      {t("clearSearch")}
+                    </Button>
+                  )}
+                  <div className="mt-8 flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
+                    <div className="h-px w-8 bg-gradient-to-r from-transparent to-muted-foreground/30" />
+                    <span>Ready to start</span>
+                    <div className="h-px w-8 bg-gradient-to-l from-transparent to-muted-foreground/30" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </TooltipProvider>
+    );
+  }
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
@@ -617,279 +821,158 @@ export default function AdminClients() {
 
             {/* Error State */}
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="mb-6">
                 <AlertDescription>
                   {t("loadingError", { error: error.message })}
                 </AlertDescription>
               </Alert>
             )}
 
-            {/* Loading State - Skeleton */}
-            {loading && (
-              <div className="space-y-4">
-                <div className="overflow-x-auto rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t("fullName")}</TableHead>
-                        <TableHead>{t("email")}</TableHead>
-                        <TableHead>{t("phone")}</TableHead>
-                        <TableHead>{t("location")}</TableHead>
-                        <TableHead>{t("createdAt")}</TableHead>
-                        <TableHead className="text-right">
-                          {t("actions")}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[...Array(pageSize)].map((_, index) => (
-                        <TableRow key={index}>
-                          <TableCell>
-                            <div className="h-4 w-32 animate-pulse rounded bg-muted"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-40 animate-pulse rounded bg-muted"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-28 animate-pulse rounded bg-muted"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-36 animate-pulse rounded bg-muted"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-20 animate-pulse rounded bg-muted"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-end gap-2">
-                              <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                              <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                              <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="h-9 w-32 animate-pulse rounded bg-muted"></div>
-                  <div className="h-4 w-32 animate-pulse rounded bg-muted"></div>
-                  <div className="flex gap-2">
-                    <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                    <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                    <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                  </div>
+            {/* Table */}
+            <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20 backdrop-blur-sm transition-colors hover:from-muted/60 hover:to-muted/30">
+                      <TableHead
+                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
+                        onClick={() => handleSort("full_name")}
+                        aria-sort={getAriaSort("full_name")}
+                      >
+                        <div className="flex items-center gap-2">
+                          {t("fullName")}
+                          {getSortIcon("full_name")}
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
+                        onClick={() => handleSort("email")}
+                        aria-sort={getAriaSort("email")}
+                      >
+                        <div className="flex items-center gap-2">
+                          {t("email")}
+                          {getSortIcon("email")}
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {t("phone")}
+                      </TableHead>
+                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {t("location")}
+                      </TableHead>
+                      <TableHead
+                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
+                        onClick={() => handleSort("created_at")}
+                        aria-sort={getAriaSort("created_at")}
+                      >
+                        <div className="flex items-center gap-2">
+                          {t("createdAt")}
+                          {getSortIcon("created_at")}
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {t("actions")}
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {clients.map((client, index) => (
+                      <ClientRow
+                        key={client.id}
+                        client={client}
+                        onView={handleViewClient}
+                        onEdit={handleEditClient}
+                        onDelete={handleDeleteClient}
+                        animationDelay={index * 50}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                <p className="text-sm text-muted-foreground">
+                  {t("showing", {
+                    start: (page - 1) * pageSize + 1,
+                    end: Math.min(page * pageSize, totalCount),
+                    total: totalCount,
+                  })}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {t("rowsPerPage")}
+                  </span>
+                  <Select
+                    value={pageSize.toString()}
+                    onValueChange={(value) =>
+                      handlePageSizeChange(parseInt(value, 10))
+                    }
+                  >
+                    <SelectTrigger className="h-8 w-16">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            )}
 
-            {/* Empty State */}
-            {!loading && !error && clients.length === 0 && (
-              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-16 text-center">
-                <div className="mb-6 rounded-full bg-primary/10 p-6">
-                  {EMPTY_STATE_ICON}
-                </div>
-                <h3 className="text-xl font-semibold text-foreground">
-                  {debouncedSearch
-                    ? t("noMatchingClients")
-                    : t("noClientsFound")}
-                </h3>
-                <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                  {debouncedSearch
-                    ? t("noMatchingClientsDescription", {
-                        search: debouncedSearch,
-                      })
-                    : t("noClientsFoundDescription")}
-                </p>
-                {debouncedSearch && (
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleClearSearch}
-                    className="mt-4"
+                    onClick={() => updateURL({ page: page - 1 })}
+                    disabled={!hasPrevious}
+                    aria-label={t("previousPage")}
                   >
-                    <X className="mr-2 h-4 w-4" />
-                    {t("clearSearch")}
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
-                )}
-              </div>
-            )}
 
-            {/* Table - with horizontal scroll only */}
-            {!loading && !error && clients.length > 0 && (
-              <>
-                <div className="overflow-x-auto overflow-y-visible rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead aria-sort={getAriaSort("full_name")}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleSort("full_name")}
-                            className={`flex items-center gap-1 ${
-                              sortField === "full_name"
-                                ? "text-primary font-semibold"
-                                : ""
-                            }`}
-                          >
-                            {t("fullName")}
-                            {getSortIcon("full_name")}
-                          </Button>
-                        </TableHead>
-                        <TableHead aria-sort={getAriaSort("email")}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleSort("email")}
-                            className={`flex items-center gap-1 ${
-                              sortField === "email"
-                                ? "text-primary font-semibold"
-                                : ""
-                            }`}
-                          >
-                            {t("email")}
-                            {getSortIcon("email")}
-                          </Button>
-                        </TableHead>
-                        <TableHead>{t("phone")}</TableHead>
-                        <TableHead>{t("location")}</TableHead>
-                        <TableHead aria-sort={getAriaSort("created_at")}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleSort("created_at")}
-                            className={`flex items-center gap-1 ${
-                              sortField === "created_at"
-                                ? "text-primary font-semibold"
-                                : ""
-                            }`}
-                          >
-                            {t("createdAt")}
-                            {getSortIcon("created_at")}
-                          </Button>
-                        </TableHead>
-                        <TableHead className="text-right">
-                          {t("actions")}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {clients.map((client) => (
-                        <ClientRow
-                          key={client.id}
-                          client={client}
-                          onView={handleViewClient}
-                          onEdit={handleEditClient}
-                          onDelete={handleDeleteClient}
-                          t={t}
-                        />
-                      ))}
-                    </TableBody>
-                  </Table>
+                  <div className="flex items-center gap-1">
+                    {pageNumbers.map((pageNum, idx) =>
+                      pageNum === "..." ? (
+                        <span
+                          key={`ellipsis-${idx}`}
+                          className="px-2 text-muted-foreground"
+                        >
+                          ...
+                        </span>
+                      ) : (
+                        <Button
+                          key={pageNum}
+                          variant={page === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => updateURL({ page: pageNum as number })}
+                          className="h-8 w-8 p-0"
+                          aria-label={t("goToPage", { page: pageNum })}
+                          aria-current={page === pageNum ? "page" : undefined}
+                        >
+                          {pageNum}
+                        </Button>
+                      )
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => updateURL({ page: page + 1 })}
+                    disabled={!hasNext}
+                    aria-label={t("nextPage")}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
-
-                {/* Pagination and Page Size Controls */}
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3 md:items-center">
-                  {/* Left: Page Size Selector */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">
-                      {t("rowsPerPage")}
-                    </span>
-                    <Select
-                      value={pageSize.toString()}
-                      onValueChange={(value) =>
-                        handlePageSizeChange(parseInt(value))
-                      }
-                    >
-                      <SelectTrigger className="w-[70px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="10">10</SelectItem>
-                        <SelectItem value="20">20</SelectItem>
-                        <SelectItem value="50">50</SelectItem>
-                        <SelectItem value="100">100</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Center: Showing Entries */}
-                  <div className="flex justify-center">
-                    <span className="text-sm text-muted-foreground">
-                      {t("showing", {
-                        start: (page - 1) * pageSize + 1,
-                        end: Math.min(page * pageSize, totalCount),
-                        total: totalCount,
-                      })}
-                    </span>
-                  </div>
-
-                  {/* Right: Pagination Controls */}
-                  <div className="flex items-center justify-end gap-1">
-                    {/* Previous Button - Icon Only */}
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => updateURL({ page: page - 1 })}
-                      disabled={!hasPrevious}
-                      aria-label={t("previousPage")}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-
-                    {/* Page Numbers - Desktop Only */}
-                    <div className="hidden sm:flex items-center gap-1">
-                      {pageNumbers.map((pageNum, index) => {
-                        if (pageNum === "...") {
-                          return (
-                            <span
-                              key={`ellipsis-${index}`}
-                              className="px-2 text-sm text-muted-foreground"
-                            >
-                              …
-                            </span>
-                          );
-                        }
-
-                        const pageNumber = pageNum as number;
-                        const isActive = pageNumber === page;
-
-                        return (
-                          <PaginationButton
-                            key={pageNumber}
-                            pageNumber={pageNumber}
-                            isActive={isActive}
-                            onClick={(p) => updateURL({ page: p })}
-                            t={t}
-                          />
-                        );
-                      })}
-                    </div>
-
-                    {/* Mobile: Current Page Indicator */}
-                    <div className="flex sm:hidden items-center justify-center min-w-[60px]">
-                      <span className="text-sm font-medium">
-                        {page} / {totalPages}
-                      </span>
-                    </div>
-
-                    {/* Next Button - Icon Only */}
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => updateURL({ page: page + 1 })}
-                      disabled={!hasNext}
-                      aria-label={t("nextPage")}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </>
-            )}
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
