@@ -76,7 +76,7 @@ const DeleteConsolidationDialog = dynamic(
   { ssr: false }
 );
 
-type SortField = "created_at" | "delivery_date" | "status";
+type SortField = "delivery_date" | "status";
 
 const DEBOUNCE_DELAY = 400;
 const DANGEROUS_CHARS_REGEX = /[<>{};\\\[\]]/g;
@@ -134,48 +134,46 @@ const ConsolidationRow = memo(function ConsolidationRow({
       }}
     >
       <TableCell>
-        <div className="flex items-center gap-3">
+        <div className="relative">
           <div
-            className={`transition-all duration-500 ${
-              isHovered ? "scale-110 rotate-3" : "scale-100"
-            }`}
+            className="font-mono text-xs font-semibold tracking-wide text-foreground transition-colors duration-300"
+            style={{ fontVariantNumeric: "tabular-nums" }}
+            title={consolidation.id}
           >
-            <PackageIcon className="h-5 w-5 text-muted-foreground/60 group-hover:text-primary transition-colors duration-300" />
+            <div className="max-w-[120px] truncate">{consolidation.id}</div>
           </div>
-          <div className="relative">
-            <div
-              className="font-mono text-sm font-semibold tracking-wide text-foreground transition-colors duration-300"
-              style={{ fontVariantNumeric: "tabular-nums" }}
-              title={consolidation.id}
-            >
-              <div className="max-w-[120px] truncate">{consolidation.id}</div>
-            </div>
-            <div
-              className={`absolute -bottom-0.5 left-0 h-[2px] bg-gradient-to-r from-primary to-secondary transition-all duration-500 ${
-                isHovered ? "w-full opacity-100" : "w-0 opacity-0"
-              }`}
-            />
-          </div>
+          <div
+            className={`absolute -bottom-0.5 left-0 h-[2px] bg-gradient-to-r from-primary to-secondary transition-all duration-500 ${
+              isHovered ? "w-full opacity-100" : "w-0 opacity-0"
+            }`}
+          />
         </div>
       </TableCell>
       <TableCell>
         <div className="relative max-w-[200px]">
-          <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300 truncate">
+          <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300 truncate">
             {consolidation.client.fullName}
           </p>
         </div>
       </TableCell>
-      <TableCell>
-        <div className="relative max-w-md">
-          <p
-            className={`text-sm transition-colors duration-300 truncate ${
-              consolidation.description
-                ? "text-muted-foreground group-hover:text-foreground"
-                : "text-muted-foreground/40 italic"
-            }`}
-          >
-            {consolidation.description || "—"}
-          </p>
+      <TableCell className="whitespace-normal">
+        <div className="relative max-w-xs">
+          {consolidation.description ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-xs transition-colors duration-300 line-clamp-3 text-muted-foreground group-hover:text-foreground cursor-default">
+                  {consolidation.description}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-sm text-[11px]">
+                {consolidation.description}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <p className="text-xs transition-colors duration-300 text-muted-foreground/40 italic">
+              —
+            </p>
+          )}
         </div>
       </TableCell>
       <TableCell>
@@ -210,22 +208,6 @@ const ConsolidationRow = memo(function ConsolidationRow({
                     }
                   )
                 : "—"}
-            </time>
-          </div>
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
-            <time
-              className="text-xs font-medium text-foreground/80 whitespace-nowrap"
-              dateTime={consolidation.createdAt}
-            >
-              {new Date(consolidation.createdAt).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
             </time>
           </div>
         </div>
@@ -305,7 +287,7 @@ export default function AdminConsolidations() {
     getOrderBy,
   } = useConsolidationTableState({
     defaultPageSize: 10,
-    defaultSortField: "created_at",
+    defaultSortField: "delivery_date",
     defaultSortOrder: "desc",
   });
 
@@ -321,7 +303,6 @@ export default function AdminConsolidations() {
     sortOrder,
     status: statusFilter,
   } = urlState;
-  const [clientFilter, setClientFilter] = useState<string>("all");
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -466,23 +447,7 @@ export default function AdminConsolidations() {
     [data?.allConsolidates.results]
   );
 
-  const filteredConsolidations = useMemo(() => {
-    if (clientFilter === "all") {
-      return consolidations;
-    }
-    return consolidations.filter((c) => c.client.id === clientFilter);
-  }, [consolidations, clientFilter]);
-
-  const uniqueClients = useMemo(() => {
-    if (!consolidations.length) return [];
-    const clientsMap = new Map();
-    consolidations.forEach((c) => {
-      if (!clientsMap.has(c.client.id)) {
-        clientsMap.set(c.client.id, c.client);
-      }
-    });
-    return Array.from(clientsMap.values());
-  }, [consolidations]);
+  const filteredConsolidations = consolidations;
 
   const pageNumbers = useMemo(() => {
     const pages: (number | string)[] = [];
@@ -571,9 +536,6 @@ export default function AdminConsolidations() {
                     <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                       {t("deliveryDate")}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {t("createdAt")}
-                    </TableHead>
                     <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                       {t("actions")}
                     </TableHead>
@@ -590,25 +552,19 @@ export default function AdminConsolidations() {
                       }}
                     >
                       <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="h-5 w-5 animate-pulse rounded bg-muted/60"></div>
-                          <div className="h-4 w-32 animate-pulse rounded-md bg-muted/60"></div>
-                        </div>
+                        <div className="h-4 w-32 animate-pulse rounded-md bg-muted/60"></div>
                       </TableCell>
                       <TableCell>
                         <div className="h-4 w-36 animate-pulse rounded-md bg-muted/60"></div>
                       </TableCell>
                       <TableCell>
-                        <div className="h-4 w-48 animate-pulse rounded-md bg-muted/60"></div>
+                        <div className="h-4 w-40 animate-pulse rounded-md bg-muted/60"></div>
                       </TableCell>
                       <TableCell>
                         <div className="h-6 w-20 animate-pulse rounded-full bg-muted/60"></div>
                       </TableCell>
                       <TableCell>
                         <div className="h-8 w-12 animate-pulse rounded-md bg-muted/60"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="h-8 w-28 animate-pulse rounded-md bg-muted/60"></div>
                       </TableCell>
                       <TableCell>
                         <div className="h-8 w-28 animate-pulse rounded-md bg-muted/60"></div>
@@ -703,20 +659,6 @@ export default function AdminConsolidations() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-
-                <Select value={clientFilter} onValueChange={setClientFilter}>
-                  <SelectTrigger className="w-full md:w-[200px]">
-                    <SelectValue placeholder={t("filterByClient")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("allClients")}</SelectItem>
-                    {uniqueClients.map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.fullName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-border/50 bg-gradient-to-br from-muted/30 via-background to-muted/20 py-24 text-center shadow-lg backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:shadow-xl">
@@ -727,9 +669,7 @@ export default function AdminConsolidations() {
                     <PackageIcon className="h-20 w-20 text-primary/60 transition-all duration-500 group-hover:text-primary" />
                   </div>
                   <h3 className="mb-3 text-2xl font-bold tracking-tight text-foreground transition-colors duration-300 group-hover:text-primary">
-                    {searchInput ||
-                    statusFilter !== "all" ||
-                    clientFilter !== "all"
+                    {searchInput || statusFilter !== "all"
                       ? t("noMatchingConsolidations")
                       : t("noConsolidationsFound")}
                   </h3>
@@ -740,15 +680,12 @@ export default function AdminConsolidations() {
                         })
                       : t("noConsolidationsFoundDescription")}
                   </p>
-                  {(searchInput ||
-                    statusFilter !== "all" ||
-                    clientFilter !== "all") && (
+                  {(searchInput || statusFilter !== "all") && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
                         setSearchInput("");
-                        setClientFilter("all");
                         updateURL({ search: "", status: "all", page: 1 });
                       }}
                       className="mt-8 gap-2"
@@ -858,20 +795,6 @@ export default function AdminConsolidations() {
                   </SelectItem>
                 </SelectContent>
               </Select>
-
-              <Select value={clientFilter} onValueChange={setClientFilter}>
-                <SelectTrigger className="w-full md:w-[200px]">
-                  <SelectValue placeholder={t("filterByClient")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("allClients")}</SelectItem>
-                  {uniqueClients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             {error && (
@@ -883,8 +806,7 @@ export default function AdminConsolidations() {
             )}
 
             <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
-              <div className="relative overflow-x-auto">
-                <div className="pointer-events-none absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-card/80 to-transparent" />
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20 backdrop-blur-sm transition-colors hover:from-muted/60 hover:to-muted/30">
@@ -918,16 +840,6 @@ export default function AdminConsolidations() {
                         <div className="flex items-center gap-2">
                           {t("deliveryDate")}
                           {getSortIcon("delivery_date")}
-                        </div>
-                      </TableHead>
-                      <TableHead
-                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
-                        onClick={() => handleSort("created_at")}
-                        aria-sort={getAriaSort("created_at")}
-                      >
-                        <div className="flex items-center gap-2">
-                          {t("createdAt")}
-                          {getSortIcon("created_at")}
                         </div>
                       </TableHead>
                       <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">

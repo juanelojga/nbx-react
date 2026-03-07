@@ -57,7 +57,7 @@ export function MainLayout({ children, userRole }: MainLayoutProps) {
           isDesktopCollapsed={isDesktopSidebarCollapsed}
           onMobileClose={closeMobileSidebar}
         />
-        <main className="flex-1 p-6 lg:p-8 w-full transition-all duration-300">
+        <main className="flex-1 min-w-0 p-6 lg:p-8 transition-all duration-300 overflow-x-hidden">
           {children}
         </main>
       </div>

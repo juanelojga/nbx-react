@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useRouter, usePathname } from "@/lib/navigation";
 import { useSearchParams } from "next/navigation";
 
-type SortField = "created_at" | "delivery_date" | "status";
+type SortField = "delivery_date" | "status";
 type SortOrder = "asc" | "desc";
 
 export interface ConsolidationTableState {
@@ -41,7 +41,7 @@ export function useConsolidationTableState(
 
   const {
     defaultPageSize = 10,
-    defaultSortField = "created_at",
+    defaultSortField = "delivery_date",
     defaultSortOrder = "desc",
   } = options;
 
@@ -76,11 +76,7 @@ export function useConsolidationTableState(
       const field = isDescending ? orderBy.slice(1) : orderBy;
 
       // Validate field is one of the allowed sort fields
-      if (
-        field === "created_at" ||
-        field === "delivery_date" ||
-        field === "status"
-      ) {
+      if (field === "delivery_date" || field === "status") {
         sortField = field;
         sortOrder = isDescending ? "desc" : "asc";
       }
