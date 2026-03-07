@@ -136,7 +136,7 @@ const ConsolidationRow = memo(function ConsolidationRow({
       <TableCell>
         <div className="relative">
           <div
-            className="font-mono text-sm font-semibold tracking-wide text-foreground transition-colors duration-300"
+            className="font-mono text-xs font-semibold tracking-wide text-foreground transition-colors duration-300"
             style={{ fontVariantNumeric: "tabular-nums" }}
             title={consolidation.id}
           >
@@ -151,7 +151,7 @@ const ConsolidationRow = memo(function ConsolidationRow({
       </TableCell>
       <TableCell>
         <div className="relative max-w-[200px]">
-          <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300 truncate">
+          <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300 truncate">
             {consolidation.client.fullName}
           </p>
         </div>
@@ -161,7 +161,7 @@ const ConsolidationRow = memo(function ConsolidationRow({
           {consolidation.description ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <p className="text-sm transition-colors duration-300 line-clamp-3 text-muted-foreground group-hover:text-foreground cursor-default">
+                <p className="text-xs transition-colors duration-300 line-clamp-3 text-muted-foreground group-hover:text-foreground cursor-default">
                   {consolidation.description}
                 </p>
               </TooltipTrigger>
@@ -170,7 +170,7 @@ const ConsolidationRow = memo(function ConsolidationRow({
               </TooltipContent>
             </Tooltip>
           ) : (
-            <p className="text-sm transition-colors duration-300 text-muted-foreground/40 italic">
+            <p className="text-xs transition-colors duration-300 text-muted-foreground/40 italic">
               —
             </p>
           )}
