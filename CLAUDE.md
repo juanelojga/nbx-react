@@ -68,6 +68,7 @@ npm run docker:down        # Stop container
 - **Imports:** prefer `@/` path alias; relative imports only for closely related files
 - **Code style (Prettier-enforced):** double quotes, semicolons, 2-space indent, 80-char width, ES5 trailing commas
 - **Pre-commit hooks** (Husky + lint-staged): auto-runs ESLint fix + Prettier on staged files
+- **One function per file:** If a component or file requires multiple exported functions/components, each must be defined in its own separate file. Keep files focused and single-purpose.
 
 ### Typography
 
@@ -94,7 +95,7 @@ const interFont = Inter({
 
 ### Table Design
 
-All data tables must follow `docs/TABLE_DESIGN_SPEC.md`. Reference implementation: `src/app/(dashboard)/admin/packages/components/PackagesTable.tsx`. Key requirements: `rounded-2xl` containers with `backdrop-blur-sm`, gradient headers, left-bordered rows with hover effects, color-coded action buttons (blue/amber/red gradients).
+All data tables **must** use `src/components/ui/base-table.tsx` (`BaseTable` component) as the foundation. Do not build tables from scratch or directly use low-level table primitives — always compose on top of `BaseTable`, which provides selection, sorting, pagination, skeleton loading, and empty states out of the box. Define column configurations via the `ColumnDef<T>` type and pass data, handlers, and options as props. Visual style must follow `docs/TABLE_DESIGN_SPEC.md`: `rounded-2xl` containers with `backdrop-blur-sm`, gradient headers, left-bordered rows with hover effects, color-coded action buttons (blue/amber/red gradients). Reference implementation: `src/app/(dashboard)/admin/packages/components/PackagesTable.tsx`.
 
 ### GraphQL Pattern
 
