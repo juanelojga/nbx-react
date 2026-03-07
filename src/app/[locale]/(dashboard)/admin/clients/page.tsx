@@ -7,49 +7,24 @@ import dynamic from "next/dynamic";
 import { useClientTableState } from "@/hooks/useClientTableState";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { TableActionButtons } from "@/components/common/TableActionButtons";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  BaseTable,
+  type ColumnDef,
+  type SortState,
+  type PaginationState,
+  type EmptyStateConfig,
+  type PaginationLabels,
+} from "@/components/ui/base-table";
 import {
   GET_ALL_CLIENTS,
   GetAllClientsResponse,
   GetAllClientsVariables,
 } from "@/graphql/queries/clients";
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Loader2,
-  Pencil,
-  RefreshCw,
-  Search,
-  Trash2,
-  UserPlus,
-  X,
-} from "lucide-react";
+import { Loader2, RefreshCw, Search, UserPlus, Users, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Dynamically import dialog components for better bundle splitting
@@ -89,23 +64,6 @@ const DEBOUNCE_DELAY = 400; // milliseconds
 // Rule 7.9: Hoist RegExp creation to module level
 const DANGEROUS_CHARS_REGEX = /[<>{};\\\[\]]/g;
 
-// Rule 6.3: Hoist static JSX elements to module-level constants
-const EMPTY_STATE_ICON = (
-  <svg
-    className="h-16 w-16 text-primary/60"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={1.5}
-      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-    />
-  </svg>
-);
-
 // Rule 5.5: Extract to memoized components - ClientRow
 interface ClientRowProps {
   client: {
@@ -131,7 +89,7 @@ interface ClientRowProps {
   onView: (clientId: string) => void;
   onEdit: (client: ClientRowProps["client"]) => void;
   onDelete: (client: ClientRowProps["client"]) => void;
-  t: (key: string) => string;
+  animationDelay?: number;
 }
 
 const ClientRow = memo(function ClientRow({
@@ -139,23 +97,51 @@ const ClientRow = memo(function ClientRow({
   onView,
   onEdit,
   onDelete,
-  t,
+  animationDelay = 0,
 }: ClientRowProps) {
+  const t = useTranslations("adminClients");
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
-    <TableRow key={client.id} className="table-row-optimized">
-      <TableCell className="font-medium">
-        <div className="max-w-[200px] truncate" title={client.fullName || "-"}>
-          {client.fullName || "-"}
+    <TableRow
+      key={client.id}
+      className="group relative transition-all duration-300 hover:bg-gradient-to-r hover:from-muted/80 hover:to-transparent border-l-4 border-l-transparent hover:border-l-primary"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        animationName: "fade-in",
+        animationDuration: "0.4s",
+        animationTimingFunction: "ease-out",
+        animationFillMode: "forwards",
+        animationDelay: `${animationDelay}ms`,
+      }}
+    >
+      <TableCell>
+        <div className="relative">
+          <div
+            className="max-w-[200px] truncate text-xs font-medium text-foreground transition-colors duration-300"
+            title={client.fullName || "-"}
+          >
+            {client.fullName || "-"}
+          </div>
+          <div
+            className={`absolute -bottom-0.5 left-0 h-[2px] bg-gradient-to-r from-primary to-secondary transition-all duration-500 ${
+              isHovered ? "w-full opacity-100" : "w-0 opacity-0"
+            }`}
+          />
         </div>
       </TableCell>
       <TableCell>
-        <div className="max-w-[250px] truncate" title={client.email}>
+        <div
+          className="max-w-[250px] truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300"
+          title={client.email}
+        >
           {client.email}
         </div>
       </TableCell>
       <TableCell>
         <div
-          className="max-w-[150px] truncate"
+          className="max-w-[150px] truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300"
           title={client.mobilePhoneNumber || client.phoneNumber || "-"}
         >
           {client.mobilePhoneNumber || client.phoneNumber || "-"}
@@ -163,7 +149,7 @@ const ClientRow = memo(function ClientRow({
       </TableCell>
       <TableCell>
         <div
-          className="max-w-[200px] truncate"
+          className="max-w-[200px] truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300"
           title={
             client.city && client.state
               ? `${client.city}, ${client.state}`
@@ -176,91 +162,39 @@ const ClientRow = memo(function ClientRow({
         </div>
       </TableCell>
       <TableCell>
-        <div className="whitespace-nowrap">
-          {new Date(client.createdAt).toLocaleDateString()}
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
+            <time
+              className="text-xs font-medium text-foreground/80 whitespace-nowrap"
+              dateTime={client.createdAt}
+            >
+              {new Date(client.createdAt).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </time>
+          </div>
         </div>
       </TableCell>
-      <TableCell>
-        <div className="flex items-center justify-end gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
-                onClick={() => onView(client.id)}
-                aria-label={`View ${client.fullName || client.email}`}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{t("viewClient")}</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
-                onClick={() => onEdit(client)}
-                aria-label={`Edit ${client.fullName || client.email}`}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{t("editClient")}</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                onClick={() => onDelete(client)}
-                aria-label={`Delete ${client.fullName || client.email}`}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{t("deleteClient")}</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </TableCell>
+      <TableActionButtons
+        onView={{
+          onClick: () => onView(client.id),
+          ariaLabel: `View ${client.fullName || client.email}`,
+          tooltip: t("viewClient"),
+        }}
+        onEdit={{
+          onClick: () => onEdit(client),
+          ariaLabel: `Edit ${client.fullName || client.email}`,
+          tooltip: t("editClient"),
+        }}
+        onDelete={{
+          onClick: () => onDelete(client),
+          ariaLabel: `Delete ${client.fullName || client.email}`,
+          tooltip: t("deleteClient"),
+        }}
+      />
     </TableRow>
-  );
-});
-
-// Rule 5.5: Extract to memoized components - PaginationButton
-interface PaginationButtonProps {
-  pageNumber: number;
-  isActive: boolean;
-  onClick: (page: number) => void;
-  t: (key: string, values?: Record<string, string | number | Date>) => string;
-}
-
-const PaginationButton = memo(function PaginationButton({
-  pageNumber,
-  isActive,
-  onClick,
-  t,
-}: PaginationButtonProps) {
-  return (
-    <Button
-      variant={isActive ? "default" : "outline"}
-      size="sm"
-      onClick={() => onClick(pageNumber)}
-      className="h-8 w-8 p-0"
-      aria-label={t("goToPage", { page: pageNumber })}
-      aria-current={isActive ? "page" : undefined}
-    >
-      {pageNumber}
-    </Button>
   );
 });
 
@@ -367,14 +301,14 @@ export default function AdminClients() {
 
   // Rule 5.9: Use functional setState updates & Rule 5.6: Narrow effect dependencies with useCallback
   const handleSort = useCallback(
-    (field: SortField) => {
+    (field: string) => {
       if (sortField === field) {
         // Toggle sort order
         const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
         updateURL({ sortOrder: newSortOrder });
       } else {
         // Change sort field, default to ascending
-        updateURL({ sortField: field, sortOrder: "asc" });
+        updateURL({ sortField: field as SortField, sortOrder: "asc" });
       }
     },
     [sortField, sortOrder, updateURL]
@@ -403,70 +337,6 @@ export default function AdminClients() {
   const totalCount = data?.allClients.totalCount || 0;
   const hasNext = data?.allClients.hasNext || false;
   const hasPrevious = data?.allClients.hasPrevious || false;
-  const totalPages = Math.ceil(totalCount / pageSize);
-
-  // Rule 5.8: Subscribe to derived state with useMemo
-  const pageNumbers = useMemo(() => {
-    const pages: (number | string)[] = [];
-    const maxVisiblePages = 5;
-    const ellipsis = "...";
-
-    if (totalPages <= maxVisiblePages + 2) {
-      // Show all pages if total is small
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Always show first page
-      pages.push(1);
-
-      if (page <= 3) {
-        // Near the beginning
-        for (let i = 2; i <= Math.min(maxVisiblePages, totalPages - 1); i++) {
-          pages.push(i);
-        }
-        pages.push(ellipsis);
-      } else if (page >= totalPages - 2) {
-        // Near the end
-        pages.push(ellipsis);
-        for (let i = totalPages - maxVisiblePages + 1; i < totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        // Middle section
-        pages.push(ellipsis);
-        for (let i = page - 1; i <= page + 1; i++) {
-          pages.push(i);
-        }
-        pages.push(ellipsis);
-      }
-
-      // Always show last page
-      pages.push(totalPages);
-    }
-
-    return pages;
-  }, [page, totalPages]);
-
-  // Helper function to get sort icon for a column
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="h-4 w-4" />;
-    }
-    return sortOrder === "asc" ? (
-      <ArrowUp className="h-4 w-4" />
-    ) : (
-      <ArrowDown className="h-4 w-4" />
-    );
-  };
-
-  // Helper function to get ARIA sort attribute
-  const getAriaSort = (
-    field: SortField
-  ): "ascending" | "descending" | "none" => {
-    if (sortField !== field) return "none";
-    return sortOrder === "asc" ? "ascending" : "descending";
-  };
 
   // Rule 5.7: Put interaction logic in event handlers (with useCallback for stability)
   const handleViewClient = useCallback((clientId: string) => {
@@ -529,370 +399,237 @@ export default function AdminClients() {
     []
   );
 
-  return (
-    <TooltipProvider>
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <PageHeader title={t("title")} description={t("description")} />
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={loading}
-              className="sm:w-auto"
-            >
-              {/* Rule 6.1: Animate wrapper div instead of SVG icon */}
-              <div className={loading ? "animate-spin mr-2" : "mr-2"}>
-                <RefreshCw className="h-4 w-4" />
-              </div>
-              {t("refresh")}
-            </Button>
-            <Button
-              onClick={() => setIsAddDialogOpen(true)}
-              className="sm:w-auto"
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              {t("addClient")}
-            </Button>
-          </div>
-        </div>
+  const columns: ColumnDef<(typeof clients)[number]>[] = useMemo(
+    () => [
+      {
+        id: "fullName",
+        header: t("fullName"),
+        cell: () => null,
+        sortable: true,
+        sortField: "full_name",
+        skeletonWidth: "8rem",
+      },
+      {
+        id: "email",
+        header: t("email"),
+        cell: () => null,
+        sortable: true,
+        sortField: "email",
+        skeletonWidth: "10rem",
+      },
+      {
+        id: "phone",
+        header: t("phone"),
+        cell: () => null,
+        skeletonWidth: "7rem",
+      },
+      {
+        id: "location",
+        header: t("location"),
+        cell: () => null,
+        skeletonWidth: "9rem",
+      },
+      {
+        id: "createdAt",
+        header: t("createdAt"),
+        cell: () => null,
+        sortable: true,
+        sortField: "created_at",
+        skeletonWidth: "7rem",
+        skeletonVariant: "date",
+      },
+      {
+        id: "actions",
+        header: t("actions"),
+        cell: () => null,
+        align: "right",
+        skeletonVariant: "actions",
+        skeletonActionCount: 3,
+      },
+    ],
+    [t]
+  );
 
-        <AddClientDialog
-          open={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
-          onClientCreated={handleRefresh}
+  const sortState: SortState = useMemo(
+    () => ({
+      field: sortField,
+      order: sortOrder,
+    }),
+    [sortField, sortOrder]
+  );
+
+  const paginationState: PaginationState | undefined = useMemo(
+    () =>
+      totalCount > 0
+        ? { page, pageSize, totalCount, hasNext, hasPrevious }
+        : undefined,
+    [page, pageSize, totalCount, hasNext, hasPrevious]
+  );
+
+  const paginationLabels: PaginationLabels = useMemo(
+    () => ({
+      showing: (start: number, end: number, total: number) =>
+        t("showing", { start, end, total }),
+      rowsPerPage: t("rowsPerPage"),
+      previousPage: t("previousPage"),
+      nextPage: t("nextPage"),
+      goToPage: (pageNum: number | string) => t("goToPage", { page: pageNum }),
+    }),
+    [t]
+  );
+
+  const emptyState: EmptyStateConfig = useMemo(
+    () => ({
+      icon: Users,
+      title: debouncedSearch ? t("noMatchingClients") : t("noClientsFound"),
+      description: debouncedSearch
+        ? t("noMatchingClientsDescription", { search: debouncedSearch })
+        : t("noClientsFoundDescription"),
+      action: debouncedSearch ? (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleClearSearch}
+          className="mt-8 gap-2"
+        >
+          <X className="h-4 w-4" />
+          {t("clearSearch")}
+        </Button>
+      ) : undefined,
+    }),
+    [t, debouncedSearch, handleClearSearch]
+  );
+
+  const renderRow = useCallback(
+    (client: (typeof clients)[number], index: number, _isSelected: boolean) => (
+      <ClientRow
+        key={client.id}
+        client={client}
+        onView={handleViewClient}
+        onEdit={handleEditClient}
+        onDelete={handleDeleteClient}
+        animationDelay={index * 50}
+      />
+    ),
+    [handleViewClient, handleEditClient, handleDeleteClient]
+  );
+
+  const searchToolbar = (
+    <div className="mb-6">
+      <div className="relative max-w-md">
+        {loading || isDebouncing ? (
+          <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+        ) : (
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        )}
+        <Input
+          type="text"
+          placeholder={t("searchPlaceholder")}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          disabled={loading && !searchInput}
+          className="pl-9 pr-9"
+          aria-label={t("searchPlaceholder")}
         />
-
-        <DeleteClientDialog
-          open={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-          client={clientToDelete}
-          onClientDeleted={handleRefresh}
-        />
-
-        <EditClientDialog
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          client={clientToEdit}
-          onClientUpdated={handleRefresh}
-        />
-
-        <ViewClientDialog
-          open={isViewDialogOpen}
-          onOpenChange={setIsViewDialogOpen}
-          clientId={clientIdToView}
-        />
-
-        <Card>
-          <CardContent className="p-6">
-            {/* Search Input */}
-            <div className="mb-6">
-              <div className="relative max-w-md">
-                {isDebouncing ? (
-                  <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-                ) : (
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                )}
-                <Input
-                  type="text"
-                  placeholder={t("searchPlaceholder")}
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-9 pr-9"
-                  aria-label={t("searchPlaceholder")}
-                />
-                {searchInput && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleClearSearch}
-                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                    aria-label={t("clearSearch")}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Error State */}
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {t("loadingError", { error: error.message })}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Loading State - Skeleton */}
-            {loading && (
-              <div className="space-y-4">
-                <div className="overflow-x-auto rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t("fullName")}</TableHead>
-                        <TableHead>{t("email")}</TableHead>
-                        <TableHead>{t("phone")}</TableHead>
-                        <TableHead>{t("location")}</TableHead>
-                        <TableHead>{t("createdAt")}</TableHead>
-                        <TableHead className="text-right">
-                          {t("actions")}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[...Array(pageSize)].map((_, index) => (
-                        <TableRow key={index}>
-                          <TableCell>
-                            <div className="h-4 w-32 animate-pulse rounded bg-muted"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-40 animate-pulse rounded bg-muted"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-28 animate-pulse rounded bg-muted"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-36 animate-pulse rounded bg-muted"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-20 animate-pulse rounded bg-muted"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-end gap-2">
-                              <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                              <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                              <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="h-9 w-32 animate-pulse rounded bg-muted"></div>
-                  <div className="h-4 w-32 animate-pulse rounded bg-muted"></div>
-                  <div className="flex gap-2">
-                    <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                    <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                    <div className="h-8 w-8 animate-pulse rounded bg-muted"></div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Empty State */}
-            {!loading && !error && clients.length === 0 && (
-              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-16 text-center">
-                <div className="mb-6 rounded-full bg-primary/10 p-6">
-                  {EMPTY_STATE_ICON}
-                </div>
-                <h3 className="text-xl font-semibold text-foreground">
-                  {debouncedSearch
-                    ? t("noMatchingClients")
-                    : t("noClientsFound")}
-                </h3>
-                <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                  {debouncedSearch
-                    ? t("noMatchingClientsDescription", {
-                        search: debouncedSearch,
-                      })
-                    : t("noClientsFoundDescription")}
-                </p>
-                {debouncedSearch && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClearSearch}
-                    className="mt-4"
-                  >
-                    <X className="mr-2 h-4 w-4" />
-                    {t("clearSearch")}
-                  </Button>
-                )}
-              </div>
-            )}
-
-            {/* Table - with horizontal scroll only */}
-            {!loading && !error && clients.length > 0 && (
-              <>
-                <div className="overflow-x-auto overflow-y-visible rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead aria-sort={getAriaSort("full_name")}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleSort("full_name")}
-                            className={`flex items-center gap-1 ${
-                              sortField === "full_name"
-                                ? "text-primary font-semibold"
-                                : ""
-                            }`}
-                          >
-                            {t("fullName")}
-                            {getSortIcon("full_name")}
-                          </Button>
-                        </TableHead>
-                        <TableHead aria-sort={getAriaSort("email")}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleSort("email")}
-                            className={`flex items-center gap-1 ${
-                              sortField === "email"
-                                ? "text-primary font-semibold"
-                                : ""
-                            }`}
-                          >
-                            {t("email")}
-                            {getSortIcon("email")}
-                          </Button>
-                        </TableHead>
-                        <TableHead>{t("phone")}</TableHead>
-                        <TableHead>{t("location")}</TableHead>
-                        <TableHead aria-sort={getAriaSort("created_at")}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleSort("created_at")}
-                            className={`flex items-center gap-1 ${
-                              sortField === "created_at"
-                                ? "text-primary font-semibold"
-                                : ""
-                            }`}
-                          >
-                            {t("createdAt")}
-                            {getSortIcon("created_at")}
-                          </Button>
-                        </TableHead>
-                        <TableHead className="text-right">
-                          {t("actions")}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {clients.map((client) => (
-                        <ClientRow
-                          key={client.id}
-                          client={client}
-                          onView={handleViewClient}
-                          onEdit={handleEditClient}
-                          onDelete={handleDeleteClient}
-                          t={t}
-                        />
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-
-                {/* Pagination and Page Size Controls */}
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3 md:items-center">
-                  {/* Left: Page Size Selector */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">
-                      {t("rowsPerPage")}
-                    </span>
-                    <Select
-                      value={pageSize.toString()}
-                      onValueChange={(value) =>
-                        handlePageSizeChange(parseInt(value))
-                      }
-                    >
-                      <SelectTrigger className="w-[70px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="10">10</SelectItem>
-                        <SelectItem value="20">20</SelectItem>
-                        <SelectItem value="50">50</SelectItem>
-                        <SelectItem value="100">100</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Center: Showing Entries */}
-                  <div className="flex justify-center">
-                    <span className="text-sm text-muted-foreground">
-                      {t("showing", {
-                        start: (page - 1) * pageSize + 1,
-                        end: Math.min(page * pageSize, totalCount),
-                        total: totalCount,
-                      })}
-                    </span>
-                  </div>
-
-                  {/* Right: Pagination Controls */}
-                  <div className="flex items-center justify-end gap-1">
-                    {/* Previous Button - Icon Only */}
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => updateURL({ page: page - 1 })}
-                      disabled={!hasPrevious}
-                      aria-label={t("previousPage")}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-
-                    {/* Page Numbers - Desktop Only */}
-                    <div className="hidden sm:flex items-center gap-1">
-                      {pageNumbers.map((pageNum, index) => {
-                        if (pageNum === "...") {
-                          return (
-                            <span
-                              key={`ellipsis-${index}`}
-                              className="px-2 text-sm text-muted-foreground"
-                            >
-                              …
-                            </span>
-                          );
-                        }
-
-                        const pageNumber = pageNum as number;
-                        const isActive = pageNumber === page;
-
-                        return (
-                          <PaginationButton
-                            key={pageNumber}
-                            pageNumber={pageNumber}
-                            isActive={isActive}
-                            onClick={(p) => updateURL({ page: p })}
-                            t={t}
-                          />
-                        );
-                      })}
-                    </div>
-
-                    {/* Mobile: Current Page Indicator */}
-                    <div className="flex sm:hidden items-center justify-center min-w-[60px]">
-                      <span className="text-sm font-medium">
-                        {page} / {totalPages}
-                      </span>
-                    </div>
-
-                    {/* Next Button - Icon Only */}
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => updateURL({ page: page + 1 })}
-                      disabled={!hasNext}
-                      aria-label={t("nextPage")}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        {searchInput && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleClearSearch}
+            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+            aria-label={t("clearSearch")}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
-    </TooltipProvider>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <PageHeader title={t("title")} description={t("description")} />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={loading}
+            className="sm:w-auto"
+          >
+            {/* Rule 6.1: Animate wrapper div instead of SVG icon */}
+            <div className={loading ? "animate-spin mr-2" : "mr-2"}>
+              <RefreshCw className="h-4 w-4" />
+            </div>
+            {t("refresh")}
+          </Button>
+          <Button
+            onClick={() => setIsAddDialogOpen(true)}
+            className="sm:w-auto"
+          >
+            <UserPlus className="mr-2 h-4 w-4" />
+            {t("addClient")}
+          </Button>
+        </div>
+      </div>
+
+      <AddClientDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onClientCreated={handleRefresh}
+      />
+
+      <DeleteClientDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        client={clientToDelete}
+        onClientDeleted={handleRefresh}
+      />
+
+      <EditClientDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        client={clientToEdit}
+        onClientUpdated={handleRefresh}
+      />
+
+      <ViewClientDialog
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
+        clientId={clientIdToView}
+      />
+
+      <Card>
+        <CardContent className="p-6">
+          {/* Error State */}
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>
+                {t("loadingError", { error: error.message })}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <BaseTable
+            columns={columns}
+            data={clients}
+            getRowKey={(client) => client.id}
+            isLoading={loading}
+            skeletonRowCount={pageSize}
+            renderRow={renderRow}
+            sort={sortState}
+            onSortChange={handleSort}
+            pagination={paginationState}
+            onPageChange={(p) => updateURL({ page: p })}
+            onPageSizeChange={handlePageSizeChange}
+            paginationLabels={paginationLabels}
+            emptyState={emptyState}
+            toolbar={searchToolbar}
+            withTooltipProvider={true}
+            className=""
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

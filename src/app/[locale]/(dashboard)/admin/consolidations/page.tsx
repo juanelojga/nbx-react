@@ -7,14 +7,7 @@ import dynamic from "next/dynamic";
 import { useConsolidationTableState } from "@/hooks/useConsolidationTableState";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -27,29 +20,24 @@ import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { TableActionButtons } from "@/components/common/TableActionButtons";
+import {
+  BaseTable,
+  type ColumnDef,
+  type SortState,
+  type PaginationState,
+  type EmptyStateConfig,
+  type PaginationLabels,
+} from "@/components/ui/base-table";
 import {
   GET_ALL_CONSOLIDATES,
   GetAllConsolidatesResponse,
   GetAllConsolidatesVariables,
   ConsolidateType,
 } from "@/graphql/queries/consolidations";
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Pencil,
-  RefreshCw,
-  Search,
-  Trash2,
-  X,
-  Package as PackageIcon,
-} from "lucide-react";
+import { RefreshCw, Search, X, Package as PackageIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/status-badge";
 
@@ -171,7 +159,7 @@ const ConsolidationRow = memo(function ConsolidationRow({
             </Tooltip>
           ) : (
             <p className="text-xs transition-colors duration-300 text-muted-foreground/40 italic">
-              —
+              {"\u2014"}
             </p>
           )}
         </div>
@@ -207,72 +195,28 @@ const ConsolidationRow = memo(function ConsolidationRow({
                       year: "numeric",
                     }
                   )
-                : "—"}
+                : "\u2014"}
             </time>
           </div>
         </div>
       </TableCell>
-      <TableCell>
-        <div className="flex items-center justify-end gap-1.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-600 shadow-sm ring-1 ring-blue-200/50 transition-all duration-300 hover:scale-110 hover:from-blue-100 hover:to-blue-200/50 hover:text-blue-700 hover:shadow-md hover:ring-blue-300/50 active:scale-95 dark:from-blue-950/30 dark:to-blue-900/20 dark:ring-blue-800/30 dark:hover:from-blue-900/40"
-                onClick={() => onView(consolidation.id)}
-                aria-label={`View ${consolidation.description}`}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="rounded-lg bg-blue-950 px-3 py-1.5 text-xs font-medium text-blue-50"
-            >
-              <p>{t("viewConsolidation")}</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-lg bg-gradient-to-br from-amber-50 to-amber-100/50 text-amber-600 shadow-sm ring-1 ring-amber-200/50 transition-all duration-300 hover:scale-110 hover:from-amber-100 hover:to-amber-200/50 hover:text-amber-700 hover:shadow-md hover:ring-amber-300/50 active:scale-95 dark:from-amber-950/30 dark:to-amber-900/20 dark:ring-amber-800/30 dark:hover:from-amber-900/40"
-                onClick={() => onEdit(consolidation)}
-                aria-label={`Edit ${consolidation.description}`}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="rounded-lg bg-amber-950 px-3 py-1.5 text-xs font-medium text-amber-50"
-            >
-              <p>{t("editConsolidation")}</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 text-red-600 shadow-sm ring-1 ring-red-200/50 transition-all duration-300 hover:scale-110 hover:from-red-100 hover:to-red-200/50 hover:text-red-700 hover:shadow-md hover:ring-red-300/50 active:scale-95 dark:from-red-950/30 dark:to-red-900/20 dark:ring-red-800/30 dark:hover:from-red-900/40"
-                onClick={() => onDelete(consolidation)}
-                aria-label={`Delete ${consolidation.description}`}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="rounded-lg bg-red-950 px-3 py-1.5 text-xs font-medium text-red-50"
-            >
-              <p>{t("deleteConsolidation")}</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </TableCell>
+      <TableActionButtons
+        onView={{
+          onClick: () => onView(consolidation.id),
+          ariaLabel: `View ${consolidation.description}`,
+          tooltip: t("viewConsolidation"),
+        }}
+        onEdit={{
+          onClick: () => onEdit(consolidation),
+          ariaLabel: `Edit ${consolidation.description}`,
+          tooltip: t("editConsolidation"),
+        }}
+        onDelete={{
+          onClick: () => onDelete(consolidation),
+          ariaLabel: `Delete ${consolidation.description}`,
+          tooltip: t("deleteConsolidation"),
+        }}
+      />
     </TableRow>
   );
 });
@@ -376,12 +320,12 @@ export default function AdminConsolidations() {
   });
 
   const handleSort = useCallback(
-    (field: SortField) => {
+    (field: string) => {
       if (sortField === field) {
         const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
         updateURL({ sortOrder: newSortOrder });
       } else {
-        updateURL({ sortField: field, sortOrder: "asc" });
+        updateURL({ sortField: field as SortField, sortOrder: "asc" });
       }
     },
     [sortField, sortOrder, updateURL]
@@ -440,514 +384,249 @@ export default function AdminConsolidations() {
   const totalCount = data?.allConsolidates.totalCount || 0;
   const hasNext = data?.allConsolidates.hasNext || false;
   const hasPrevious = data?.allConsolidates.hasPrevious || false;
-  const totalPages = Math.ceil(totalCount / pageSize);
 
   const consolidations = useMemo(
     () => data?.allConsolidates.results || [],
     [data?.allConsolidates.results]
   );
 
-  const filteredConsolidations = consolidations;
+  const columns: ColumnDef<ConsolidateType>[] = useMemo(
+    () => [
+      {
+        id: "id",
+        header: t("id"),
+        cell: () => null,
+        skeletonWidth: "8rem",
+      },
+      {
+        id: "client",
+        header: t("client"),
+        cell: () => null,
+        skeletonWidth: "9rem",
+      },
+      {
+        id: "description",
+        header: t("description"),
+        cell: () => null,
+        skeletonWidth: "10rem",
+      },
+      {
+        id: "status",
+        header: t("status"),
+        cell: () => null,
+        sortable: true,
+        sortField: "status",
+        skeletonWidth: "5rem",
+        skeletonVariant: "badge",
+      },
+      {
+        id: "packagesCount",
+        header: t("packagesCount"),
+        cell: () => null,
+        skeletonWidth: "3rem",
+        skeletonVariant: "date",
+      },
+      {
+        id: "deliveryDate",
+        header: t("deliveryDate"),
+        cell: () => null,
+        sortable: true,
+        sortField: "delivery_date",
+        skeletonWidth: "7rem",
+        skeletonVariant: "date",
+      },
+      {
+        id: "actions",
+        header: t("actions"),
+        cell: () => null,
+        align: "right",
+        skeletonVariant: "actions",
+        skeletonActionCount: 3,
+      },
+    ],
+    [t]
+  );
 
-  const pageNumbers = useMemo(() => {
-    const pages: (number | string)[] = [];
-    const maxVisiblePages = 5;
-    const ellipsis = "...";
+  const sortState: SortState = useMemo(
+    () => ({
+      field: sortField,
+      order: sortOrder,
+    }),
+    [sortField, sortOrder]
+  );
 
-    if (totalPages <= maxVisiblePages + 2) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
+  const paginationState: PaginationState | undefined = useMemo(
+    () =>
+      totalCount > 0
+        ? { page, pageSize, totalCount, hasNext, hasPrevious }
+        : undefined,
+    [page, pageSize, totalCount, hasNext, hasPrevious]
+  );
 
-      if (page <= 3) {
-        for (let i = 2; i <= Math.min(maxVisiblePages, totalPages - 1); i++) {
-          pages.push(i);
-        }
-        pages.push(ellipsis);
-      } else if (page >= totalPages - 2) {
-        pages.push(ellipsis);
-        for (let i = totalPages - maxVisiblePages + 1; i < totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(ellipsis);
-        for (let i = page - 1; i <= page + 1; i++) {
-          pages.push(i);
-        }
-        pages.push(ellipsis);
-      }
+  const paginationLabels: PaginationLabels = useMemo(
+    () => ({
+      showing: (start: number, end: number, total: number) =>
+        t("showingResults", { start, end, total }),
+      rowsPerPage: `${t("itemsPerPage")}:`,
+      previousPage: t("previousPage"),
+      nextPage: t("nextPage"),
+      goToPage: (pageNum: number | string) => t("goToPage", { page: pageNum }),
+    }),
+    [t]
+  );
 
-      pages.push(totalPages);
-    }
+  const emptyState: EmptyStateConfig = useMemo(
+    () => ({
+      icon: PackageIcon,
+      title:
+        searchInput || statusFilter !== "all"
+          ? t("noMatchingConsolidations")
+          : t("noConsolidationsFound"),
+      description: searchInput
+        ? t("noMatchingConsolidationsDescription", { search: searchInput })
+        : t("noConsolidationsFoundDescription"),
+      action:
+        searchInput || statusFilter !== "all" ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSearchInput("");
+              updateURL({ search: "", status: "all", page: 1 });
+            }}
+            className="mt-8 gap-2"
+          >
+            <X className="h-4 w-4" />
+            {t("clearSearch")}
+          </Button>
+        ) : undefined,
+    }),
+    [t, searchInput, statusFilter, updateURL]
+  );
 
-    return pages;
-  }, [page, totalPages]);
+  const renderRow = useCallback(
+    (consolidation: ConsolidateType, index: number, _isSelected: boolean) => (
+      <ConsolidationRow
+        key={consolidation.id}
+        consolidation={consolidation}
+        onView={handleViewConsolidation}
+        onEdit={handleEditConsolidation}
+        onDelete={handleDeleteConsolidation}
+        animationDelay={index * 50}
+      />
+    ),
+    [
+      handleViewConsolidation,
+      handleEditConsolidation,
+      handleDeleteConsolidation,
+    ]
+  );
 
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="h-4 w-4" />;
-    }
-    return sortOrder === "asc" ? (
-      <ArrowUp className="h-4 w-4" />
-    ) : (
-      <ArrowDown className="h-4 w-4" />
-    );
-  };
+  const searchAndFilterToolbar = (
+    <div className="mb-6 flex flex-col gap-4 md:flex-row">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder={t("searchPlaceholder")}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          className="pl-9 pr-9"
+          aria-label={t("searchPlaceholder")}
+        />
+        {searchInput && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleClearSearch}
+            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+            aria-label={t("clearSearch")}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
 
-  const getAriaSort = (
-    field: SortField
-  ): "ascending" | "descending" | "none" => {
-    if (sortField !== field) return "none";
-    return sortOrder === "asc" ? "ascending" : "descending";
-  };
-
-  // Loading skeleton
-  if (loading) {
-    return (
-      <TooltipProvider>
-        <div className="space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <PageHeader title={t("title")} description={t("description")} />
-          </div>
-
-          <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
-            <div className="relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent shimmer" />
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20">
-                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {t("id")}
-                    </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {t("client")}
-                    </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {t("description")}
-                    </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {t("status")}
-                    </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {t("packagesCount")}
-                    </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {t("deliveryDate")}
-                    </TableHead>
-                    <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {t("actions")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[...Array(5)].map((_, index) => (
-                    <TableRow
-                      key={index}
-                      style={{
-                        animationDelay: `${index * 100}ms`,
-                        animation: "fade-in 0.6s ease-out forwards",
-                        opacity: 0,
-                      }}
-                    >
-                      <TableCell>
-                        <div className="h-4 w-32 animate-pulse rounded-md bg-muted/60"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="h-4 w-36 animate-pulse rounded-md bg-muted/60"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="h-4 w-40 animate-pulse rounded-md bg-muted/60"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="h-6 w-20 animate-pulse rounded-full bg-muted/60"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="h-8 w-12 animate-pulse rounded-md bg-muted/60"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="h-8 w-28 animate-pulse rounded-md bg-muted/60"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-1.5">
-                          {[...Array(3)].map((_, i) => (
-                            <div
-                              key={i}
-                              className="h-9 w-9 animate-pulse rounded-lg bg-muted/60"
-                              style={{ animationDelay: `${i * 50}ms` }}
-                            ></div>
-                          ))}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </div>
-      </TooltipProvider>
-    );
-  }
-
-  // Empty state
-  if (!loading && !error && filteredConsolidations.length === 0) {
-    return (
-      <TooltipProvider>
-        <div className="space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <PageHeader title={t("title")} description={t("description")} />
-            <Button variant="outline" onClick={handleRefresh}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              {t("refresh")}
-            </Button>
-          </div>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="mb-6 flex flex-col gap-4 md:flex-row">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder={t("searchPlaceholder")}
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    className="pl-9 pr-9"
-                    aria-label={t("searchPlaceholder")}
-                  />
-                  {searchInput && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={handleClearSearch}
-                      className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                      aria-label={t("clearSearch")}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-
-                <Select
-                  value={statusFilter}
-                  onValueChange={handleStatusFilterChange}
-                >
-                  <SelectTrigger className="w-full md:w-[200px]">
-                    <SelectValue placeholder={t("filterByStatus")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                    <SelectItem value="awaiting_payment">
-                      {t("statusAwaitingPayment")}
-                    </SelectItem>
-                    <SelectItem value="pending">
-                      {t("statusPending")}
-                    </SelectItem>
-                    <SelectItem value="processing">
-                      {t("statusProcessing")}
-                    </SelectItem>
-                    <SelectItem value="in_transit">
-                      {t("statusInTransit")}
-                    </SelectItem>
-                    <SelectItem value="delivered">
-                      {t("statusDelivered")}
-                    </SelectItem>
-                    <SelectItem value="cancelled">
-                      {t("statusCancelled")}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-border/50 bg-gradient-to-br from-muted/30 via-background to-muted/20 py-24 text-center shadow-lg backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:shadow-xl">
-                <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary/5 blur-3xl transition-all duration-1000 group-hover:scale-150" />
-                <div className="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-secondary/5 blur-3xl transition-all duration-1000 group-hover:scale-150" />
-                <div className="relative">
-                  <div className="mb-8 inline-flex rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 shadow-inner ring-1 ring-primary/10 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-                    <PackageIcon className="h-20 w-20 text-primary/60 transition-all duration-500 group-hover:text-primary" />
-                  </div>
-                  <h3 className="mb-3 text-2xl font-bold tracking-tight text-foreground transition-colors duration-300 group-hover:text-primary">
-                    {searchInput || statusFilter !== "all"
-                      ? t("noMatchingConsolidations")
-                      : t("noConsolidationsFound")}
-                  </h3>
-                  <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted-foreground transition-colors duration-300 group-hover:text-foreground/80">
-                    {searchInput
-                      ? t("noMatchingConsolidationsDescription", {
-                          search: searchInput,
-                        })
-                      : t("noConsolidationsFoundDescription")}
-                  </p>
-                  {(searchInput || statusFilter !== "all") && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSearchInput("");
-                        updateURL({ search: "", status: "all", page: 1 });
-                      }}
-                      className="mt-8 gap-2"
-                    >
-                      <X className="h-4 w-4" />
-                      {t("clearSearch")}
-                    </Button>
-                  )}
-                  <div className="mt-8 flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-                    <div className="h-px w-8 bg-gradient-to-r from-transparent to-muted-foreground/30" />
-                    <span>Ready to start</span>
-                    <div className="h-px w-8 bg-gradient-to-l from-transparent to-muted-foreground/30" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </TooltipProvider>
-    );
-  }
+      <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+        <SelectTrigger className="w-full md:w-[200px]">
+          <SelectValue placeholder={t("filterByStatus")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{t("allStatuses")}</SelectItem>
+          <SelectItem value="awaiting_payment">
+            {t("statusAwaitingPayment")}
+          </SelectItem>
+          <SelectItem value="pending">{t("statusPending")}</SelectItem>
+          <SelectItem value="processing">{t("statusProcessing")}</SelectItem>
+          <SelectItem value="in_transit">{t("statusInTransit")}</SelectItem>
+          <SelectItem value="delivered">{t("statusDelivered")}</SelectItem>
+          <SelectItem value="cancelled">{t("statusCancelled")}</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
 
   return (
-    <TooltipProvider>
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <PageHeader title={t("title")} description={t("description")} />
-          <Button variant="outline" onClick={handleRefresh} disabled={loading}>
-            <div className={loading ? "animate-spin mr-2" : "mr-2"}>
-              <RefreshCw className="h-4 w-4" />
-            </div>
-            {t("refresh")}
-          </Button>
-        </div>
-
-        <ViewConsolidationDialog
-          open={isViewDialogOpen}
-          onOpenChange={setIsViewDialogOpen}
-          consolidationId={consolidationIdToView}
-        />
-
-        <EditConsolidationDialog
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          consolidation={consolidationToEdit}
-          onConsolidationUpdated={handleRefresh}
-        />
-
-        <DeleteConsolidationDialog
-          open={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-          consolidation={consolidationToDelete}
-          onConsolidationDeleted={handleRefresh}
-        />
-
-        <Card>
-          <CardContent className="p-6">
-            {/* Search and Filters */}
-            <div className="mb-6 flex flex-col gap-4 md:flex-row">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder={t("searchPlaceholder")}
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-9 pr-9"
-                  aria-label={t("searchPlaceholder")}
-                />
-                {searchInput && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleClearSearch}
-                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                    aria-label={t("clearSearch")}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-
-              <Select
-                value={statusFilter}
-                onValueChange={handleStatusFilterChange}
-              >
-                <SelectTrigger className="w-full md:w-[200px]">
-                  <SelectValue placeholder={t("filterByStatus")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                  <SelectItem value="awaiting_payment">
-                    {t("statusAwaitingPayment")}
-                  </SelectItem>
-                  <SelectItem value="pending">{t("statusPending")}</SelectItem>
-                  <SelectItem value="processing">
-                    {t("statusProcessing")}
-                  </SelectItem>
-                  <SelectItem value="in_transit">
-                    {t("statusInTransit")}
-                  </SelectItem>
-                  <SelectItem value="delivered">
-                    {t("statusDelivered")}
-                  </SelectItem>
-                  <SelectItem value="cancelled">
-                    {t("statusCancelled")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {error && (
-              <Alert variant="destructive" className="mb-6">
-                <AlertDescription>
-                  {t("loadingError", { error: error.message })}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20 backdrop-blur-sm transition-colors hover:from-muted/60 hover:to-muted/30">
-                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {t("id")}
-                      </TableHead>
-                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {t("client")}
-                      </TableHead>
-                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {t("description")}
-                      </TableHead>
-                      <TableHead
-                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
-                        onClick={() => handleSort("status")}
-                        aria-sort={getAriaSort("status")}
-                      >
-                        <div className="flex items-center gap-2">
-                          {t("status")}
-                          {getSortIcon("status")}
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {t("packagesCount")}
-                      </TableHead>
-                      <TableHead
-                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
-                        onClick={() => handleSort("delivery_date")}
-                        aria-sort={getAriaSort("delivery_date")}
-                      >
-                        <div className="flex items-center gap-2">
-                          {t("deliveryDate")}
-                          {getSortIcon("delivery_date")}
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {t("actions")}
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredConsolidations.map((consolidation, index) => (
-                      <ConsolidationRow
-                        key={consolidation.id}
-                        consolidation={consolidation}
-                        onView={handleViewConsolidation}
-                        onEdit={handleEditConsolidation}
-                        onDelete={handleDeleteConsolidation}
-                        animationDelay={index * 50}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                <p className="text-sm text-muted-foreground">
-                  {t("showingResults", {
-                    start: (page - 1) * pageSize + 1,
-                    end: Math.min(page * pageSize, totalCount),
-                    total: totalCount,
-                  })}
-                </p>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    {t("itemsPerPage")}:
-                  </span>
-                  <Select
-                    value={pageSize.toString()}
-                    onValueChange={(value) =>
-                      handlePageSizeChange(parseInt(value, 10))
-                    }
-                  >
-                    <SelectTrigger className="h-8 w-16">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => updateURL({ page: page - 1 })}
-                    disabled={!hasPrevious}
-                    aria-label={t("previousPage")}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-
-                  <div className="flex items-center gap-1">
-                    {pageNumbers.map((pageNum, idx) =>
-                      pageNum === "..." ? (
-                        <span
-                          key={`ellipsis-${idx}`}
-                          className="px-2 text-muted-foreground"
-                        >
-                          ...
-                        </span>
-                      ) : (
-                        <Button
-                          key={pageNum}
-                          variant={page === pageNum ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => updateURL({ page: pageNum as number })}
-                          className="h-8 w-8 p-0"
-                          aria-label={t("goToPage", { page: pageNum })}
-                          aria-current={page === pageNum ? "page" : undefined}
-                        >
-                          {pageNum}
-                        </Button>
-                      )
-                    )}
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => updateURL({ page: page + 1 })}
-                    disabled={!hasNext}
-                    aria-label={t("nextPage")}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <PageHeader title={t("title")} description={t("description")} />
+        <Button variant="outline" onClick={handleRefresh} disabled={loading}>
+          <div className={loading ? "animate-spin mr-2" : "mr-2"}>
+            <RefreshCw className="h-4 w-4" />
+          </div>
+          {t("refresh")}
+        </Button>
       </div>
-    </TooltipProvider>
+
+      <ViewConsolidationDialog
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
+        consolidationId={consolidationIdToView}
+      />
+
+      <EditConsolidationDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        consolidation={consolidationToEdit}
+        onConsolidationUpdated={handleRefresh}
+      />
+
+      <DeleteConsolidationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        consolidation={consolidationToDelete}
+        onConsolidationDeleted={handleRefresh}
+      />
+
+      <Card>
+        <CardContent className="p-6">
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>
+                {t("loadingError", { error: error.message })}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <BaseTable<ConsolidateType>
+            columns={columns}
+            data={consolidations}
+            getRowKey={(c) => c.id}
+            isLoading={loading}
+            renderRow={renderRow}
+            sort={sortState}
+            onSortChange={handleSort}
+            pagination={paginationState}
+            onPageChange={(p) => updateURL({ page: p })}
+            onPageSizeChange={handlePageSizeChange}
+            paginationLabels={paginationLabels}
+            emptyState={emptyState}
+            toolbar={searchAndFilterToolbar}
+            withTooltipProvider={true}
+            className=""
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
