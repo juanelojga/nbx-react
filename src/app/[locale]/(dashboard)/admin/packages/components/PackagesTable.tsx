@@ -3,22 +3,19 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  BaseTable,
+  type ColumnDef,
+  type EmptyStateConfig,
+} from "@/components/ui/base-table";
 import {
   Package as PackageIcon,
   X,
@@ -104,7 +101,7 @@ const PackageRow = memo(function PackageRow({
             className="transition-all duration-300 hover:scale-110"
           />
           {isSelected && (
-            <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-primary animate-pulse" />
+            <Sparkles className="absolute -top-1 -right-1 h-3 w-3 animate-pulse text-primary" />
           )}
         </div>
       </TableCell>
@@ -149,7 +146,7 @@ const PackageRow = memo(function PackageRow({
                 : "text-muted-foreground/40 italic"
             }`}
           >
-            {pkg.description || "—"}
+            {pkg.description || "\u2014"}
           </p>
         </div>
       </TableCell>
@@ -262,24 +259,7 @@ export function PackagesTable({
     barcode: string;
   } | null>(null);
 
-  // Rule 5.8: Subscribe to derived state with useMemo - Rule 7.11: Using Set.size
-  const allSelected = useMemo(() => {
-    return packages.length > 0 && selectedPackages.size === packages.length;
-  }, [packages.length, selectedPackages.size]);
-
-  const someSelected = useMemo(() => {
-    return selectedPackages.size > 0 && !allSelected;
-  }, [selectedPackages.size, allSelected]);
-
   // Rule 5.7: Put interaction logic in event handlers with useCallback
-  const handleSelectAll = useCallback(() => {
-    if (allSelected) {
-      onSelectionChange(new Set());
-    } else {
-      onSelectionChange(new Set(packages.map((pkg) => pkg.id)));
-    }
-  }, [allSelected, onSelectionChange, packages]);
-
   const handleSelectPackage = useCallback(
     (packageId: string) => {
       const newSelection = new Set(selectedPackages);
@@ -292,10 +272,6 @@ export function PackagesTable({
     },
     [onSelectionChange, selectedPackages]
   );
-
-  const handleClearSelection = useCallback(() => {
-    onSelectionChange(new Set());
-  }, [onSelectionChange]);
 
   const handleViewPackage = useCallback((packageId: string) => {
     setSelectedPackageId(packageId);
@@ -316,7 +292,6 @@ export function PackagesTable({
   }, []);
 
   const handlePackageUpdated = useCallback(async () => {
-    // Refetch packages to update the table
     if (onRefetch) {
       await onRefetch();
     }
@@ -329,213 +304,121 @@ export function PackagesTable({
       newSelection.delete(packageToDelete.id);
       onSelectionChange(newSelection);
     }
-    // Refetch packages to update the table
     if (onRefetch) {
       await onRefetch();
     }
   }, [onRefetch, onSelectionChange, packageToDelete, selectedPackages]);
 
-  // Loading skeleton
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent shimmer" />
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20">
-                  <TableHead className="w-12 pl-4">
-                    <div className="h-4 w-4 animate-pulse rounded bg-muted/60"></div>
-                  </TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("barcodeHeader")}
-                  </TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("descriptionHeader")}
-                  </TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("createdAtHeader")}
-                  </TableHead>
-                  <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("actionsHeader")}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {[...Array(5)].map((_, index) => (
-                  <TableRow
-                    key={index}
-                    style={{
-                      animationDelay: `${index * 100}ms`,
-                      animation: "fade-in 0.6s ease-out forwards",
-                      opacity: 0,
-                    }}
-                  >
-                    <TableCell className="pl-4">
-                      <div className="h-4 w-4 animate-pulse rounded bg-muted/60"></div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-5 w-5 animate-pulse rounded bg-muted/60"></div>
-                        <div className="h-4 w-32 animate-pulse rounded-md bg-muted/60"></div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="h-4 w-48 animate-pulse rounded-md bg-muted/60"></div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="h-8 w-28 animate-pulse rounded-md bg-muted/60"></div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-1.5">
-                        {[...Array(3)].map((_, i) => (
-                          <div
-                            key={i}
-                            className="h-9 w-9 animate-pulse rounded-lg bg-muted/60"
-                            style={{ animationDelay: `${i * 50}ms` }}
-                          ></div>
-                        ))}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const columns: ColumnDef<Package>[] = useMemo(
+    () => [
+      {
+        id: "barcode",
+        header: t("barcodeHeader"),
+        cell: () => null, // Not used with renderRow
+        skeletonWidth: "8rem",
+      },
+      {
+        id: "description",
+        header: t("descriptionHeader"),
+        cell: () => null,
+        skeletonWidth: "12rem",
+      },
+      {
+        id: "createdAt",
+        header: t("createdAtHeader"),
+        cell: () => null,
+        skeletonWidth: "7rem",
+        skeletonVariant: "date",
+      },
+      {
+        id: "actions",
+        header: t("actionsHeader"),
+        cell: () => null,
+        align: "right",
+        skeletonVariant: "actions",
+        skeletonActionCount: 3,
+      },
+    ],
+    [t]
+  );
 
-  // Empty state
-  if (packages.length === 0) {
-    return (
-      <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-border/50 bg-gradient-to-br from-muted/30 via-background to-muted/20 py-24 text-center shadow-lg backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:shadow-xl">
-        <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary/5 blur-3xl transition-all duration-1000 group-hover:scale-150" />
-        <div className="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-secondary/5 blur-3xl transition-all duration-1000 group-hover:scale-150" />
-        <div className="relative">
-          <div className="mb-8 inline-flex rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 shadow-inner ring-1 ring-primary/10 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-            <PackageIcon className="h-20 w-20 text-primary/60 transition-all duration-500 group-hover:text-primary" />
+  const emptyState: EmptyStateConfig = useMemo(
+    () => ({
+      icon: PackageIcon,
+      title: t("emptyTitle"),
+      description: t("emptyDescription"),
+    }),
+    [t]
+  );
+
+  const selectionBarContent = useMemo(
+    () => (
+      <div className="flex items-center gap-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
+          <Sparkles className="h-5 w-5 animate-pulse text-primary-foreground" />
+        </div>
+        <div>
+          <div className="text-sm font-bold text-foreground">
+            {t("selectedCount", {
+              count: selectedPackages.size,
+              plural: selectedPackages.size !== 1 ? "s" : "",
+            })}
           </div>
-          <h3 className="mb-3 text-2xl font-bold tracking-tight text-foreground transition-colors duration-300 group-hover:text-primary">
-            {t("emptyTitle")}
-          </h3>
-          <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted-foreground transition-colors duration-300 group-hover:text-foreground/80">
-            {t("emptyDescription")}
-          </p>
-          <div className="mt-8 flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-            <div className="h-px w-8 bg-gradient-to-r from-transparent to-muted-foreground/30" />
-            <span>Ready to start</span>
-            <div className="h-px w-8 bg-gradient-to-l from-transparent to-muted-foreground/30" />
+          <div className="text-xs text-muted-foreground">
+            {t("selectToConsolidate")}
           </div>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onSelectionChange(new Set())}
+          className="gap-2 rounded-xl border-2 border-border/50 bg-background/80 font-semibold shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive hover:shadow-md active:scale-95"
+        >
+          <X className="h-4 w-4" />
+          {t("clearSelection")}
+        </Button>
       </div>
-    );
-  }
+    ),
+    [t, selectedPackages.size, onSelectionChange]
+  );
+
+  const renderRow = useCallback(
+    (pkg: Package, index: number, isSelected: boolean) => (
+      <PackageRow
+        key={pkg.id}
+        pkg={pkg}
+        isSelected={isSelected}
+        onSelect={handleSelectPackage}
+        onView={handleViewPackage}
+        onEdit={handleEditPackage}
+        onDelete={handleDeletePackage}
+        animationDelay={index * 50}
+      />
+    ),
+    [
+      handleSelectPackage,
+      handleViewPackage,
+      handleEditPackage,
+      handleDeletePackage,
+    ]
+  );
 
   return (
-    <TooltipProvider>
-      <div className="space-y-6">
-        <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
-          <div className="relative overflow-x-auto">
-            <div className="pointer-events-none absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-card/80 to-transparent" />
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20 backdrop-blur-sm transition-colors hover:from-muted/60 hover:to-muted/30">
-                  <TableHead className="w-12 pl-4">
-                    <div className="relative">
-                      <Checkbox
-                        checked={allSelected}
-                        onCheckedChange={handleSelectAll}
-                        aria-label={t("selectPackage", { barcode: "" })}
-                        className={`transition-all duration-300 hover:scale-110 ${
-                          someSelected
-                            ? "data-[state=checked]:bg-primary/50"
-                            : ""
-                        }`}
-                      />
-                      {someSelected && !allSelected && (
-                        <div className="absolute -right-1 -top-1 h-2 w-2 animate-pulse rounded-full bg-primary" />
-                      )}
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      {t("barcodeHeader")}
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("descriptionHeader")}
-                  </TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("createdAtHeader")}
-                  </TableHead>
-                  <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("actionsHeader")}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {packages.map((pkg, index) => (
-                  <PackageRow
-                    key={pkg.id}
-                    pkg={pkg}
-                    isSelected={selectedPackages.has(pkg.id)}
-                    onSelect={handleSelectPackage}
-                    onView={handleViewPackage}
-                    onEdit={handleEditPackage}
-                    onDelete={handleDeletePackage}
-                    animationDelay={index * 50}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-
-        {/* Selection Actions Bar */}
-        {selectedPackages.size > 0 && (
-          <div
-            className="sticky bottom-4 z-10 overflow-hidden rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-background via-primary/5 to-background p-5 shadow-2xl backdrop-blur-md transition-all duration-500 animate-slide-up"
-            style={{
-              animation: "slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-            }}
-          >
-            <div className="absolute -left-12 -top-12 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
-            <div className="absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-secondary/10 blur-2xl" />
-            <div className="relative flex items-center justify-between">
-              <div className="flex items-center gap-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
-                    <Sparkles className="h-5 w-5 animate-pulse text-primary-foreground" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-foreground">
-                      {t("selectedCount", {
-                        count: selectedPackages.size,
-                        plural: selectedPackages.size !== 1 ? "s" : "",
-                      })}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {t("selectToConsolidate")}
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClearSelection}
-                  className="gap-2 rounded-xl border-2 border-border/50 bg-background/80 font-semibold shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive hover:shadow-md active:scale-95"
-                >
-                  <X className="h-4 w-4" />
-                  {t("clearSelection")}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+    <>
+      <BaseTable<Package>
+        columns={columns}
+        data={packages}
+        getRowKey={(pkg) => pkg.id}
+        isLoading={isLoading}
+        renderRow={renderRow}
+        selection={{
+          selectedIds: selectedPackages,
+          onSelectionChange,
+          getItemId: (pkg) => pkg.id,
+          selectionBarContent,
+        }}
+        emptyState={emptyState}
+      />
 
       {/* Package Details Modal */}
       <PackageDetailsModal
@@ -559,6 +442,6 @@ export function PackagesTable({
         package_={packageToDelete}
         onPackageDeleted={handlePackageDeleted}
       />
-    </TooltipProvider>
+    </>
   );
 }

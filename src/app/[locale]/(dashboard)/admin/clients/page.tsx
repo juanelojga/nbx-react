@@ -7,40 +7,28 @@ import dynamic from "next/dynamic";
 import { useClientTableState } from "@/hooks/useClientTableState";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  BaseTable,
+  type ColumnDef,
+  type SortState,
+  type PaginationState,
+  type EmptyStateConfig,
+  type PaginationLabels,
+} from "@/components/ui/base-table";
 import {
   GET_ALL_CLIENTS,
   GetAllClientsResponse,
   GetAllClientsVariables,
 } from "@/graphql/queries/clients";
 import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   Loader2,
   Pencil,
@@ -371,14 +359,14 @@ export default function AdminClients() {
 
   // Rule 5.9: Use functional setState updates & Rule 5.6: Narrow effect dependencies with useCallback
   const handleSort = useCallback(
-    (field: SortField) => {
+    (field: string) => {
       if (sortField === field) {
         // Toggle sort order
         const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
         updateURL({ sortOrder: newSortOrder });
       } else {
         // Change sort field, default to ascending
-        updateURL({ sortField: field, sortOrder: "asc" });
+        updateURL({ sortField: field as SortField, sortOrder: "asc" });
       }
     },
     [sortField, sortOrder, updateURL]
@@ -407,70 +395,6 @@ export default function AdminClients() {
   const totalCount = data?.allClients.totalCount || 0;
   const hasNext = data?.allClients.hasNext || false;
   const hasPrevious = data?.allClients.hasPrevious || false;
-  const totalPages = Math.ceil(totalCount / pageSize);
-
-  // Rule 5.8: Subscribe to derived state with useMemo
-  const pageNumbers = useMemo(() => {
-    const pages: (number | string)[] = [];
-    const maxVisiblePages = 5;
-    const ellipsis = "...";
-
-    if (totalPages <= maxVisiblePages + 2) {
-      // Show all pages if total is small
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Always show first page
-      pages.push(1);
-
-      if (page <= 3) {
-        // Near the beginning
-        for (let i = 2; i <= Math.min(maxVisiblePages, totalPages - 1); i++) {
-          pages.push(i);
-        }
-        pages.push(ellipsis);
-      } else if (page >= totalPages - 2) {
-        // Near the end
-        pages.push(ellipsis);
-        for (let i = totalPages - maxVisiblePages + 1; i < totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        // Middle section
-        pages.push(ellipsis);
-        for (let i = page - 1; i <= page + 1; i++) {
-          pages.push(i);
-        }
-        pages.push(ellipsis);
-      }
-
-      // Always show last page
-      pages.push(totalPages);
-    }
-
-    return pages;
-  }, [page, totalPages]);
-
-  // Helper function to get sort icon for a column
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="h-4 w-4" />;
-    }
-    return sortOrder === "asc" ? (
-      <ArrowUp className="h-4 w-4" />
-    ) : (
-      <ArrowDown className="h-4 w-4" />
-    );
-  };
-
-  // Helper function to get ARIA sort attribute
-  const getAriaSort = (
-    field: SortField
-  ): "ascending" | "descending" | "none" => {
-    if (sortField !== field) return "none";
-    return sortOrder === "asc" ? "ascending" : "descending";
-  };
 
   // Rule 5.7: Put interaction logic in event handlers (with useCallback for stability)
   const handleViewClient = useCallback((clientId: string) => {
@@ -533,449 +457,237 @@ export default function AdminClients() {
     []
   );
 
-  // Loading skeleton
-  if (loading) {
-    return (
-      <TooltipProvider>
-        <div className="space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <PageHeader title={t("title")} description={t("description")} />
-          </div>
+  const columns: ColumnDef<(typeof clients)[number]>[] = useMemo(
+    () => [
+      {
+        id: "fullName",
+        header: t("fullName"),
+        cell: () => null,
+        sortable: true,
+        sortField: "full_name",
+        skeletonWidth: "8rem",
+      },
+      {
+        id: "email",
+        header: t("email"),
+        cell: () => null,
+        sortable: true,
+        sortField: "email",
+        skeletonWidth: "10rem",
+      },
+      {
+        id: "phone",
+        header: t("phone"),
+        cell: () => null,
+        skeletonWidth: "7rem",
+      },
+      {
+        id: "location",
+        header: t("location"),
+        cell: () => null,
+        skeletonWidth: "9rem",
+      },
+      {
+        id: "createdAt",
+        header: t("createdAt"),
+        cell: () => null,
+        sortable: true,
+        sortField: "created_at",
+        skeletonWidth: "7rem",
+        skeletonVariant: "date",
+      },
+      {
+        id: "actions",
+        header: t("actions"),
+        cell: () => null,
+        align: "right",
+        skeletonVariant: "actions",
+        skeletonActionCount: 3,
+      },
+    ],
+    [t]
+  );
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="mb-6">
-                <div className="relative max-w-md">
-                  <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder={t("searchPlaceholder")}
-                    value={searchInput}
-                    disabled
-                    className="pl-9 pr-9"
-                    aria-label={t("searchPlaceholder")}
-                  />
-                </div>
-              </div>
+  const sortState: SortState = useMemo(
+    () => ({
+      field: sortField,
+      order: sortOrder,
+    }),
+    [sortField, sortOrder]
+  );
 
-              <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
-                <div className="relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent shimmer" />
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20">
-                        <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          {t("fullName")}
-                        </TableHead>
-                        <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          {t("email")}
-                        </TableHead>
-                        <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          {t("phone")}
-                        </TableHead>
-                        <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          {t("location")}
-                        </TableHead>
-                        <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          {t("createdAt")}
-                        </TableHead>
-                        <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          {t("actions")}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[...Array(pageSize)].map((_, index) => (
-                        <TableRow
-                          key={index}
-                          style={{
-                            animationDelay: `${index * 100}ms`,
-                            animation: "fade-in 0.6s ease-out forwards",
-                            opacity: 0,
-                          }}
-                        >
-                          <TableCell>
-                            <div className="h-4 w-32 animate-pulse rounded-md bg-muted/60"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-40 animate-pulse rounded-md bg-muted/60"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-28 animate-pulse rounded-md bg-muted/60"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-4 w-36 animate-pulse rounded-md bg-muted/60"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="h-8 w-28 animate-pulse rounded-md bg-muted/60"></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-end gap-1.5">
-                              {[...Array(3)].map((_, i) => (
-                                <div
-                                  key={i}
-                                  className="h-9 w-9 animate-pulse rounded-lg bg-muted/60"
-                                  style={{ animationDelay: `${i * 50}ms` }}
-                                ></div>
-                              ))}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </TooltipProvider>
-    );
-  }
+  const paginationState: PaginationState | undefined = useMemo(
+    () =>
+      totalCount > 0
+        ? { page, pageSize, totalCount, hasNext, hasPrevious }
+        : undefined,
+    [page, pageSize, totalCount, hasNext, hasPrevious]
+  );
 
-  // Empty state
-  if (!loading && !error && clients.length === 0) {
-    return (
-      <TooltipProvider>
-        <div className="space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <PageHeader title={t("title")} description={t("description")} />
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleRefresh}>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                {t("refresh")}
-              </Button>
-              <Button onClick={() => setIsAddDialogOpen(true)}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                {t("addClient")}
-              </Button>
-            </div>
-          </div>
+  const paginationLabels: PaginationLabels = useMemo(
+    () => ({
+      showing: (start: number, end: number, total: number) =>
+        t("showing", { start, end, total }),
+      rowsPerPage: t("rowsPerPage"),
+      previousPage: t("previousPage"),
+      nextPage: t("nextPage"),
+      goToPage: (pageNum: number | string) => t("goToPage", { page: pageNum }),
+    }),
+    [t]
+  );
 
-          <AddClientDialog
-            open={isAddDialogOpen}
-            onOpenChange={setIsAddDialogOpen}
-            onClientCreated={handleRefresh}
-          />
+  const emptyState: EmptyStateConfig = useMemo(
+    () => ({
+      icon: Users,
+      title: debouncedSearch ? t("noMatchingClients") : t("noClientsFound"),
+      description: debouncedSearch
+        ? t("noMatchingClientsDescription", { search: debouncedSearch })
+        : t("noClientsFoundDescription"),
+      action: debouncedSearch ? (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleClearSearch}
+          className="mt-8 gap-2"
+        >
+          <X className="h-4 w-4" />
+          {t("clearSearch")}
+        </Button>
+      ) : undefined,
+    }),
+    [t, debouncedSearch, handleClearSearch]
+  );
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="mb-6">
-                <div className="relative max-w-md">
-                  {isDebouncing ? (
-                    <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-                  ) : (
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  )}
-                  <Input
-                    type="text"
-                    placeholder={t("searchPlaceholder")}
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    className="pl-9 pr-9"
-                    aria-label={t("searchPlaceholder")}
-                  />
-                  {searchInput && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={handleClearSearch}
-                      className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                      aria-label={t("clearSearch")}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
+  const renderRow = useCallback(
+    (client: (typeof clients)[number], index: number, _isSelected: boolean) => (
+      <ClientRow
+        key={client.id}
+        client={client}
+        onView={handleViewClient}
+        onEdit={handleEditClient}
+        onDelete={handleDeleteClient}
+        animationDelay={index * 50}
+      />
+    ),
+    [handleViewClient, handleEditClient, handleDeleteClient]
+  );
 
-              <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-border/50 bg-gradient-to-br from-muted/30 via-background to-muted/20 py-24 text-center shadow-lg backdrop-blur-sm transition-all duration-500 hover:border-primary/30 hover:shadow-xl">
-                <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary/5 blur-3xl transition-all duration-1000 group-hover:scale-150" />
-                <div className="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-secondary/5 blur-3xl transition-all duration-1000 group-hover:scale-150" />
-                <div className="relative">
-                  <div className="mb-8 inline-flex rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 shadow-inner ring-1 ring-primary/10 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-                    <Users className="h-20 w-20 text-primary/60 transition-all duration-500 group-hover:text-primary" />
-                  </div>
-                  <h3 className="mb-3 text-2xl font-bold tracking-tight text-foreground transition-colors duration-300 group-hover:text-primary">
-                    {debouncedSearch
-                      ? t("noMatchingClients")
-                      : t("noClientsFound")}
-                  </h3>
-                  <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted-foreground transition-colors duration-300 group-hover:text-foreground/80">
-                    {debouncedSearch
-                      ? t("noMatchingClientsDescription", {
-                          search: debouncedSearch,
-                        })
-                      : t("noClientsFoundDescription")}
-                  </p>
-                  {debouncedSearch && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleClearSearch}
-                      className="mt-8 gap-2"
-                    >
-                      <X className="h-4 w-4" />
-                      {t("clearSearch")}
-                    </Button>
-                  )}
-                  <div className="mt-8 flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-                    <div className="h-px w-8 bg-gradient-to-r from-transparent to-muted-foreground/30" />
-                    <span>Ready to start</span>
-                    <div className="h-px w-8 bg-gradient-to-l from-transparent to-muted-foreground/30" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </TooltipProvider>
-    );
-  }
+  const searchToolbar = (
+    <div className="mb-6">
+      <div className="relative max-w-md">
+        {loading || isDebouncing ? (
+          <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+        ) : (
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        )}
+        <Input
+          type="text"
+          placeholder={t("searchPlaceholder")}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          disabled={loading && !searchInput}
+          className="pl-9 pr-9"
+          aria-label={t("searchPlaceholder")}
+        />
+        {searchInput && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleClearSearch}
+            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+            aria-label={t("clearSearch")}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 
   return (
-    <TooltipProvider>
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <PageHeader title={t("title")} description={t("description")} />
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={loading}
-              className="sm:w-auto"
-            >
-              {/* Rule 6.1: Animate wrapper div instead of SVG icon */}
-              <div className={loading ? "animate-spin mr-2" : "mr-2"}>
-                <RefreshCw className="h-4 w-4" />
-              </div>
-              {t("refresh")}
-            </Button>
-            <Button
-              onClick={() => setIsAddDialogOpen(true)}
-              className="sm:w-auto"
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              {t("addClient")}
-            </Button>
-          </div>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <PageHeader title={t("title")} description={t("description")} />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={loading}
+            className="sm:w-auto"
+          >
+            {/* Rule 6.1: Animate wrapper div instead of SVG icon */}
+            <div className={loading ? "animate-spin mr-2" : "mr-2"}>
+              <RefreshCw className="h-4 w-4" />
+            </div>
+            {t("refresh")}
+          </Button>
+          <Button
+            onClick={() => setIsAddDialogOpen(true)}
+            className="sm:w-auto"
+          >
+            <UserPlus className="mr-2 h-4 w-4" />
+            {t("addClient")}
+          </Button>
         </div>
-
-        <AddClientDialog
-          open={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
-          onClientCreated={handleRefresh}
-        />
-
-        <DeleteClientDialog
-          open={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-          client={clientToDelete}
-          onClientDeleted={handleRefresh}
-        />
-
-        <EditClientDialog
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          client={clientToEdit}
-          onClientUpdated={handleRefresh}
-        />
-
-        <ViewClientDialog
-          open={isViewDialogOpen}
-          onOpenChange={setIsViewDialogOpen}
-          clientId={clientIdToView}
-        />
-
-        <Card>
-          <CardContent className="p-6">
-            {/* Search Input */}
-            <div className="mb-6">
-              <div className="relative max-w-md">
-                {isDebouncing ? (
-                  <Loader2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-                ) : (
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                )}
-                <Input
-                  type="text"
-                  placeholder={t("searchPlaceholder")}
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-9 pr-9"
-                  aria-label={t("searchPlaceholder")}
-                />
-                {searchInput && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleClearSearch}
-                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                    aria-label={t("clearSearch")}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Error State */}
-            {error && (
-              <Alert variant="destructive" className="mb-6">
-                <AlertDescription>
-                  {t("loadingError", { error: error.message })}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Table */}
-            <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20 backdrop-blur-sm transition-colors hover:from-muted/60 hover:to-muted/30">
-                      <TableHead
-                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
-                        onClick={() => handleSort("full_name")}
-                        aria-sort={getAriaSort("full_name")}
-                      >
-                        <div className="flex items-center gap-2">
-                          {t("fullName")}
-                          {getSortIcon("full_name")}
-                        </div>
-                      </TableHead>
-                      <TableHead
-                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
-                        onClick={() => handleSort("email")}
-                        aria-sort={getAriaSort("email")}
-                      >
-                        <div className="flex items-center gap-2">
-                          {t("email")}
-                          {getSortIcon("email")}
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {t("phone")}
-                      </TableHead>
-                      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {t("location")}
-                      </TableHead>
-                      <TableHead
-                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:bg-accent/50 transition-colors"
-                        onClick={() => handleSort("created_at")}
-                        aria-sort={getAriaSort("created_at")}
-                      >
-                        <div className="flex items-center gap-2">
-                          {t("createdAt")}
-                          {getSortIcon("created_at")}
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {t("actions")}
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {clients.map((client, index) => (
-                      <ClientRow
-                        key={client.id}
-                        client={client}
-                        onView={handleViewClient}
-                        onEdit={handleEditClient}
-                        onDelete={handleDeleteClient}
-                        animationDelay={index * 50}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                <p className="text-sm text-muted-foreground">
-                  {t("showing", {
-                    start: (page - 1) * pageSize + 1,
-                    end: Math.min(page * pageSize, totalCount),
-                    total: totalCount,
-                  })}
-                </p>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    {t("rowsPerPage")}
-                  </span>
-                  <Select
-                    value={pageSize.toString()}
-                    onValueChange={(value) =>
-                      handlePageSizeChange(parseInt(value, 10))
-                    }
-                  >
-                    <SelectTrigger className="h-8 w-16">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => updateURL({ page: page - 1 })}
-                    disabled={!hasPrevious}
-                    aria-label={t("previousPage")}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-
-                  <div className="flex items-center gap-1">
-                    {pageNumbers.map((pageNum, idx) =>
-                      pageNum === "..." ? (
-                        <span
-                          key={`ellipsis-${idx}`}
-                          className="px-2 text-muted-foreground"
-                        >
-                          ...
-                        </span>
-                      ) : (
-                        <Button
-                          key={pageNum}
-                          variant={page === pageNum ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => updateURL({ page: pageNum as number })}
-                          className="h-8 w-8 p-0"
-                          aria-label={t("goToPage", { page: pageNum })}
-                          aria-current={page === pageNum ? "page" : undefined}
-                        >
-                          {pageNum}
-                        </Button>
-                      )
-                    )}
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => updateURL({ page: page + 1 })}
-                    disabled={!hasNext}
-                    aria-label={t("nextPage")}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
       </div>
-    </TooltipProvider>
+
+      <AddClientDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onClientCreated={handleRefresh}
+      />
+
+      <DeleteClientDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        client={clientToDelete}
+        onClientDeleted={handleRefresh}
+      />
+
+      <EditClientDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        client={clientToEdit}
+        onClientUpdated={handleRefresh}
+      />
+
+      <ViewClientDialog
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
+        clientId={clientIdToView}
+      />
+
+      <Card>
+        <CardContent className="p-6">
+          {/* Error State */}
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>
+                {t("loadingError", { error: error.message })}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <BaseTable
+            columns={columns}
+            data={clients}
+            getRowKey={(client) => client.id}
+            isLoading={loading}
+            skeletonRowCount={pageSize}
+            renderRow={renderRow}
+            sort={sortState}
+            onSortChange={handleSort}
+            pagination={paginationState}
+            onPageChange={(p) => updateURL({ page: p })}
+            onPageSizeChange={handlePageSizeChange}
+            paginationLabels={paginationLabels}
+            emptyState={emptyState}
+            toolbar={searchToolbar}
+            withTooltipProvider={true}
+            className=""
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
