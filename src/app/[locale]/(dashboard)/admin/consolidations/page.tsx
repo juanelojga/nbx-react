@@ -883,8 +883,7 @@ export default function AdminConsolidations() {
             )}
 
             <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
-              <div className="relative overflow-x-auto">
-                <div className="pointer-events-none absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-card/80 to-transparent" />
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-b-2 border-border/50 bg-gradient-to-r from-muted/40 to-muted/20 backdrop-blur-sm transition-colors hover:from-muted/60 hover:to-muted/30">
