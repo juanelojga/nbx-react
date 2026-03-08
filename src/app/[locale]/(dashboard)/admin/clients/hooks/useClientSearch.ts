@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const DEBOUNCE_DELAY = 400;
 const DANGEROUS_CHARS_REGEX = /[<>{};\\\[\]]/g;
@@ -27,37 +28,28 @@ export function useClientSearch({
   debounceDelay = DEBOUNCE_DELAY,
 }: UseClientSearchOptions): UseClientSearchReturn {
   const [searchInput, setSearchInput] = useState(initialSearch);
-  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
-  const [isDebouncing, setIsDebouncing] = useState(false);
+  const debouncedRaw = useDebounce(searchInput, debounceDelay);
+  const debouncedSearch = sanitizeInput(debouncedRaw);
+  const isDebouncing = searchInput !== debouncedRaw;
 
-  // Sync search input from URL when it changes (e.g., browser back/forward)
+  // Sync from URL only when initialSearch actually changes (browser back/forward)
+  const [prevInitialSearch, setPrevInitialSearch] = useState(initialSearch);
+  if (prevInitialSearch !== initialSearch) {
+    setPrevInitialSearch(initialSearch);
+    setSearchInput(initialSearch);
+  }
+
+  // Fire onSearchChange only when debounced value actually changes
+  const prevDebouncedRef = useRef(debouncedSearch);
   useEffect(() => {
-    if (initialSearch !== searchInput && !isDebouncing) {
-      setSearchInput(initialSearch);
-      setDebouncedSearch(initialSearch);
+    if (prevDebouncedRef.current !== debouncedSearch) {
+      prevDebouncedRef.current = debouncedSearch;
+      onSearchChange(debouncedSearch, 1);
     }
-  }, [initialSearch, searchInput, isDebouncing]);
-
-  // Debounce search input and update URL
-  useEffect(() => {
-    if (searchInput !== debouncedSearch) {
-      setIsDebouncing(true);
-    }
-
-    const timer = setTimeout(() => {
-      const sanitized = sanitizeInput(searchInput);
-      setDebouncedSearch(sanitized);
-      onSearchChange(sanitized, 1);
-      setIsDebouncing(false);
-    }, debounceDelay);
-
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchInput]);
+  }, [debouncedSearch, onSearchChange]);
 
   const handleClearSearch = useCallback(() => {
     setSearchInput("");
-    setDebouncedSearch("");
     onSearchChange("", 1);
   }, [onSearchChange]);
 

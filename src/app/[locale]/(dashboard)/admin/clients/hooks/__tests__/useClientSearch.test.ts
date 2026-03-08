@@ -23,14 +23,58 @@ describe("useClientSearch", () => {
     expect(result.current.isDebouncing).toBe(false);
   });
 
-  it("strips dangerous characters on initial debounce", () => {
+  it("does not call onSearchChange on mount", () => {
     const onSearchChange = jest.fn();
     renderHook(() =>
       useClientSearch({
-        initialSearch: "<bad>",
+        initialSearch: "test",
         onSearchChange,
       })
     );
+
+    act(() => {
+      jest.advanceTimersByTime(DEBOUNCE_DELAY);
+    });
+
+    expect(onSearchChange).not.toHaveBeenCalled();
+  });
+
+  it("does not lose the first typed character", () => {
+    const onSearchChange = jest.fn();
+    const { result } = renderHook(() =>
+      useClientSearch({
+        initialSearch: "",
+        onSearchChange,
+      })
+    );
+
+    act(() => {
+      result.current.setSearchInput("a");
+    });
+
+    expect(result.current.searchInput).toBe("a");
+    expect(result.current.isDebouncing).toBe(true);
+
+    act(() => {
+      jest.advanceTimersByTime(DEBOUNCE_DELAY);
+    });
+
+    expect(result.current.debouncedSearch).toBe("a");
+    expect(onSearchChange).toHaveBeenCalledWith("a", 1);
+  });
+
+  it("strips dangerous characters after debounce", () => {
+    const onSearchChange = jest.fn();
+    const { result } = renderHook(() =>
+      useClientSearch({
+        initialSearch: "",
+        onSearchChange,
+      })
+    );
+
+    act(() => {
+      result.current.setSearchInput("<bad>");
+    });
 
     act(() => {
       jest.advanceTimersByTime(DEBOUNCE_DELAY);
@@ -46,16 +90,10 @@ describe("useClientSearch", () => {
       { initialProps: { initialSearch: "first" } }
     );
 
-    // Flush initial debounce
-    act(() => {
-      jest.advanceTimersByTime(DEBOUNCE_DELAY);
-    });
-
     // Simulate URL change (browser back)
     rerender({ initialSearch: "second" });
 
     expect(result.current.searchInput).toBe("second");
-    expect(result.current.debouncedSearch).toBe("second");
   });
 
   it("handleClearSearch calls onSearchChange with empty string", () => {
@@ -64,12 +102,6 @@ describe("useClientSearch", () => {
       ({ initialSearch }) => useClientSearch({ initialSearch, onSearchChange }),
       { initialProps: { initialSearch: "test" } }
     );
-
-    // Flush initial debounce
-    act(() => {
-      jest.advanceTimersByTime(DEBOUNCE_DELAY);
-    });
-    onSearchChange.mockClear();
 
     act(() => {
       result.current.handleClearSearch();
@@ -81,17 +113,20 @@ describe("useClientSearch", () => {
     rerender({ initialSearch: "" });
 
     expect(result.current.searchInput).toBe("");
-    expect(result.current.debouncedSearch).toBe("");
   });
 
   it("debounce fires onSearchChange after delay", () => {
     const onSearchChange = jest.fn();
-    renderHook(() =>
+    const { result } = renderHook(() =>
       useClientSearch({
-        initialSearch: "test",
+        initialSearch: "",
         onSearchChange,
       })
     );
+
+    act(() => {
+      result.current.setSearchInput("query");
+    });
 
     // Before delay
     expect(onSearchChange).not.toHaveBeenCalled();
@@ -101,6 +136,6 @@ describe("useClientSearch", () => {
       jest.advanceTimersByTime(DEBOUNCE_DELAY);
     });
 
-    expect(onSearchChange).toHaveBeenCalledWith("test", 1);
+    expect(onSearchChange).toHaveBeenCalledWith("query", 1);
   });
 });
