@@ -100,7 +100,7 @@ export interface GetAllClientsVariables {
  * This query is restricted to superusers
  */
 export const GET_CLIENT = gql`
-  query GetClient($id: Int!) {
+  query GetClient($id: ID!) {
     client(id: $id) {
       id
       email
