@@ -74,7 +74,6 @@ interface ClientRowProps {
     phoneNumber: string | null;
     city: string | null;
     state: string | null;
-    createdAt: string;
     user: {
       id: string;
       firstName: string | null;
@@ -141,14 +140,6 @@ const ClientRow = memo(function ClientRow({
       </TableCell>
       <TableCell>
         <div
-          className="max-w-[150px] truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300"
-          title={client.mobilePhoneNumber || client.phoneNumber || "-"}
-        >
-          {client.mobilePhoneNumber || client.phoneNumber || "-"}
-        </div>
-      </TableCell>
-      <TableCell>
-        <div
           className="max-w-[200px] truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300"
           title={
             client.city && client.state
@@ -159,22 +150,6 @@ const ClientRow = memo(function ClientRow({
           {client.city && client.state
             ? `${client.city}, ${client.state}`
             : client.city || client.state || "-"}
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
-            <time
-              className="text-xs font-medium text-foreground/80 whitespace-nowrap"
-              dateTime={client.createdAt}
-            >
-              {new Date(client.createdAt).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </time>
-          </div>
         </div>
       </TableCell>
       <TableActionButtons
@@ -418,25 +393,10 @@ export default function AdminClients() {
         skeletonWidth: "10rem",
       },
       {
-        id: "phone",
-        header: t("phone"),
-        cell: () => null,
-        skeletonWidth: "7rem",
-      },
-      {
         id: "location",
         header: t("location"),
         cell: () => null,
         skeletonWidth: "9rem",
-      },
-      {
-        id: "createdAt",
-        header: t("createdAt"),
-        cell: () => null,
-        sortable: true,
-        sortField: "created_at",
-        skeletonWidth: "7rem",
-        skeletonVariant: "date",
       },
       {
         id: "actions",

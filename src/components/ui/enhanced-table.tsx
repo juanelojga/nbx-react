@@ -268,13 +268,13 @@ export const EnhancedTableActionButton = React.forwardRef<
         variant="ghost"
         size="icon"
         className={cn(
-          "h-9 w-9 rounded-lg transition-all duration-300 hover:scale-110 active:scale-95",
+          "h-7 w-7 rounded-lg transition-all duration-300 hover:scale-110 active:scale-95",
           colorClass,
           className
         )}
         {...props}
       >
-        <Icon className="h-4 w-4" />
+        <Icon className="h-3.5 w-3.5" />
         {children}
       </Button>
     );
