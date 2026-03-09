@@ -32,11 +32,22 @@ export function useClientSearch({
   const debouncedSearch = sanitizeInput(debouncedRaw);
   const isDebouncing = searchInput !== debouncedRaw;
 
-  // Sync from URL only when initialSearch actually changes (browser back/forward)
+  // Track last value sent to parent via render-time state
+  const [lastSentSearch, setLastSentSearch] = useState(initialSearch);
+  const [prevDebouncedSearch, setPrevDebouncedSearch] =
+    useState(debouncedSearch);
+  if (prevDebouncedSearch !== debouncedSearch) {
+    setPrevDebouncedSearch(debouncedSearch);
+    setLastSentSearch(debouncedSearch);
+  }
+
+  // Sync from URL only for external changes (browser back/forward)
   const [prevInitialSearch, setPrevInitialSearch] = useState(initialSearch);
   if (prevInitialSearch !== initialSearch) {
     setPrevInitialSearch(initialSearch);
-    setSearchInput(initialSearch);
+    if (initialSearch !== lastSentSearch) {
+      setSearchInput(initialSearch);
+    }
   }
 
   // Fire onSearchChange only when debounced value actually changes
@@ -50,6 +61,7 @@ export function useClientSearch({
 
   const handleClearSearch = useCallback(() => {
     setSearchInput("");
+    setLastSentSearch("");
     onSearchChange("", 1);
   }, [onSearchChange]);
 
