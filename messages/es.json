@@ -648,9 +648,12 @@
       "createAnotherButton": "Crear Otra",
       "backToPackagesButton": "Volver a Paquetes",
       "status": {
+        "awaiting_payment": "Esperando Pago",
         "pending": "Pendiente",
+        "processing": "Procesando",
         "in_transit": "En Tránsito",
-        "delivered": "Entregado"
+        "delivered": "Entregado",
+        "cancelled": "Cancelado"
       }
     },
     "clientSelect": {
