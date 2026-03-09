@@ -164,7 +164,7 @@ export function EditConsolidationDialog({
     <BaseDialog
       open={open}
       onOpenChange={onOpenChange}
-      size="md"
+      size="lg"
       title={t("title")}
       description={t("description")}
       icon={Pencil}

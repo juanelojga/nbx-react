@@ -5,7 +5,7 @@ import { gql } from "@apollo/client";
  */
 export const RESOLVE_ALL_PACKAGES = gql`
   query ResolveAllPackages(
-    $client_id: Int!
+    $client_id: ID!
     $page: Int
     $page_size: Int
     $order_by: String

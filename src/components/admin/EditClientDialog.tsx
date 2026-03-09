@@ -233,7 +233,7 @@ export function EditClientDialog({
     <BaseDialog
       open={open}
       onOpenChange={onOpenChange}
-      size="lg"
+      size="xl"
       title={t("title")}
       description={t("description")}
       icon={Pencil}

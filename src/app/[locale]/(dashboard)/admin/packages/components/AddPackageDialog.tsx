@@ -256,7 +256,7 @@ export function AddPackageDialog({
     <BaseDialog
       open={open}
       onOpenChange={onOpenChange}
-      size="lg"
+      size="xl"
       title={t("title")}
       description={t("description")}
       icon={Plus}

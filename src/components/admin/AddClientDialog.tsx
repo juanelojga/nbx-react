@@ -194,7 +194,7 @@ export function AddClientDialog({
     <BaseDialog
       open={open}
       onOpenChange={onOpenChange}
-      size="lg"
+      size="xl"
       title={t("title")}
       description={t("description")}
       icon={UserPlus}
