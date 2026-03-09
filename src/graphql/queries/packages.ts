@@ -41,7 +41,7 @@ export const RESOLVE_ALL_PACKAGES = gql`
  * Get single package by ID with full details
  */
 export const GET_PACKAGE = gql`
-  query GetPackage($id: Int!) {
+  query GetPackage($id: ID!) {
     package(id: $id) {
       id
       barcode
