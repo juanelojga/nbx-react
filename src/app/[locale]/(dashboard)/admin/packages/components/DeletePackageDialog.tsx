@@ -2,14 +2,7 @@
 
 import { useMutation } from "@apollo/client";
 import { useTranslations } from "next-intl";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { BaseDialog } from "@/components/ui/base-dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import {
@@ -86,46 +79,16 @@ export function DeletePackageDialog({
   if (!package_) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <div className="flex items-start gap-4">
-            <div className="rounded-full bg-destructive/10 p-3">
-              <AlertTriangle className="h-6 w-6 text-destructive" />
-            </div>
-            <div className="flex-1">
-              <DialogTitle className="text-xl text-left">
-                {t("title")}
-              </DialogTitle>
-              <DialogDescription className="text-left mt-2">
-                {t("description")}
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          {/* Package Info */}
-          <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-2">
-            <div className="flex justify-between items-start">
-              <span className="text-sm font-medium text-muted-foreground">
-                {t("barcodeLabel")}
-              </span>
-              <span className="text-sm font-semibold text-foreground text-right">
-                {package_.barcode}
-              </span>
-            </div>
-          </div>
-
-          {/* Warning Message */}
-          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-            <p className="text-sm text-destructive font-medium">
-              <strong>{t("warningLabel")}</strong> {t("warningMessage")}
-            </p>
-          </div>
-        </div>
-
-        <DialogFooter className="gap-2 sm:gap-0">
+    <BaseDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="sm"
+      title={t("title")}
+      description={t("description")}
+      icon={AlertTriangle}
+      iconVariant="destructive"
+      footer={
+        <>
           <Button
             type="button"
             variant="outline"
@@ -149,8 +112,29 @@ export function DeletePackageDialog({
               t("deleteButton")
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+    >
+      <div className="space-y-4 py-4">
+        {/* Package Info */}
+        <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="text-sm font-medium text-muted-foreground">
+              {t("barcodeLabel")}
+            </span>
+            <span className="text-sm font-semibold text-foreground text-right">
+              {package_.barcode}
+            </span>
+          </div>
+        </div>
+
+        {/* Warning Message */}
+        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+          <p className="text-sm text-destructive font-medium">
+            <strong>{t("warningLabel")}</strong> {t("warningMessage")}
+          </p>
+        </div>
+      </div>
+    </BaseDialog>
   );
 }

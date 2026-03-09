@@ -3,14 +3,7 @@
 import { useState } from "react";
 import { useMutation } from "@apollo/client";
 import { useTranslations } from "next-intl";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { BaseDialog, DialogFooter } from "@/components/ui/base-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -260,398 +253,391 @@ export function AddPackageDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
-            <Plus className="h-6 w-6" />
-            {t("title")}
-          </DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("basicInfoTitle")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Barcode */}
-              <div className="space-y-2">
-                <Label htmlFor="barcode">
-                  {t("barcodeLabel")}{" "}
-                  <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="barcode"
-                  value={formData.barcode}
-                  onChange={(e) => handleInputChange("barcode", e.target.value)}
-                  disabled={loading}
-                  aria-invalid={!!validationErrors.barcode}
-                  placeholder={t("barcodePlaceholder")}
-                />
-                {validationErrors.barcode && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.barcode}
-                  </p>
-                )}
-              </div>
-
-              {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description">{t("descriptionLabel")}</Label>
-                <Input
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    handleInputChange("description", e.target.value)
-                  }
-                  disabled={loading}
-                  placeholder={t("descriptionPlaceholder")}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Courier Information */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("courierInfoTitle")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Courier */}
-              <div className="space-y-2">
-                <Label htmlFor="courier">
-                  {t("courierLabel")}{" "}
-                  <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="courier"
-                  value={formData.courier}
-                  onChange={(e) => handleInputChange("courier", e.target.value)}
-                  disabled={loading}
-                  aria-invalid={!!validationErrors.courier}
-                  placeholder={t("courierPlaceholder")}
-                />
-                {validationErrors.courier && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.courier}
-                  </p>
-                )}
-              </div>
-
-              {/* Other Courier */}
-              <div className="space-y-2">
-                <Label htmlFor="otherCourier">{t("otherCourierLabel")}</Label>
-                <Input
-                  id="otherCourier"
-                  value={formData.otherCourier}
-                  onChange={(e) =>
-                    handleInputChange("otherCourier", e.target.value)
-                  }
-                  disabled={loading}
-                  placeholder={t("otherCourierPlaceholder")}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Dimensions */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("dimensionsTitle")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Length */}
-              <div className="space-y-2">
-                <Label htmlFor="length">{t("lengthLabel")}</Label>
-                <Input
-                  id="length"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.length}
-                  onChange={(e) => handleInputChange("length", e.target.value)}
-                  disabled={loading}
-                  aria-invalid={!!validationErrors.length}
-                  placeholder={t("dimensionPlaceholder")}
-                />
-                {validationErrors.length && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.length}
-                  </p>
-                )}
-              </div>
-
-              {/* Width */}
-              <div className="space-y-2">
-                <Label htmlFor="width">{t("widthLabel")}</Label>
-                <Input
-                  id="width"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.width}
-                  onChange={(e) => handleInputChange("width", e.target.value)}
-                  disabled={loading}
-                  aria-invalid={!!validationErrors.width}
-                  placeholder={t("dimensionPlaceholder")}
-                />
-                {validationErrors.width && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.width}
-                  </p>
-                )}
-              </div>
-
-              {/* Height */}
-              <div className="space-y-2">
-                <Label htmlFor="height">{t("heightLabel")}</Label>
-                <Input
-                  id="height"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.height}
-                  onChange={(e) => handleInputChange("height", e.target.value)}
-                  disabled={loading}
-                  aria-invalid={!!validationErrors.height}
-                  placeholder={t("dimensionPlaceholder")}
-                />
-                {validationErrors.height && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.height}
-                  </p>
-                )}
-              </div>
-
-              {/* Dimension Unit */}
-              <div className="space-y-2">
-                <Label htmlFor="dimensionUnit">{t("unitLabel")}</Label>
-                <Select
-                  value={formData.dimensionUnit}
-                  onValueChange={(value) =>
-                    handleInputChange("dimensionUnit", value)
-                  }
-                  disabled={loading}
-                >
-                  <SelectTrigger id="dimensionUnit" className="w-full">
-                    <SelectValue placeholder={t("unitPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cm">{t("unitCm")}</SelectItem>
-                    <SelectItem value="in">{t("unitIn")}</SelectItem>
-                    <SelectItem value="m">{t("unitM")}</SelectItem>
-                    <SelectItem value="ft">{t("unitFt")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {/* Weight */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("weightTitle")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Weight Value */}
-              <div className="space-y-2">
-                <Label htmlFor="weight">{t("weightLabel")}</Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.weight}
-                  onChange={(e) => handleInputChange("weight", e.target.value)}
-                  disabled={loading}
-                  aria-invalid={!!validationErrors.weight}
-                  placeholder={t("weightPlaceholder")}
-                />
-                {validationErrors.weight && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.weight}
-                  </p>
-                )}
-              </div>
-
-              {/* Weight Unit */}
-              <div className="space-y-2">
-                <Label htmlFor="weightUnit">{t("unitLabel")}</Label>
-                <Select
-                  value={formData.weightUnit}
-                  onValueChange={(value) =>
-                    handleInputChange("weightUnit", value)
-                  }
-                  disabled={loading}
-                >
-                  <SelectTrigger id="weightUnit" className="w-full">
-                    <SelectValue placeholder={t("unitPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="kg">{t("unitKg")}</SelectItem>
-                    <SelectItem value="lb">{t("unitLb")}</SelectItem>
-                    <SelectItem value="g">{t("unitG")}</SelectItem>
-                    <SelectItem value="oz">{t("unitOz")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {/* Pricing */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("pricingTitle")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Real Price */}
-              <div className="space-y-2">
-                <Label htmlFor="realPrice">{t("realPriceLabel")}</Label>
-                <Input
-                  id="realPrice"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.realPrice}
-                  onChange={(e) =>
-                    handleInputChange("realPrice", e.target.value)
-                  }
-                  disabled={loading}
-                  aria-invalid={!!validationErrors.realPrice}
-                  placeholder={t("dimensionPlaceholder")}
-                />
-                {validationErrors.realPrice && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.realPrice}
-                  </p>
-                )}
-              </div>
-
-              {/* Service Price */}
-              <div className="space-y-2">
-                <Label htmlFor="servicePrice">{t("servicePriceLabel")}</Label>
-                <Input
-                  id="servicePrice"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.servicePrice}
-                  onChange={(e) =>
-                    handleInputChange("servicePrice", e.target.value)
-                  }
-                  disabled={loading}
-                  aria-invalid={!!validationErrors.servicePrice}
-                  placeholder={t("dimensionPlaceholder")}
-                />
-                {validationErrors.servicePrice && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.servicePrice}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Additional Details */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("additionalDetailsTitle")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Purchase Link */}
-              <div className="space-y-2">
-                <Label htmlFor="purchaseLink">{t("purchaseLinkLabel")}</Label>
-                <Input
-                  id="purchaseLink"
-                  type="url"
-                  value={formData.purchaseLink}
-                  onChange={(e) =>
-                    handleInputChange("purchaseLink", e.target.value)
-                  }
-                  disabled={loading}
-                  aria-invalid={!!validationErrors.purchaseLink}
-                  placeholder={t("purchaseLinkPlaceholder")}
-                />
-                {validationErrors.purchaseLink && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.purchaseLink}
-                  </p>
-                )}
-              </div>
-
-              {/* Arrival Date */}
-              <div className="space-y-2">
-                <Label htmlFor="arrivalDate">{t("arrivalDateLabel")}</Label>
-                <Input
-                  id="arrivalDate"
-                  type="date"
-                  value={formData.arrivalDate}
-                  onChange={(e) =>
-                    handleInputChange("arrivalDate", e.target.value)
-                  }
-                  disabled={loading}
-                  aria-invalid={!!validationErrors.arrivalDate}
-                />
-                {validationErrors.arrivalDate && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.arrivalDate}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Comments */}
+    <BaseDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="xl"
+      title={t("title")}
+      description={t("description")}
+      icon={Plus}
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Basic Information */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {t("basicInfoTitle")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Barcode */}
             <div className="space-y-2">
-              <Label htmlFor="comments">{t("commentsLabel")}</Label>
-              <Textarea
-                id="comments"
-                value={formData.comments}
-                onChange={(e) => handleInputChange("comments", e.target.value)}
+              <Label htmlFor="barcode">
+                {t("barcodeLabel")} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="barcode"
+                value={formData.barcode}
+                onChange={(e) => handleInputChange("barcode", e.target.value)}
                 disabled={loading}
-                placeholder={t("commentsPlaceholder")}
-                rows={3}
+                aria-invalid={!!validationErrors.barcode}
+                placeholder={t("barcodePlaceholder")}
+              />
+              {validationErrors.barcode && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.barcode}
+                </p>
+              )}
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">{t("descriptionLabel")}</Label>
+              <Input
+                id="description"
+                value={formData.description}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
+                disabled={loading}
+                placeholder={t("descriptionPlaceholder")}
               />
             </div>
           </div>
+        </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={loading}
-            >
-              {t("cancel")}
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t("creating")}
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t("createButton")}
-                </>
+        {/* Courier Information */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {t("courierInfoTitle")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Courier */}
+            <div className="space-y-2">
+              <Label htmlFor="courier">
+                {t("courierLabel")} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="courier"
+                value={formData.courier}
+                onChange={(e) => handleInputChange("courier", e.target.value)}
+                disabled={loading}
+                aria-invalid={!!validationErrors.courier}
+                placeholder={t("courierPlaceholder")}
+              />
+              {validationErrors.courier && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.courier}
+                </p>
               )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            </div>
+
+            {/* Other Courier */}
+            <div className="space-y-2">
+              <Label htmlFor="otherCourier">{t("otherCourierLabel")}</Label>
+              <Input
+                id="otherCourier"
+                value={formData.otherCourier}
+                onChange={(e) =>
+                  handleInputChange("otherCourier", e.target.value)
+                }
+                disabled={loading}
+                placeholder={t("otherCourierPlaceholder")}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Dimensions */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {t("dimensionsTitle")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Length */}
+            <div className="space-y-2">
+              <Label htmlFor="length">{t("lengthLabel")}</Label>
+              <Input
+                id="length"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.length}
+                onChange={(e) => handleInputChange("length", e.target.value)}
+                disabled={loading}
+                aria-invalid={!!validationErrors.length}
+                placeholder={t("dimensionPlaceholder")}
+              />
+              {validationErrors.length && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.length}
+                </p>
+              )}
+            </div>
+
+            {/* Width */}
+            <div className="space-y-2">
+              <Label htmlFor="width">{t("widthLabel")}</Label>
+              <Input
+                id="width"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.width}
+                onChange={(e) => handleInputChange("width", e.target.value)}
+                disabled={loading}
+                aria-invalid={!!validationErrors.width}
+                placeholder={t("dimensionPlaceholder")}
+              />
+              {validationErrors.width && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.width}
+                </p>
+              )}
+            </div>
+
+            {/* Height */}
+            <div className="space-y-2">
+              <Label htmlFor="height">{t("heightLabel")}</Label>
+              <Input
+                id="height"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.height}
+                onChange={(e) => handleInputChange("height", e.target.value)}
+                disabled={loading}
+                aria-invalid={!!validationErrors.height}
+                placeholder={t("dimensionPlaceholder")}
+              />
+              {validationErrors.height && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.height}
+                </p>
+              )}
+            </div>
+
+            {/* Dimension Unit */}
+            <div className="space-y-2">
+              <Label htmlFor="dimensionUnit">{t("unitLabel")}</Label>
+              <Select
+                value={formData.dimensionUnit}
+                onValueChange={(value) =>
+                  handleInputChange("dimensionUnit", value)
+                }
+                disabled={loading}
+              >
+                <SelectTrigger id="dimensionUnit" className="w-full">
+                  <SelectValue placeholder={t("unitPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cm">{t("unitCm")}</SelectItem>
+                  <SelectItem value="in">{t("unitIn")}</SelectItem>
+                  <SelectItem value="m">{t("unitM")}</SelectItem>
+                  <SelectItem value="ft">{t("unitFt")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* Weight */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {t("weightTitle")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Weight Value */}
+            <div className="space-y-2">
+              <Label htmlFor="weight">{t("weightLabel")}</Label>
+              <Input
+                id="weight"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.weight}
+                onChange={(e) => handleInputChange("weight", e.target.value)}
+                disabled={loading}
+                aria-invalid={!!validationErrors.weight}
+                placeholder={t("weightPlaceholder")}
+              />
+              {validationErrors.weight && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.weight}
+                </p>
+              )}
+            </div>
+
+            {/* Weight Unit */}
+            <div className="space-y-2">
+              <Label htmlFor="weightUnit">{t("unitLabel")}</Label>
+              <Select
+                value={formData.weightUnit}
+                onValueChange={(value) =>
+                  handleInputChange("weightUnit", value)
+                }
+                disabled={loading}
+              >
+                <SelectTrigger id="weightUnit" className="w-full">
+                  <SelectValue placeholder={t("unitPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="kg">{t("unitKg")}</SelectItem>
+                  <SelectItem value="lb">{t("unitLb")}</SelectItem>
+                  <SelectItem value="g">{t("unitG")}</SelectItem>
+                  <SelectItem value="oz">{t("unitOz")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* Pricing */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {t("pricingTitle")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Real Price */}
+            <div className="space-y-2">
+              <Label htmlFor="realPrice">{t("realPriceLabel")}</Label>
+              <Input
+                id="realPrice"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.realPrice}
+                onChange={(e) => handleInputChange("realPrice", e.target.value)}
+                disabled={loading}
+                aria-invalid={!!validationErrors.realPrice}
+                placeholder={t("dimensionPlaceholder")}
+              />
+              {validationErrors.realPrice && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.realPrice}
+                </p>
+              )}
+            </div>
+
+            {/* Service Price */}
+            <div className="space-y-2">
+              <Label htmlFor="servicePrice">{t("servicePriceLabel")}</Label>
+              <Input
+                id="servicePrice"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.servicePrice}
+                onChange={(e) =>
+                  handleInputChange("servicePrice", e.target.value)
+                }
+                disabled={loading}
+                aria-invalid={!!validationErrors.servicePrice}
+                placeholder={t("dimensionPlaceholder")}
+              />
+              {validationErrors.servicePrice && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.servicePrice}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Details */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {t("additionalDetailsTitle")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Purchase Link */}
+            <div className="space-y-2">
+              <Label htmlFor="purchaseLink">{t("purchaseLinkLabel")}</Label>
+              <Input
+                id="purchaseLink"
+                type="url"
+                value={formData.purchaseLink}
+                onChange={(e) =>
+                  handleInputChange("purchaseLink", e.target.value)
+                }
+                disabled={loading}
+                aria-invalid={!!validationErrors.purchaseLink}
+                placeholder={t("purchaseLinkPlaceholder")}
+              />
+              {validationErrors.purchaseLink && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.purchaseLink}
+                </p>
+              )}
+            </div>
+
+            {/* Arrival Date */}
+            <div className="space-y-2">
+              <Label htmlFor="arrivalDate">{t("arrivalDateLabel")}</Label>
+              <Input
+                id="arrivalDate"
+                type="date"
+                value={formData.arrivalDate}
+                onChange={(e) =>
+                  handleInputChange("arrivalDate", e.target.value)
+                }
+                disabled={loading}
+                aria-invalid={!!validationErrors.arrivalDate}
+              />
+              {validationErrors.arrivalDate && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.arrivalDate}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Comments */}
+          <div className="space-y-2">
+            <Label htmlFor="comments">{t("commentsLabel")}</Label>
+            <Textarea
+              id="comments"
+              value={formData.comments}
+              onChange={(e) => handleInputChange("comments", e.target.value)}
+              disabled={loading}
+              placeholder={t("commentsPlaceholder")}
+              rows={3}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={loading}
+          >
+            {t("cancel")}
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {t("creating")}
+              </>
+            ) : (
+              <>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("createButton")}
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </form>
+    </BaseDialog>
   );
 }
