@@ -12,6 +12,11 @@ import {
   type ColumnDef,
   type EmptyStateConfig,
 } from "@/components/ui/base-table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Package as PackageIcon, X, Sparkles } from "lucide-react";
 import { Package } from "../types";
 
@@ -49,6 +54,23 @@ interface PackageRowProps {
   animationDelay?: number;
 }
 
+const BarcodeText = ({
+  barcode,
+  isSelected,
+}: {
+  barcode: string;
+  isSelected: boolean;
+}) => (
+  <div
+    className={`font-mono text-xs font-semibold tracking-wide ${
+      isSelected ? "text-primary" : "text-foreground"
+    } transition-colors duration-300`}
+    style={{ fontVariantNumeric: "tabular-nums" }}
+  >
+    {barcode}
+  </div>
+);
+
 const PackageRow = memo(function PackageRow({
   pkg,
   isSelected,
@@ -59,7 +81,6 @@ const PackageRow = memo(function PackageRow({
   animationDelay = 0,
 }: PackageRowProps) {
   const t = useTranslations("adminPackages.table");
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <TableRow
@@ -68,8 +89,6 @@ const PackageRow = memo(function PackageRow({
           ? "bg-gradient-to-r from-primary/10 via-primary/5 to-transparent hover:from-primary/15 hover:via-primary/8 border-l-4 border-l-primary"
           : "hover:bg-gradient-to-r hover:from-muted/80 hover:to-transparent border-l-4 border-l-transparent"
       }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       style={{
         animationName: isSelected ? "subtle-pulse" : "fade-in",
         animationDuration: isSelected ? "2s" : "0.4s",
@@ -95,65 +114,20 @@ const PackageRow = memo(function PackageRow({
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-3">
-          <div
-            className={`transition-all duration-500 ${
-              isHovered ? "scale-110 rotate-3" : "scale-100"
-            }`}
-          >
-            <PackageIcon
-              className={`h-5 w-5 ${
-                isSelected
-                  ? "text-primary"
-                  : "text-muted-foreground/60 group-hover:text-primary"
-              } transition-colors duration-300`}
-            />
-          </div>
-          <div className="relative">
-            <div
-              className={`font-mono text-xs font-semibold tracking-wide ${
-                isSelected ? "text-primary" : "text-foreground"
-              } transition-colors duration-300`}
-              style={{ fontVariantNumeric: "tabular-nums" }}
-            >
-              {pkg.barcode}
-            </div>
-            <div
-              className={`absolute -bottom-0.5 left-0 h-[2px] bg-gradient-to-r from-primary to-secondary transition-all duration-500 ${
-                isHovered ? "w-full opacity-100" : "w-0 opacity-0"
-              }`}
-            />
-          </div>
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="relative max-w-md">
-          <p
-            className={`text-xs transition-colors duration-300 ${
-              pkg.description
-                ? "text-muted-foreground group-hover:text-foreground"
-                : "text-muted-foreground/40 italic"
-            }`}
-          >
-            {pkg.description || "\u2014"}
-          </p>
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
-            <time
-              className="text-xs font-medium text-foreground/80"
-              dateTime={pkg.createdAt}
-            >
-              {new Date(pkg.createdAt).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </time>
-          </div>
-        </div>
+        {pkg.description ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="inline-block cursor-default">
+                <BarcodeText barcode={pkg.barcode} isSelected={isSelected} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{pkg.description}</p>
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <BarcodeText barcode={pkg.barcode} isSelected={isSelected} />
+        )}
       </TableCell>
       <TableActionButtons
         onView={{
@@ -261,19 +235,6 @@ export function PackagesTable({
         header: t("barcodeHeader"),
         cell: () => null, // Not used with renderRow
         skeletonWidth: "8rem",
-      },
-      {
-        id: "description",
-        header: t("descriptionHeader"),
-        cell: () => null,
-        skeletonWidth: "12rem",
-      },
-      {
-        id: "createdAt",
-        header: t("createdAtHeader"),
-        cell: () => null,
-        skeletonWidth: "7rem",
-        skeletonVariant: "date",
       },
       {
         id: "actions",
