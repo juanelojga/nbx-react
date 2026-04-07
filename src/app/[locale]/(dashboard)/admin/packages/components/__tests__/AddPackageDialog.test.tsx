@@ -60,6 +60,8 @@ const successMock: MockedResponse = {
       barcode: "ABC123",
       courier: "FedEx",
       clientId: "client-1",
+      weight: 5.0,
+      purchasedByNarbox: false,
       dimensionUnit: "cm",
       weightUnit: "kg",
     },
@@ -71,6 +73,13 @@ const successMock: MockedResponse = {
           id: "1",
           barcode: "ABC123",
           description: null,
+          purchasedByNarbox: false,
+          weight: 5.0,
+          weightUnit: "kg",
+          realPrice: null,
+          servicePrice: 13.75,
+          transportationCost: 13.75,
+          serviceFee: 0,
           createdAt: "2024-01-01",
         },
       },
@@ -85,6 +94,8 @@ const errorMock: MockedResponse = {
       barcode: "ABC123",
       courier: "FedEx",
       clientId: "client-1",
+      weight: 5.0,
+      purchasedByNarbox: false,
       dimensionUnit: "cm",
       weightUnit: "kg",
     },
@@ -104,7 +115,7 @@ describe("AddPackageDialog", () => {
     jest.clearAllMocks();
   });
 
-  it("renders form with required field indicators for barcode and courier", () => {
+  it("renders form with required field indicators for barcode, courier, and weight", () => {
     render(
       <MockedProvider mocks={[]} addTypename={false}>
         <AddPackageDialog {...defaultProps} />
@@ -115,7 +126,7 @@ describe("AddPackageDialog", () => {
     expect(screen.getByLabelText(/courierLabel/)).toBeInTheDocument();
 
     const requiredMarkers = screen.getAllByText("*");
-    expect(requiredMarkers.length).toBeGreaterThanOrEqual(2);
+    expect(requiredMarkers.length).toBeGreaterThanOrEqual(3);
   });
 
   it("shows validation error when barcode is empty on submit", async () => {
@@ -168,6 +179,24 @@ describe("AddPackageDialog", () => {
     });
   });
 
+  it("shows validation error when weight is empty on submit", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MockedProvider mocks={[]} addTypename={false}>
+        <AddPackageDialog {...defaultProps} />
+      </MockedProvider>
+    );
+
+    await user.type(screen.getByLabelText(/barcodeLabel/), "ABC123");
+    await user.type(screen.getByLabelText(/courierLabel/), "FedEx");
+    await user.click(screen.getByText("createButton"));
+
+    await waitFor(() => {
+      expect(screen.getByText("weightRequired")).toBeInTheDocument();
+    });
+  });
+
   it("submits with required fields only and calls mutation with correct variables", async () => {
     const user = userEvent.setup();
 
@@ -179,6 +208,7 @@ describe("AddPackageDialog", () => {
 
     await user.type(screen.getByLabelText(/barcodeLabel/), "ABC123");
     await user.type(screen.getByLabelText(/courierLabel/), "FedEx");
+    await user.type(screen.getByLabelText(/weightLabel/), "5");
     await user.click(screen.getByText("createButton"));
 
     await waitFor(() => {
@@ -197,6 +227,7 @@ describe("AddPackageDialog", () => {
 
     await user.type(screen.getByLabelText(/barcodeLabel/), "ABC123");
     await user.type(screen.getByLabelText(/courierLabel/), "FedEx");
+    await user.type(screen.getByLabelText(/weightLabel/), "5");
     await user.click(screen.getByText("createButton"));
 
     await waitFor(() => {
@@ -219,6 +250,7 @@ describe("AddPackageDialog", () => {
 
     await user.type(screen.getByLabelText(/barcodeLabel/), "ABC123");
     await user.type(screen.getByLabelText(/courierLabel/), "FedEx");
+    await user.type(screen.getByLabelText(/weightLabel/), "5");
     await user.click(screen.getByText("createButton"));
 
     await waitFor(() => {

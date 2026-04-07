@@ -68,8 +68,11 @@ const mockPackage = {
   weightUnit: "kg",
   description: "Test package",
   purchaseLink: "https://example.com",
+  purchasedByNarbox: false,
   realPrice: 100,
   servicePrice: 25,
+  transportationCost: 15.13,
+  serviceFee: 0,
   arrivalDate: "2024-06-15",
   comments: "Handle with care",
   client: { id: "1", fullName: "John Doe", email: "john@example.com" },
@@ -122,7 +125,7 @@ const mutationSuccessMock: MockedResponse = {
       height: 15,
       weight: 5.5,
       realPrice: 100,
-      servicePrice: 25,
+      purchasedByNarbox: false,
       arrivalDate: "2024-06-15",
     },
   },
@@ -142,8 +145,11 @@ const mutationSuccessMock: MockedResponse = {
           weightUnit: "kg",
           description: "Updated description",
           purchaseLink: "https://example.com",
+          purchasedByNarbox: false,
           realPrice: 100,
           servicePrice: 25,
+          transportationCost: 15.13,
+          serviceFee: 0,
           arrivalDate: "2024-06-15",
           comments: "Handle with care",
           client: {
@@ -175,7 +181,7 @@ const mutationErrorMock: MockedResponse = {
       height: 15,
       weight: 5.5,
       realPrice: 100,
-      servicePrice: 25,
+      purchasedByNarbox: false,
       arrivalDate: "2024-06-15",
     },
   },
@@ -238,7 +244,7 @@ describe("UpdatePackageDialog", () => {
     expect(screen.getByDisplayValue("5.5")).toBeInTheDocument();
     expect(screen.getByDisplayValue("https://example.com")).toBeInTheDocument();
     expect(screen.getByDisplayValue("100")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("25")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("$25.00")).toBeInTheDocument();
     expect(screen.getByDisplayValue("2024-06-15")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Handle with care")).toBeInTheDocument();
   });

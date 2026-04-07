@@ -7,6 +7,7 @@ import {
   User,
   UserCog,
   Layers,
+  Settings,
   type LucideIcon,
 } from "lucide-react";
 import { createNavigation } from "next-intl/navigation";
@@ -41,6 +42,11 @@ export const adminNavItems: NavItem[] = [
     icon: Layers,
   },
   { labelKey: "admin.reports", href: "/admin/reports", icon: BarChart3 },
+  {
+    labelKey: "admin.settings",
+    href: "/admin/settings/pricing",
+    icon: Settings,
+  },
 ];
 
 export const clientNavItems: NavItem[] = [

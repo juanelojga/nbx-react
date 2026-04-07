@@ -22,8 +22,11 @@ export const RESOLVE_ALL_PACKAGES = gql`
         id
         barcode
         description
+        purchasedByNarbox
         realPrice
         servicePrice
+        transportationCost
+        serviceFee
         weight
         weightUnit
         createdAt
@@ -55,8 +58,11 @@ export const GET_PACKAGE = gql`
       weightUnit
       description
       purchaseLink
+      purchasedByNarbox
       realPrice
       servicePrice
+      transportationCost
+      serviceFee
       arrivalDate
       comments
       client {
@@ -77,8 +83,11 @@ export interface PackageType {
   id: string;
   barcode: string;
   description: string | null;
+  purchasedByNarbox: boolean;
   realPrice: number | null;
   servicePrice: number | null;
+  transportationCost: number | null;
+  serviceFee: number | null;
   weight: number | null;
   weightUnit: string | null;
   createdAt: string;
@@ -97,8 +106,11 @@ export interface PackageDetailType {
   weightUnit: string | null;
   description: string | null;
   purchaseLink: string | null;
+  purchasedByNarbox: boolean;
   realPrice: number | null;
   servicePrice: number | null;
+  transportationCost: number | null;
+  serviceFee: number | null;
   arrivalDate: string | null;
   comments: string | null;
   client: {
