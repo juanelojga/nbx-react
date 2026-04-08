@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Pencil, AlertCircle } from "lucide-react";
 import {
   UPDATE_PACKAGE,
@@ -47,8 +48,8 @@ interface FormData {
   weightUnit: string;
   description: string;
   purchaseLink: string;
+  purchasedByNarbox: boolean;
   realPrice: string;
-  servicePrice: string;
   arrivalDate: string;
   comments: string;
 }
@@ -75,8 +76,8 @@ export function UpdatePackageDialog({
     weightUnit: "kg",
     description: "",
     purchaseLink: "",
+    purchasedByNarbox: false,
     realPrice: "",
-    servicePrice: "",
     arrivalDate: "",
     comments: "",
   });
@@ -155,8 +156,8 @@ export function UpdatePackageDialog({
             weightUnit: pkg.weightUnit || "kg",
             description: pkg.description || "",
             purchaseLink: pkg.purchaseLink || "",
+            purchasedByNarbox: pkg.purchasedByNarbox ?? false,
             realPrice: pkg.realPrice?.toString() || "",
-            servicePrice: pkg.servicePrice?.toString() || "",
             arrivalDate: formatDateForInput(pkg.arrivalDate),
             comments: pkg.comments || "",
           });
@@ -177,8 +178,8 @@ export function UpdatePackageDialog({
       weightUnit: "kg",
       description: "",
       purchaseLink: "",
+      purchasedByNarbox: false,
       realPrice: "",
-      servicePrice: "",
       arrivalDate: "",
       comments: "",
     });
@@ -187,7 +188,14 @@ export function UpdatePackageDialog({
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === "purchasedByNarbox") {
+      setFormData((prev) => ({
+        ...prev,
+        purchasedByNarbox: value === "true",
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
     // Clear validation error for this field
     if (validationErrors[field]) {
       setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -204,11 +212,10 @@ export function UpdatePackageDialog({
       { key: "height", label: "Height" },
       { key: "weight", label: "Weight" },
       { key: "realPrice", label: "Real price" },
-      { key: "servicePrice", label: "Service price" },
     ];
 
     numericFields.forEach(({ key }) => {
-      const value = formData[key as keyof FormData].trim();
+      const value = (formData[key as keyof FormData] as string).trim();
       if (value) {
         const numValue = parseFloat(value);
         if (isNaN(numValue) || numValue <= 0) {
@@ -289,9 +296,9 @@ export function UpdatePackageDialog({
     if (formData.realPrice.trim()) {
       variables.realPrice = parseFloat(formData.realPrice.trim());
     }
-    if (formData.servicePrice.trim()) {
-      variables.servicePrice = parseFloat(formData.servicePrice.trim());
-    }
+
+    // Add purchasedByNarbox
+    variables.purchasedByNarbox = formData.purchasedByNarbox;
 
     // Add arrival date if provided
     if (formData.arrivalDate.trim()) {
@@ -558,8 +565,32 @@ export function UpdatePackageDialog({
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               {t("pricingTitle")}
             </h3>
+
+            {/* Purchased by Narbox */}
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="purchasedByNarbox"
+                checked={formData.purchasedByNarbox}
+                onCheckedChange={(checked) =>
+                  handleInputChange(
+                    "purchasedByNarbox",
+                    checked === true ? "true" : "false"
+                  )
+                }
+                disabled={isLoading}
+              />
+              <div className="grid gap-1 leading-none">
+                <Label htmlFor="purchasedByNarbox" className="cursor-pointer">
+                  {t("purchasedByNarboxLabel")}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {t("purchasedByNarboxDescription")}
+                </p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Real Price */}
+              {/* Real Price (editable) */}
               <div className="space-y-2">
                 <Label htmlFor="realPrice">{t("realPriceLabel")}</Label>
                 <Input
@@ -583,30 +614,61 @@ export function UpdatePackageDialog({
                 )}
               </div>
 
-              {/* Service Price */}
+              {/* Service Price (read-only, auto-calculated) */}
               <div className="space-y-2">
-                <Label htmlFor="servicePrice">{t("servicePriceLabel")}</Label>
+                <Label htmlFor="servicePrice-readonly">
+                  {t("servicePriceLabel")}
+                </Label>
                 <Input
-                  id="servicePrice"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.servicePrice}
-                  onChange={(e) =>
-                    handleInputChange("servicePrice", e.target.value)
+                  id="servicePrice-readonly"
+                  value={
+                    data?.package.servicePrice != null
+                      ? `$${data.package.servicePrice.toFixed(2)}`
+                      : "—"
                   }
-                  disabled={isLoading}
-                  aria-invalid={!!validationErrors.servicePrice}
-                  placeholder={t("dimensionPlaceholder")}
+                  disabled
+                  className="bg-muted cursor-not-allowed"
                 />
-                {validationErrors.servicePrice && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.servicePrice}
-                  </p>
-                )}
+              </div>
+
+              {/* Transportation Cost (read-only) */}
+              <div className="space-y-2">
+                <Label htmlFor="transportationCost-readonly">
+                  {t("transportationCostLabel")}
+                </Label>
+                <Input
+                  id="transportationCost-readonly"
+                  value={
+                    data?.package.transportationCost != null
+                      ? `$${data.package.transportationCost.toFixed(2)}`
+                      : "—"
+                  }
+                  disabled
+                  className="bg-muted cursor-not-allowed"
+                />
+              </div>
+
+              {/* Service Fee (read-only) */}
+              <div className="space-y-2">
+                <Label htmlFor="serviceFee-readonly">
+                  {t("serviceFeeLabel")}
+                </Label>
+                <Input
+                  id="serviceFee-readonly"
+                  value={
+                    data?.package.serviceFee != null
+                      ? `$${data.package.serviceFee.toFixed(2)}`
+                      : "—"
+                  }
+                  disabled
+                  className="bg-muted cursor-not-allowed"
+                />
               </div>
             </div>
+
+            <p className="text-xs text-muted-foreground">
+              {t("computedFieldsNote")}
+            </p>
           </div>
 
           {/* Additional Details */}

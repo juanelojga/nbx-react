@@ -45,11 +45,15 @@ const mockConsolidation = {
       width: 20,
       height: 30,
       dimensionUnit: "cm",
+      purchasedByNarbox: false,
       realPrice: 50,
       servicePrice: 10,
+      transportationCost: 6.88,
+      serviceFee: 0,
       arrivalDate: "2024-06-01",
     },
   ],
+  totalCost: 10,
   createdAt: "2024-01-01T00:00:00Z",
   updatedAt: "2024-06-01T00:00:00Z",
 };
@@ -153,6 +157,9 @@ describe("ViewConsolidationDialog", () => {
     expect(screen.getByText("Package 1")).toBeInTheDocument();
     expect(screen.getByText("2.5 kg")).toBeInTheDocument();
     expect(screen.getByText(/10.*20.*30/)).toBeInTheDocument();
+    expect(screen.getByText("$50.00")).toBeInTheDocument();
+    // $10.00 appears both in totalCost (general info) and servicePrice (table)
+    expect(screen.getAllByText("$10.00").length).toBeGreaterThanOrEqual(2);
   });
 
   it("renders empty packages state with dashed border", async () => {

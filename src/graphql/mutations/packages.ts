@@ -13,12 +13,12 @@ export const CREATE_PACKAGE = gql`
     $width: Float
     $height: Float
     $dimensionUnit: String
-    $weight: Float
+    $weight: Float!
     $weightUnit: String
     $description: String
     $purchaseLink: String
     $realPrice: Float
-    $servicePrice: Float
+    $purchasedByNarbox: Boolean
     $arrivalDate: Date
     $comments: String
   ) {
@@ -36,7 +36,7 @@ export const CREATE_PACKAGE = gql`
       description: $description
       purchaseLink: $purchaseLink
       realPrice: $realPrice
-      servicePrice: $servicePrice
+      purchasedByNarbox: $purchasedByNarbox
       arrivalDate: $arrivalDate
       comments: $comments
     ) {
@@ -44,6 +44,13 @@ export const CREATE_PACKAGE = gql`
         id
         barcode
         description
+        purchasedByNarbox
+        weight
+        weightUnit
+        realPrice
+        servicePrice
+        transportationCost
+        serviceFee
         createdAt
       }
     }
@@ -73,12 +80,12 @@ export interface CreatePackageVariables {
   width?: number;
   height?: number;
   dimensionUnit?: string;
-  weight?: number;
+  weight: number;
   weightUnit?: string;
   description?: string;
   purchaseLink?: string;
   realPrice?: number;
-  servicePrice?: number;
+  purchasedByNarbox?: boolean;
   arrivalDate?: string;
   comments?: string;
 }
@@ -89,6 +96,13 @@ export interface CreatePackageResponse {
       id: string;
       barcode: string;
       description: string | null;
+      purchasedByNarbox: boolean;
+      weight: number;
+      weightUnit: string | null;
+      realPrice: number | null;
+      servicePrice: number | null;
+      transportationCost: number | null;
+      serviceFee: number | null;
       createdAt: string;
     };
   };
@@ -111,7 +125,7 @@ export const UPDATE_PACKAGE = gql`
     $description: String
     $purchaseLink: String
     $realPrice: Float
-    $servicePrice: Float
+    $purchasedByNarbox: Boolean
     $arrivalDate: Date
     $comments: String
     $clientId: ID
@@ -129,7 +143,7 @@ export const UPDATE_PACKAGE = gql`
       description: $description
       purchaseLink: $purchaseLink
       realPrice: $realPrice
-      servicePrice: $servicePrice
+      purchasedByNarbox: $purchasedByNarbox
       arrivalDate: $arrivalDate
       comments: $comments
       clientId: $clientId
@@ -149,6 +163,9 @@ export const UPDATE_PACKAGE = gql`
         purchaseLink
         realPrice
         servicePrice
+        purchasedByNarbox
+        transportationCost
+        serviceFee
         arrivalDate
         comments
         client {
@@ -192,7 +209,7 @@ export interface UpdatePackageVariables {
   description?: string;
   purchaseLink?: string;
   realPrice?: number;
-  servicePrice?: number;
+  purchasedByNarbox?: boolean;
   arrivalDate?: string;
   comments?: string;
   clientId?: string;
@@ -215,6 +232,9 @@ export interface UpdatePackageResponse {
       purchaseLink: string | null;
       realPrice: number | null;
       servicePrice: number | null;
+      purchasedByNarbox: boolean;
+      transportationCost: number | null;
+      serviceFee: number | null;
       arrivalDate: string | null;
       comments: string | null;
       client: {

@@ -60,6 +60,7 @@ export const GET_CONSOLIDATE_BY_ID = gql`
       deliveryDate
       comment
       extraAttributes
+      totalCost
       client {
         id
         fullName
@@ -78,8 +79,11 @@ export const GET_CONSOLIDATE_BY_ID = gql`
         width
         height
         dimensionUnit
+        purchasedByNarbox
         realPrice
         servicePrice
+        transportationCost
+        serviceFee
         arrivalDate
       }
       createdAt
@@ -110,8 +114,11 @@ export interface ConsolidatePackageType {
   width?: number | null;
   height?: number | null;
   dimensionUnit?: string | null;
+  purchasedByNarbox?: boolean;
   realPrice?: number | null;
   servicePrice?: number | null;
+  transportationCost?: number | null;
+  serviceFee?: number | null;
   arrivalDate?: string | null;
 }
 
@@ -122,6 +129,7 @@ export interface ConsolidateType {
   deliveryDate: string | null;
   comment: string | null;
   extraAttributes: string | null;
+  totalCost?: number | null;
   client: ConsolidateClientType;
   packages: ConsolidatePackageType[];
   createdAt: string;

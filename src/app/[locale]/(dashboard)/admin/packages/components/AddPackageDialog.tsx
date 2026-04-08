@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Plus } from "lucide-react";
 import {
   CREATE_PACKAGE,
@@ -42,8 +43,8 @@ interface FormData {
   weightUnit: string;
   description: string;
   purchaseLink: string;
+  purchasedByNarbox: boolean;
   realPrice: string;
-  servicePrice: string;
   arrivalDate: string;
   comments: string;
 }
@@ -71,8 +72,8 @@ export function AddPackageDialog({
     weightUnit: "kg",
     description: "",
     purchaseLink: "",
+    purchasedByNarbox: false,
     realPrice: "",
-    servicePrice: "",
     arrivalDate: "",
     comments: "",
   });
@@ -117,8 +118,8 @@ export function AddPackageDialog({
       weightUnit: "kg",
       description: "",
       purchaseLink: "",
+      purchasedByNarbox: false,
       realPrice: "",
-      servicePrice: "",
       arrivalDate: "",
       comments: "",
     });
@@ -127,7 +128,14 @@ export function AddPackageDialog({
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === "purchasedByNarbox") {
+      setFormData((prev) => ({
+        ...prev,
+        purchasedByNarbox: value === "true",
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
     // Clear validation error for this field
     if (validationErrors[field]) {
       setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -149,19 +157,39 @@ export function AddPackageDialog({
       errors.courier = t("courierRequired");
     }
 
+    // Required: Weight
+    if (!formData.weight.trim()) {
+      errors.weight = t("weightRequired");
+    } else {
+      const weightVal = parseFloat(formData.weight.trim());
+      if (isNaN(weightVal) || weightVal <= 0) {
+        errors.weight = t("positiveNumberError");
+      }
+    }
+
+    // Conditional: Real price required when purchasedByNarbox
+    if (formData.purchasedByNarbox) {
+      if (!formData.realPrice.trim()) {
+        errors.realPrice = t("realPriceRequired");
+      } else {
+        const rpVal = parseFloat(formData.realPrice.trim());
+        if (isNaN(rpVal) || rpVal <= 0) {
+          errors.realPrice = t("positiveNumberError");
+        }
+      }
+    }
+
     // Optional: Numeric fields must be > 0 if provided
     const numericFields = [
       { key: "length", label: "Length" },
       { key: "width", label: "Width" },
       { key: "height", label: "Height" },
-      { key: "weight", label: "Weight" },
       { key: "realPrice", label: "Real price" },
-      { key: "servicePrice", label: "Service price" },
     ];
 
     numericFields.forEach(({ key }) => {
-      const value = formData[key as keyof FormData].trim();
-      if (value) {
+      const value = (formData[key as keyof FormData] as string).trim();
+      if (value && !errors[key]) {
         const numValue = parseFloat(value);
         if (isNaN(numValue) || numValue <= 0) {
           errors[key] = t("positiveNumberError");
@@ -202,6 +230,7 @@ export function AddPackageDialog({
       barcode: formData.barcode.trim(),
       courier: formData.courier.trim(),
       clientId: clientId,
+      weight: parseFloat(formData.weight.trim()),
     };
 
     // Add optional string fields
@@ -224,6 +253,9 @@ export function AddPackageDialog({
       variables.comments = formData.comments.trim();
     }
 
+    // Add purchasedByNarbox
+    variables.purchasedByNarbox = formData.purchasedByNarbox;
+
     // Add optional numeric fields
     if (formData.length.trim()) {
       variables.length = parseFloat(formData.length.trim());
@@ -234,14 +266,8 @@ export function AddPackageDialog({
     if (formData.height.trim()) {
       variables.height = parseFloat(formData.height.trim());
     }
-    if (formData.weight.trim()) {
-      variables.weight = parseFloat(formData.weight.trim());
-    }
     if (formData.realPrice.trim()) {
       variables.realPrice = parseFloat(formData.realPrice.trim());
-    }
-    if (formData.servicePrice.trim()) {
-      variables.servicePrice = parseFloat(formData.servicePrice.trim());
     }
 
     // Add arrival date if provided
@@ -452,7 +478,9 @@ export function AddPackageDialog({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Weight Value */}
             <div className="space-y-2">
-              <Label htmlFor="weight">{t("weightLabel")}</Label>
+              <Label htmlFor="weight">
+                {t("weightLabel")} <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="weight"
                 type="number"
@@ -501,10 +529,39 @@ export function AddPackageDialog({
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
             {t("pricingTitle")}
           </h3>
+
+          {/* Purchased by Narbox */}
+          <div className="flex items-start space-x-3">
+            <Checkbox
+              id="purchasedByNarbox"
+              checked={formData.purchasedByNarbox}
+              onCheckedChange={(checked) =>
+                handleInputChange(
+                  "purchasedByNarbox",
+                  checked === true ? "true" : "false"
+                )
+              }
+              disabled={loading}
+            />
+            <div className="grid gap-1 leading-none">
+              <Label htmlFor="purchasedByNarbox" className="cursor-pointer">
+                {t("purchasedByNarboxLabel")}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {t("purchasedByNarboxDescription")}
+              </p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Real Price */}
             <div className="space-y-2">
-              <Label htmlFor="realPrice">{t("realPriceLabel")}</Label>
+              <Label htmlFor="realPrice">
+                {t("realPriceLabel")}
+                {formData.purchasedByNarbox && (
+                  <span className="text-destructive"> *</span>
+                )}
+              </Label>
               <Input
                 id="realPrice"
                 type="number"
@@ -520,30 +577,6 @@ export function AddPackageDialog({
                 <p className="text-sm text-destructive font-medium flex items-center gap-1">
                   <span className="text-base">⚠</span>
                   {validationErrors.realPrice}
-                </p>
-              )}
-            </div>
-
-            {/* Service Price */}
-            <div className="space-y-2">
-              <Label htmlFor="servicePrice">{t("servicePriceLabel")}</Label>
-              <Input
-                id="servicePrice"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.servicePrice}
-                onChange={(e) =>
-                  handleInputChange("servicePrice", e.target.value)
-                }
-                disabled={loading}
-                aria-invalid={!!validationErrors.servicePrice}
-                placeholder={t("dimensionPlaceholder")}
-              />
-              {validationErrors.servicePrice && (
-                <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                  <span className="text-base">⚠</span>
-                  {validationErrors.servicePrice}
                 </p>
               )}
             </div>

@@ -160,6 +160,14 @@ export function ViewConsolidationDialog({
                 label={t("updatedAt")}
                 value={new Date(consolidation.updatedAt).toLocaleString()}
               />
+              <InfoRow
+                label={t("totalCost")}
+                value={
+                  consolidation.totalCost != null
+                    ? `$${consolidation.totalCost.toFixed(2)}`
+                    : undefined
+                }
+              />
             </div>
           </div>
 
@@ -182,6 +190,8 @@ export function ViewConsolidationDialog({
                       <TableHead>{t("packageDescription")}</TableHead>
                       <TableHead>{t("packageWeight")}</TableHead>
                       <TableHead>{t("packageDimensions")}</TableHead>
+                      <TableHead>{t("packageRealPrice")}</TableHead>
+                      <TableHead>{t("packageServicePrice")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -203,6 +213,16 @@ export function ViewConsolidationDialog({
                         <TableCell>
                           {pkg.length && pkg.width && pkg.height
                             ? `${pkg.length}×${pkg.width}×${pkg.height} ${pkg.dimensionUnit || ""}`
+                            : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {pkg.realPrice != null
+                            ? `$${pkg.realPrice.toFixed(2)}`
+                            : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {pkg.servicePrice != null
+                            ? `$${pkg.servicePrice.toFixed(2)}`
                             : "-"}
                         </TableCell>
                       </TableRow>

@@ -25,8 +25,11 @@ const mockPackage = {
   weightUnit: "kg",
   description: "Electronic components",
   purchaseLink: "https://example.com/product",
+  purchasedByNarbox: false,
   realPrice: 150.99,
   servicePrice: 25.5,
+  transportationCost: 15.13,
+  serviceFee: 0,
   arrivalDate: "2024-06-15",
   comments: "Handle with care",
   client: {

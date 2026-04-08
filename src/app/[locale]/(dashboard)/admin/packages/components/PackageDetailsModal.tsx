@@ -206,12 +206,24 @@ export function PackageDetailsModal({
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoRow
+                label={t("purchasedByNarboxLabel")}
+                value={pkg.purchasedByNarbox ? t("yes") : t("no")}
+              />
+              <InfoRow
                 label={t("realPriceLabel")}
                 value={formatCurrency(pkg.realPrice)}
               />
               <InfoRow
                 label={t("servicePriceLabel")}
                 value={formatCurrency(pkg.servicePrice)}
+              />
+              <InfoRow
+                label={t("transportationCostLabel")}
+                value={formatCurrency(pkg.transportationCost)}
+              />
+              <InfoRow
+                label={t("serviceFeeLabel")}
+                value={formatCurrency(pkg.serviceFee)}
               />
             </div>
           </div>
