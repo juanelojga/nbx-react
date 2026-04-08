@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { BaseDialog, DialogFooter } from "@/components/ui/base-dialog";
 import { Button } from "@/components/ui/button";
@@ -187,7 +187,7 @@ export function AddClientDialog({
       variables.buildingNumber = formData.buildingNumber.trim();
     }
 
-    await createClient({ variables });
+    await createClient({ variables }).catch(() => {});
   };
 
   return (

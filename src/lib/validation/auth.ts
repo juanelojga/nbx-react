@@ -62,7 +62,7 @@ export function validateEmail(
 
   return {
     success: false,
-    error: result.error.errors[0]?.message || "Invalid email address",
+    error: result.error.issues[0]?.message || "Invalid email address",
   };
 }
 
@@ -82,7 +82,7 @@ export function validatePassword(
 
   return {
     success: false,
-    error: result.error.errors[0]?.message || "Invalid password",
+    error: result.error.issues[0]?.message || "Invalid password",
   };
 }
 

@@ -2,13 +2,13 @@
 
 import {
   ApolloClient,
+  CombinedGraphQLErrors,
   from,
   HttpLink,
   InMemoryCache,
-  NormalizedCacheObject,
   Observable,
 } from "@apollo/client";
-import { onError } from "@apollo/client/link/error";
+import { ErrorLink } from "@apollo/client/link/error";
 import { setContext } from "@apollo/client/link/context";
 import {
   clearTokens,
@@ -126,73 +126,69 @@ const authLink = setContext(async (_, { headers }) => {
 });
 
 // Error Link - global error handling with retry logic
-const errorLink = onError(
-  ({ graphQLErrors, networkError, operation, forward }) => {
-    if (graphQLErrors) {
-      for (const error of graphQLErrors) {
-        logger.error(
-          `[GraphQL error]: Message: ${error.message}, Location: ${JSON.stringify(error.locations)}, Path: ${error.path}`
-        );
+const errorLink = new ErrorLink(({ error, operation, forward }) => {
+  if (CombinedGraphQLErrors.is(error)) {
+    for (const gqlError of error.errors) {
+      logger.error(
+        `[GraphQL error]: Message: ${gqlError.message}, Location: ${JSON.stringify(gqlError.locations)}, Path: ${gqlError.path}`
+      );
 
-        // Handle authentication errors (401, token expired)
+      // Handle authentication errors (401, token expired)
+      if (
+        gqlError.extensions?.code === "UNAUTHENTICATED" ||
+        gqlError.message.includes("Authentication") ||
+        gqlError.message.includes("Signature has expired") ||
+        gqlError.message.includes("token") ||
+        gqlError.message.includes("Token")
+      ) {
+        // Try to refresh the token
+        const refreshToken = getRefreshToken();
         if (
-          error.extensions?.code === "UNAUTHENTICATED" ||
-          error.message.includes("Authentication") ||
-          error.message.includes("Signature has expired") ||
-          error.message.includes("token") ||
-          error.message.includes("Token")
+          refreshToken &&
+          !operation.operationName?.includes("RefreshToken")
         ) {
-          // Try to refresh the token
-          const refreshToken = getRefreshToken();
-          if (
-            refreshToken &&
-            !operation.operationName?.includes("RefreshToken")
-          ) {
-            return new Observable((observer) => {
-              performTokenRefresh()
-                .then((newToken) => {
-                  if (newToken) {
-                    // Retry the failed request with new token
-                    const subscriber = {
-                      next: observer.next.bind(observer),
-                      error: observer.error.bind(observer),
-                      complete: observer.complete.bind(observer),
-                    };
+          return new Observable((observer) => {
+            performTokenRefresh()
+              .then((newToken) => {
+                if (newToken) {
+                  // Retry the failed request with new token
+                  const subscriber = {
+                    next: observer.next.bind(observer),
+                    error: observer.error.bind(observer),
+                    complete: observer.complete.bind(observer),
+                  };
 
-                    forward(operation).subscribe(subscriber);
-                  } else {
-                    throw new Error("Refresh failed");
-                  }
-                })
-                .catch(() => {
-                  clearTokens();
-                  if (typeof window !== "undefined") {
-                    window.location.href = "/login";
-                  }
-                  observer.error(error);
-                });
-            });
-          } else {
-            // No refresh token available or already trying to refresh
-            clearTokens();
-            if (typeof window !== "undefined") {
-              window.location.href = "/login";
-            }
+                  forward(operation).subscribe(subscriber);
+                } else {
+                  throw new Error("Refresh failed");
+                }
+              })
+              .catch(() => {
+                clearTokens();
+                if (typeof window !== "undefined") {
+                  window.location.href = "/login";
+                }
+                observer.error(gqlError);
+              });
+          });
+        } else {
+          // No refresh token available or already trying to refresh
+          clearTokens();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
           }
         }
       }
     }
-
-    if (networkError) {
-      logger.error(`[Network error]: ${networkError}`);
-    }
+  } else {
+    logger.error(`[Network error]: ${error}`);
   }
-);
+});
 
 // Create Apollo Client instance
-let apolloClient: ApolloClient<NormalizedCacheObject> | null = null;
+let apolloClient: ApolloClient | null = null;
 
-function createApolloClient(): ApolloClient<NormalizedCacheObject> {
+function createApolloClient(): ApolloClient {
   return new ApolloClient({
     ssrMode: typeof window === "undefined", // Enable SSR mode on server
     link: from([errorLink, authLink, httpLink]),
@@ -255,7 +251,7 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
 }
 
 // Initialize Apollo Client (singleton pattern for client-side)
-export function getApolloClient(): ApolloClient<NormalizedCacheObject> {
+export function getApolloClient(): ApolloClient {
   if (typeof window === "undefined") {
     // Always create a new client on the server
     return createApolloClient();

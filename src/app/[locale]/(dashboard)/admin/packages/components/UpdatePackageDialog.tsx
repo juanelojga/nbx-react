@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { BaseDialog, DialogFooter } from "@/components/ui/base-dialog";
 import { Button } from "@/components/ui/button";
@@ -305,7 +305,7 @@ export function UpdatePackageDialog({
       variables.arrivalDate = formData.arrivalDate.trim();
     }
 
-    await updatePackage({ variables });
+    await updatePackage({ variables }).catch(() => {});
   };
 
   const isLoading = queryLoading || mutationLoading;

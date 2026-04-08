@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Instagram, MapPin } from "lucide-react";
+import { MessageCircle, MapPin } from "lucide-react";
+import { InstagramIcon } from "@/components/icons/InstagramIcon";
 import Link from "next/link";
 
 export function ContactSection() {
@@ -61,7 +62,7 @@ export function ContactSection() {
                   className="bg-white rounded-xl p-4 ring-1 ring-border/50 flex items-center gap-3 hover:bg-slate-50 transition-colors group"
                 >
                   <div className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center group-hover:bg-pink-100 shrink-0 transition-colors">
-                    <Instagram className="w-5 h-5 text-pink-500" />
+                    <InstagramIcon className="w-5 h-5 text-pink-500" />
                   </div>
                   <div className="overflow-hidden">
                     <p className="font-medium text-sm text-foreground">

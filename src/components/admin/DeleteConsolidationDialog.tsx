@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { BaseDialog } from "@/components/ui/base-dialog";
 import { Button } from "@/components/ui/button";
@@ -64,7 +64,7 @@ export function DeleteConsolidationDialog({
       variables: {
         id: consolidation.id,
       },
-    });
+    }).catch(() => {});
   };
 
   const handleCancel = () => {

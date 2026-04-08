@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { BaseDialog, DialogFooter } from "@/components/ui/base-dialog";
 import { Button } from "@/components/ui/button";
@@ -275,7 +275,7 @@ export function AddPackageDialog({
       variables.arrivalDate = formData.arrivalDate.trim();
     }
 
-    await createPackage({ variables });
+    await createPackage({ variables }).catch(() => {});
   };
 
   return (

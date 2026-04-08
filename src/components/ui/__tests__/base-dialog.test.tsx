@@ -2,10 +2,11 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BaseDialog } from "@/components/ui/base-dialog";
+import type { LucideIcon } from "lucide-react";
 
-const MockIcon = (props: React.SVGProps<SVGSVGElement>) => (
+const MockIcon = ((props: React.SVGProps<SVGSVGElement>) => (
   <svg data-testid="mock-icon" {...props} />
-);
+)) as unknown as LucideIcon;
 
 describe("BaseDialog Component", () => {
   const defaultProps = {

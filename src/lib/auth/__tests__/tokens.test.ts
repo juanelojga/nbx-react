@@ -34,7 +34,7 @@ describe("tokens", () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
-    jest.setSystemTime(new Date("2024-01-01T00:00:00Z"));
+    jest.setSystemTime(new Date("2024-01-01T00:00:00Z").getTime());
     // Reset mock localStorage before each test
     mockLocalStorage = {};
 

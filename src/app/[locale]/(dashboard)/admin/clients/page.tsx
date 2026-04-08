@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useClientTableState } from "@/hooks/useClientTableState";
 import { PageHeader } from "@/components/ui/page-header";

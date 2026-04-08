@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -72,7 +72,7 @@ export default function PricingConfigPage() {
       variables.serviceFeePercentage = parseFloat(serviceFeePercentage.trim());
     }
 
-    await updatePricingConfig({ variables });
+    await updatePricingConfig({ variables }).catch(() => {});
   };
 
   const formatDateTime = (dateString: string) => {
