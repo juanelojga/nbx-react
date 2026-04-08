@@ -1,4 +1,14 @@
 {
+  "seo": {
+    "title": "NarBox Courier – Shipping from USA to Panama",
+    "description": "Maritime and air courier service from USA to Panama. Miami P.O. box, vehicle and merchandise import. Over 20 years of customs experience.",
+    "ogDescription": "Shop in USA, receive in Panama. Maritime and air courier with Miami P.O. box. Home delivery across Panama.",
+    "keywords": "courier panama, shipping usa panama, miami po box, import from usa, ocean freight, air freight, vehicle import panama"
+  },
+  "footer": {
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
+  },
   "common": {
     "language": "Language",
     "spanish": "Spanish",
@@ -60,6 +70,8 @@
       "card4Text": "Ideal for businesses importing goods for resale and in need of a reliable partner."
     },
     "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know about our services.",
       "q1": "How often do ocean and air shipments depart?",
       "a1": "We have weekly departures to ensure your purchases arrive on time.",
       "q2": "How long does it take for my package to arrive from Miami?",

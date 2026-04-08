@@ -1,4 +1,14 @@
 {
+  "seo": {
+    "title": "NarBox Courier – Envíos de USA a Panamá",
+    "description": "Servicio courier marítimo y aéreo desde USA a Panamá. Casillero en Miami, importación de autos y mercancía. Más de 20 años de experiencia en aduanas.",
+    "ogDescription": "Compra en USA, recibe en Panamá. Courier marítimo y aéreo con casillero en Miami. Entrega a domicilio en todo Panamá.",
+    "keywords": "courier panamá, envíos usa panamá, casillero miami, importar desde usa, courier marítimo, courier aéreo, importación autos panamá"
+  },
+  "footer": {
+    "privacyPolicy": "Políticas de Privacidad",
+    "termsOfService": "Términos de Servicio"
+  },
   "common": {
     "language": "Idioma",
     "spanish": "Español",
@@ -60,6 +70,8 @@
       "card4Text": "Ideal para negocios que importan mercancía para reventa y necesitan un aliado de confianza."
     },
     "faq": {
+      "title": "Preguntas Frecuentes",
+      "subtitle": "Todo lo que necesitas saber sobre nuestros servicios.",
       "q1": "¿Cada cuánto salen los envíos marítimos y aéreos?",
       "a1": "Contamos con salidas semanales para garantizar que tus compras lleguen a tiempo.",
       "q2": "¿Cuánto tarda en llegar mi paquete desde Miami?",

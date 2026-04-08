@@ -15,11 +15,9 @@ export function FAQSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold font-(family-name:--font-work-sans) text-foreground">
-            Preguntas Frecuentes
+            {t("title")}
           </h2>
-          <p className="mt-4 text-muted-foreground text-lg">
-            Todo lo que necesitas saber sobre nuestros servicios.
-          </p>
+          <p className="mt-4 text-muted-foreground text-lg">{t("subtitle")}</p>
         </div>
 
         <div className="flex flex-col gap-4">
