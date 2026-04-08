@@ -14,18 +14,18 @@ NBX React is a Next.js 16 frontend application for NarBox, a package handling/co
 ### Development
 
 ```bash
-npm run dev              # Start dev server with Turbopack on http://localhost:3000
-npm run build            # Production build
-npm start                # Start production server
+pnpm run dev              # Start dev server with Turbopack on http://localhost:3000
+pnpm run build            # Production build
+pnpm start                # Start production server
 ```
 
 ### Code Quality (run after making changes)
 
 ```bash
-npm run format           # Format with Prettier
-npm run lint:fix         # Auto-fix ESLint issues
-npm run lint             # Check for remaining lint errors
-npm run type-check       # TypeScript type checking
+pnpm run format           # Format with Prettier
+pnpm run lint:fix         # Auto-fix ESLint issues
+pnpm run lint             # Check for remaining lint errors
+pnpm run type-check       # TypeScript type checking
 ```
 
 > **MANDATORY:** Before marking any implementation as complete, always check for TypeScript errors using the `get_errors` tool on every file that was created or modified. Fix all reported errors before finishing.
@@ -34,19 +34,19 @@ npm run type-check       # TypeScript type checking
 
 ```bash
 # Unit tests (Jest + React Testing Library)
-npm test                 # Run all tests
-npm run test:watch       # Watch mode
-npm run test:coverage    # With coverage report
-npm run test:ci          # CI mode (no watch, with coverage)
+pnpm test                 # Run all tests
+pnpm run test:watch       # Watch mode
+pnpm run test:coverage    # With coverage report
+pnpm run test:ci          # CI mode (no watch, with coverage)
 
 # E2E tests (Playwright)
-npm run test:e2e         # Run all E2E tests
-npm run test:e2e:ui      # UI mode for debugging
-npm run test:e2e:report  # Show HTML report
+pnpm run test:e2e         # Run all E2E tests
+pnpm run test:e2e:ui      # UI mode for debugging
+pnpm run test:e2e:report  # Show HTML report
 
 # Run a single test file
-npx jest path/to/test.test.tsx
-npx playwright test e2e/specific-test.spec.ts
+pnpm exec jest path/to/test.test.tsx
+pnpm exec playwright test e2e/specific-test.spec.ts
 ```
 
 ## Architecture
@@ -374,7 +374,7 @@ Pre-commit hooks (Husky + lint-staged):
 
 - **Platform:** Netlify (via `@netlify/plugin-nextjs`)
 - **Node version:** 22
-- **NPM version:** 10
+- **Package manager:** pnpm
 - **CI/CD:** GitHub Actions (`.github/workflows/deploy.yml`)
   - Runs lint, type-check, tests with coverage
   - Uploads coverage to Codecov
@@ -396,7 +396,7 @@ Pre-commit hooks (Husky + lint-staged):
 ### Adding a shadcn/ui Component
 
 ```bash
-npx shadcn add <component-name>
+pnpm dlx shadcn add <component-name>
 ```
 
 This installs to `src/components/ui/` with proper configuration.

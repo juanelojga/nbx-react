@@ -48,7 +48,7 @@ Successfully implemented comprehensive UX enhancements and design consistency im
 
 ### 4. Action Icon Tooltips ✅
 
-- **Installed shadcn tooltip component** via `npx shadcn@latest add tooltip`
+- **Installed shadcn tooltip component** via `pnpm dlx shadcn@latest add tooltip`
 - **Added tooltips to all action buttons**:
   - Eye icon → "View client"
   - Pencil icon → "Edit client"

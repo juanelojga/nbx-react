@@ -16,7 +16,7 @@ This project is configured for automatic deployment using GitHub Actions and Net
    - Click "New site from Git"
    - Connect your GitHub repository
    - Configure build settings:
-     - Build command: `npm run build`
+     - Build command: `pnpm run build`
      - Publish directory: `.next`
 
 3. **Get Netlify Credentials**
@@ -84,13 +84,13 @@ The workflow (`.github/workflows/deploy.yml`) includes:
 
 ```bash
 # Install Netlify CLI
-npm install -g netlify-cli
+pnpm add -g netlify-cli
 
 # Deploy to production
-npm run deploy:netlify
+pnpm run deploy:netlify
 
 # Deploy preview
-npm run deploy:preview
+pnpm run deploy:preview
 ```
 
 ## Configuration Files

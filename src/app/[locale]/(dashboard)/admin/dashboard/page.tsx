@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { Work_Sans, Inter } from "next/font/google";
 import { PageHeader } from "@/components/ui/page-header";

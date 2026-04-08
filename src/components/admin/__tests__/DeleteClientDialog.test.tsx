@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedProvider, MockedResponse } from "@apollo/client/testing";
+import { MockedProvider, MockedResponse } from "@/test/MockedProvider";
 import { DeleteClientDialog } from "@/components/admin/DeleteClientDialog";
 import { DELETE_USER } from "@/graphql/mutations/clients";
 import { toast } from "sonner";

@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedProvider } from "@apollo/client/testing";
+import { MockedProvider } from "@/test/MockedProvider";
 import { PackageDetailsModal } from "../PackageDetailsModal";
 import { GET_PACKAGE } from "@/graphql/queries/packages";
 import { GraphQLError } from "graphql";

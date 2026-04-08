@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "@/lib/navigation";
-import { useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ClientType } from "@/graphql/queries/clients";

@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedProvider } from "@apollo/client/testing";
+import { MockedProvider } from "@/test/MockedProvider";
 import { ViewConsolidationDialog } from "../ViewConsolidationDialog";
 import { GET_CONSOLIDATE_BY_ID } from "@/graphql/queries/consolidations";
 import { GraphQLError } from "graphql";

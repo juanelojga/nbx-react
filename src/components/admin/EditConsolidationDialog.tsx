@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { BaseDialog, DialogFooter } from "@/components/ui/base-dialog";
 import { Button } from "@/components/ui/button";
@@ -146,7 +146,7 @@ export function EditConsolidationDialog({
         comment: formData.comment.trim() || undefined,
       };
 
-      await updateConsolidate({ variables });
+      await updateConsolidate({ variables }).catch(() => {});
     },
     [consolidation, formData, updateConsolidate, t]
   );

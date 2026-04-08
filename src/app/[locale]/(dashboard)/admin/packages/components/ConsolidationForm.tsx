@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -55,12 +55,12 @@ const getConsolidationSchema = (t: (key: string) => string) =>
         "cancelled",
       ],
       {
-        errorMap: () => ({ message: t("statusValidationError") }),
+        error: t("statusValidationError"),
       }
     ),
     deliveryDate: z.string().optional(),
     comment: z.string().optional(),
-    sendEmail: z.boolean().optional().default(false),
+    sendEmail: z.boolean().optional().default(true),
   });
 
 type ConsolidationFormData = {
@@ -94,7 +94,7 @@ export function ConsolidationForm({
       status: "pending",
       deliveryDate: "",
       comment: "",
-      sendEmail: false,
+      sendEmail: true,
     },
   });
 

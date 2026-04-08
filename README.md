@@ -12,16 +12,16 @@ This project includes comprehensive unit tests with coverage reporting via Codec
 
 ```bash
 # Run all tests
-npm test
+pnpm test
 
 # Run tests in watch mode
-npm run test:watch
+pnpm run test:watch
 
 # Run tests with coverage report
-npm run test:coverage
+pnpm run test:coverage
 
 # Run tests for CI (with coverage)
-npm run test:ci
+pnpm run test:ci
 ```
 
 ### Coverage Reports
@@ -33,13 +33,7 @@ Coverage reports are generated in the `coverage/` directory and uploaded to Code
 First, run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -106,11 +100,11 @@ docker compose --env-file .env.docker up    # start
 docker compose --env-file .env.docker down  # stop and remove containers
 ```
 
-Or use the npm scripts:
+Or use the pnpm scripts:
 
 ```bash
-npm run docker:up
-npm run docker:down
+pnpm run docker:up
+pnpm run docker:down
 ```
 
 ### Running multiple projects in parallel

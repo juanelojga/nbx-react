@@ -9,7 +9,7 @@ import React, {
   useState,
 } from "react";
 import { useRouter } from "@/lib/navigation";
-import { useLazyQuery, useMutation } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 import { User, UserRole } from "@/types/user";
 import {
   LOGIN_MUTATION,

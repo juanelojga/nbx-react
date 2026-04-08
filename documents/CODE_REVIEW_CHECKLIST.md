@@ -142,12 +142,12 @@ Use this checklist when reviewing PRs or your own code changes.
 
 ### Local Verification
 
-- [ ] `npm run format` - Code formatted
-- [ ] `npm run lint:fix` - Auto-fixable issues resolved
-- [ ] `npm run lint` - No lint errors
-- [ ] `npm run type-check` - No TypeScript errors
-- [ ] `npm test` - All tests pass
-- [ ] `npm run build` - Production build succeeds
+- [ ] `pnpm run format` - Code formatted
+- [ ] `pnpm run lint:fix` - Auto-fixable issues resolved
+- [ ] `pnpm run lint` - No lint errors
+- [ ] `pnpm run type-check` - No TypeScript errors
+- [ ] `pnpm test` - All tests pass
+- [ ] `pnpm run build` - Production build succeeds
 
 ### Git
 

@@ -295,9 +295,9 @@ When implementing real data fetching:
 All optimizations have been thoroughly tested:
 
 ```bash
-npm run test        # All tests pass (599 tests)
-npm run lint        # No errors
-npm run type-check  # TypeScript compilation successful
+pnpm run test        # All tests pass (599 tests)
+pnpm run lint        # No errors
+pnpm run type-check  # TypeScript compilation successful
 ```
 
 ### New Tests:

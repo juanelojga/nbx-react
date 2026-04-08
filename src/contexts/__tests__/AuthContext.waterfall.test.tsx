@@ -4,7 +4,7 @@
  */
 
 import { renderHook, waitFor } from "@testing-library/react";
-import { MockedProvider } from "@apollo/client/testing";
+import { MockedProvider } from "@/test/MockedProvider";
 import { useAuth, AuthProvider } from "@/contexts/AuthContext";
 import { LOGIN_MUTATION, LOGOUT_MUTATION } from "@/graphql/mutations/auth";
 import { GET_CURRENT_USER } from "@/graphql/queries/auth";

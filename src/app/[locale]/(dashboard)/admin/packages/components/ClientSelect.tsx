@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
