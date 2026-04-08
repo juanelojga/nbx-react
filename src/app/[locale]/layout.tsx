@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import {
+  getMessages,
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing, type Locale } from "../../../i18n/routing";
 import { Providers } from "../providers";
+import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
+import { WebSiteJsonLd } from "@/components/seo/WebSiteJsonLd";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -17,14 +23,75 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "NarBox - Servicio de Courier",
-  description:
-    "Servicio de courier profesional para el manejo y seguimiento de paquetes",
-  icons: {
-    icon: "/favicon.ico",
-  },
-};
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
+  const url = `${siteUrl}/${locale}`;
+
+  return {
+    title: {
+      default: t("title"),
+      template: "%s | NarBox Courier",
+    },
+    description: t("description"),
+    keywords: t("keywords"),
+    metadataBase: new URL(siteUrl),
+    alternates: {
+      canonical: url,
+      languages: Object.fromEntries(
+        routing.locales.map((loc) => [loc, `${siteUrl}/${loc}`])
+      ),
+    },
+    openGraph: {
+      title: t("title"),
+      description: t("ogDescription"),
+      url,
+      siteName: "NarBox Courier",
+      locale: locale === "es" ? "es_PA" : "en_US",
+      alternateLocale: locale === "es" ? ["en_US"] : ["es_PA"],
+      type: "website",
+      images: [
+        {
+          url: `${siteUrl}/images/narbox-logo.png`,
+          width: 455,
+          height: 514,
+          alt: "NarBox Courier Logo",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title"),
+      description: t("ogDescription"),
+      images: [`${siteUrl}/images/narbox-logo.png`],
+    },
+    icons: {
+      icon: "/favicon.ico",
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  };
+}
 
 interface LocaleLayoutProps {
   children: React.ReactNode;
@@ -54,6 +121,8 @@ export default async function LocaleLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <OrganizationJsonLd />
+        <WebSiteJsonLd />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
