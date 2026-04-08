@@ -10,30 +10,30 @@ NBX React is a Next.js 16 frontend for NarBox, a package handling/courier compan
 
 ```bash
 # Development
-npm run dev                # Start dev server with Turbopack (http://localhost:3000)
-npm run build              # Production build
-npm start                  # Start production server
+pnpm run dev                # Start dev server with Turbopack (http://localhost:3000)
+pnpm run build              # Production build
+pnpm start                  # Start production server
 
 # Code Quality
-npm run lint               # ESLint check
-npm run lint:fix           # ESLint auto-fix
-npm run format             # Prettier format all files
-npm run type-check         # TypeScript type checking (tsc --noEmit)
+pnpm run lint               # ESLint check
+ppnpm run lint:fix           # ESLint auto-fix
+pnpm run format             # Prettier format all files
+pnpm run type-check         # TypeScript type checking (tsc --noEmit)
 
 # Testing
-npm test                   # Run all unit tests (Jest)
-npm run test:watch         # Watch mode
-npm run test:coverage      # With coverage report
-npx jest path/to/file.test.tsx          # Single unit test
-npm run test:e2e           # Playwright E2E tests
-npx playwright test e2e/file.spec.ts    # Single E2E test
+pnpm test                   # Run all unit tests (Jest)
+pnpm run test:watch         # Watch mode
+pnpm run test:coverage      # With coverage report
+pnpm exec jest path/to/file.test.tsx          # Single unit test
+pnpm run test:e2e           # Playwright E2E tests
+pnpm exec playwright test e2e/file.spec.ts    # Single E2E test
 
 # shadcn/ui
-npx shadcn add <component-name>         # Add shadcn component to src/components/ui/
+pnpm dlx shadcn add <component-name>         # Add shadcn component to src/components/ui/
 
 # Docker
-npm run docker:up          # Start container
-npm run docker:down        # Stop container
+pnpm run docker:up          # Start container
+pnpm run docker:down        # Stop container
 ```
 
 ## Architecture
@@ -52,7 +52,7 @@ npm run docker:down        # Stop container
 - `src/lib/apollo/` - Apollo Client config with JWT auth link, error link (auto token refresh on 401), SSR singleton
 - `src/lib/auth/` - Token handling (localStorage keys: `narbox_access_token`, `narbox_refresh_token`)
 - `src/contexts/AuthContext.tsx` - Provides `user`, `loading`, `isAuthenticated`, `login()`, `logout()`; maps superusers to ADMIN role, regular users to CLIENT
-- `src/components/ui/` - shadcn/ui components (do not edit manually, use `npx shadcn add`)
+- `src/components/ui/` - shadcn/ui components (do not edit manually, use `pnpm dlx shadcn add`)
 - `src/components/admin/` - Admin-specific components
 - `src/components/common/` - Shared components
 - `src/components/layout/` - Header, Sidebar, MainLayout

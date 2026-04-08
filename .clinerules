@@ -4,9 +4,9 @@
 
 After making any code changes, always run these commands in order:
 
-1. `npm run format` - Format code with Prettier
-2. `npm run lint:fix` - Auto-fix ESLint issues
-3. `npm run lint` - Check for remaining lint errors
+1. `pnpm run format` - Format code with Prettier
+2. `pnpm run lint:fix` - Auto-fix ESLint issues
+3. `pnpm run lint` - Check for remaining lint errors
 
 Report any linting errors or warnings that cannot be auto-fixed.
 

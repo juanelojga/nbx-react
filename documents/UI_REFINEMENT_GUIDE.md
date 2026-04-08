@@ -296,7 +296,7 @@ Create a comprehensive visual tour of the entire application:
 After completing all sections:
 
 ```bash
-npm run docs:update
+pnpm run docs:update
 ```
 
 Then manually add to `DESIGN_SYSTEM.md`:

@@ -62,10 +62,10 @@ You can adjust these thresholds in `jest.config.js` based on your project requir
 
 ## Available Test Scripts
 
-- `npm test` - Run all tests
-- `npm run test:watch` - Run tests in watch mode
-- `npm run test:coverage` - Run tests with coverage report
-- `npm run test:ci` - Run tests for CI with coverage
+- `pnpm test` - Run all tests
+- `pnpm run test:watch` - Run tests in watch mode
+- `pnpm run test:coverage` - Run tests with coverage report
+- `pnpm run test:ci` - Run tests for CI with coverage
 
 ## Coverage Reports
 
