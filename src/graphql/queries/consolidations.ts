@@ -26,6 +26,7 @@ export const GET_ALL_CONSOLIDATES = gql`
         deliveryDate
         comment
         extraAttributes
+        totalCost
         client {
           id
           fullName

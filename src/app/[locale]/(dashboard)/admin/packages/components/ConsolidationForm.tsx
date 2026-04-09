@@ -30,6 +30,11 @@ import {
 import { ClientType } from "@/graphql/queries/clients";
 import { Package } from "../types";
 import { ConsolidationStatus } from "@/lib/validation/status";
+import {
+  ExtraAttributesEditor,
+  ExtraAttributeEntry,
+  serializeExtraAttributes,
+} from "@/components/admin/ExtraAttributesEditor";
 
 interface ConsolidationFormProps {
   selectedClient: ClientType;
@@ -60,6 +65,11 @@ const getConsolidationSchema = (t: (key: string) => string) =>
     ),
     deliveryDate: z.string().optional(),
     comment: z.string().optional(),
+    extraAttributes: z
+      .array(z.object({ key: z.string(), value: z.string() }))
+      .max(5)
+      .optional()
+      .default([]),
     sendEmail: z.boolean().optional().default(true),
   });
 
@@ -68,6 +78,7 @@ type ConsolidationFormData = {
   status: ConsolidationStatus;
   deliveryDate?: string;
   comment?: string;
+  extraAttributes?: ExtraAttributeEntry[];
   sendEmail?: boolean;
 };
 
@@ -94,12 +105,14 @@ export function ConsolidationForm({
       status: "pending",
       deliveryDate: "",
       comment: "",
+      extraAttributes: [],
       sendEmail: true,
     },
   });
 
   // eslint-disable-next-line react-hooks/incompatible-library -- React Hook Form's watch() is required for form state tracking
   const sendEmail = watch("sendEmail");
+  const extraAttributes = watch("extraAttributes");
 
   const [createConsolidate, { loading, error }] = useMutation<
     CreateConsolidateResponse,
@@ -138,6 +151,9 @@ export function ConsolidationForm({
             deliveryDate: data.deliveryDate || undefined,
             comment: data.comment || undefined,
             sendEmail: data.sendEmail,
+            extraAttributes: serializeExtraAttributes(
+              data.extraAttributes || []
+            ),
           },
         });
       } catch (err) {
@@ -223,6 +239,11 @@ export function ConsolidationForm({
 
         .form-field-stagger-5 {
           animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.8s
+            backwards;
+        }
+
+        .form-field-stagger-6 {
+          animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.9s
             backwards;
         }
 
@@ -478,8 +499,25 @@ export function ConsolidationForm({
                   )}
                 </div>
 
+                {/* Extra Attributes */}
+                <div className="space-y-3 form-field-stagger-5">
+                  <ExtraAttributesEditor
+                    value={extraAttributes || []}
+                    onChange={(entries) => setValue("extraAttributes", entries)}
+                    disabled={loading}
+                    labels={{
+                      title: t("extraAttributesLabel"),
+                      description: t("extraAttributesDescription"),
+                      addCharge: t("addCharge"),
+                      chargeName: t("chargeName"),
+                      chargeAmount: t("chargeAmount"),
+                      maxChargesReached: t("maxChargesReached"),
+                    }}
+                  />
+                </div>
+
                 {/* Send Email Notification */}
-                <div className="flex items-center space-x-3 p-4 rounded-lg border-2 border-dashed border-border bg-muted/30 form-field-stagger-5 transition-all hover:bg-muted/50 hover:border-primary/50">
+                <div className="flex items-center space-x-3 p-4 rounded-lg border-2 border-dashed border-border bg-muted/30 form-field-stagger-6 transition-all hover:bg-muted/50 hover:border-primary/50">
                   <Checkbox
                     id="sendEmail"
                     checked={sendEmail}

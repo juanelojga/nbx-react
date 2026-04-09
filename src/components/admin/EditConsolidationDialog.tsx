@@ -23,6 +23,12 @@ import {
 } from "@/graphql/mutations/consolidations";
 import { toast } from "sonner";
 import { ConsolidationStatus } from "@/lib/validation/status";
+import {
+  ExtraAttributesEditor,
+  ExtraAttributeEntry,
+  parseExtraAttributes,
+  serializeExtraAttributes,
+} from "@/components/admin/ExtraAttributesEditor";
 
 interface EditConsolidationDialogProps {
   open: boolean;
@@ -33,6 +39,7 @@ interface EditConsolidationDialogProps {
     status: ConsolidationStatus;
     deliveryDate: string | null;
     comment: string | null;
+    extraAttributes: string | null;
   } | null;
   onConsolidationUpdated?: () => void | Promise<void>;
 }
@@ -42,6 +49,7 @@ interface FormData {
   status: ConsolidationStatus;
   deliveryDate: string;
   comment: string;
+  extraAttributes: ExtraAttributeEntry[];
 }
 
 interface ValidationErrors {
@@ -60,6 +68,7 @@ export function EditConsolidationDialog({
     status: "pending",
     deliveryDate: "",
     comment: "",
+    extraAttributes: [],
   });
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
@@ -80,6 +89,9 @@ export function EditConsolidationDialog({
             status: consolidation.status,
             deliveryDate: consolidation.deliveryDate || "",
             comment: consolidation.comment || "",
+            extraAttributes: parseExtraAttributes(
+              consolidation.extraAttributes
+            ),
           });
           setValidationErrors({});
         });
@@ -133,6 +145,28 @@ export function EditConsolidationDialog({
         errors.status = t("statusRequired");
       }
 
+      // Validate extra attributes
+      const seenKeys = new Set<string>();
+      for (let i = 0; i < formData.extraAttributes.length; i++) {
+        const entry = formData.extraAttributes[i];
+        const hasKey = entry.key.trim() !== "";
+        const hasValue = entry.value.trim() !== "";
+        if (hasKey || hasValue) {
+          if (!hasKey) {
+            errors[`extraAttributes_${i}_key`] = t("chargeNameRequired");
+          }
+          if (!hasValue) {
+            errors[`extraAttributes_${i}_value`] = t("chargeAmountRequired");
+          } else if (isNaN(Number(entry.value))) {
+            errors[`extraAttributes_${i}_value`] = t("chargeAmountInvalid");
+          }
+          if (hasKey && seenKeys.has(entry.key.trim().toLowerCase())) {
+            errors[`extraAttributes_${i}_key`] = t("duplicateChargeName");
+          }
+          if (hasKey) seenKeys.add(entry.key.trim().toLowerCase());
+        }
+      }
+
       setValidationErrors(errors);
       if (Object.keys(errors).length > 0) {
         return;
@@ -144,6 +178,7 @@ export function EditConsolidationDialog({
         status: formData.status,
         deliveryDate: formData.deliveryDate || undefined,
         comment: formData.comment.trim() || undefined,
+        extraAttributes: serializeExtraAttributes(formData.extraAttributes),
       };
 
       await updateConsolidate({ variables }).catch(() => {});
@@ -261,6 +296,24 @@ export function EditConsolidationDialog({
             rows={3}
           />
         </div>
+
+        {/* Extra Attributes */}
+        <ExtraAttributesEditor
+          value={formData.extraAttributes}
+          onChange={(entries) =>
+            setFormData({ ...formData, extraAttributes: entries })
+          }
+          disabled={loading}
+          labels={{
+            title: t("extraAttributesLabel"),
+            description: t("extraAttributesDescription"),
+            addCharge: t("addCharge"),
+            chargeName: t("chargeName"),
+            chargeAmount: t("chargeAmount"),
+            maxChargesReached: t("maxChargesReached"),
+          }}
+          errors={validationErrors}
+        />
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button

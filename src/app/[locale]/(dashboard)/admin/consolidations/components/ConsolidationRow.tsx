@@ -123,6 +123,20 @@ export const ConsolidationRow = memo(function ConsolidationRow({
           </div>
         </div>
       </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
+            <span
+              className="text-xs font-medium text-foreground/80 whitespace-nowrap"
+              style={{ fontVariantNumeric: "tabular-nums" }}
+            >
+              {consolidation.totalCost != null
+                ? `$${consolidation.totalCost.toFixed(2)}`
+                : "\u2014"}
+            </span>
+          </div>
+        </div>
+      </TableCell>
       <TableActionButtons
         onView={{
           onClick: () => onView(consolidation.id),

@@ -14,6 +14,7 @@ export const CREATE_CONSOLIDATE = gql`
     $deliveryDate: Date
     $comment: String
     $sendEmail: Boolean
+    $extraAttributes: JSONString
   ) {
     createConsolidate(
       description: $description
@@ -22,6 +23,7 @@ export const CREATE_CONSOLIDATE = gql`
       deliveryDate: $deliveryDate
       comment: $comment
       sendEmail: $sendEmail
+      extraAttributes: $extraAttributes
     ) {
       consolidate {
         id
@@ -30,6 +32,7 @@ export const CREATE_CONSOLIDATE = gql`
         deliveryDate
         comment
         extraAttributes
+        totalCost
         client {
           id
           fullName
@@ -60,6 +63,7 @@ export const UPDATE_CONSOLIDATE = gql`
     $deliveryDate: Date
     $comment: String
     $packageIds: [ID]
+    $extraAttributes: JSONString
   ) {
     updateConsolidate(
       id: $id
@@ -68,6 +72,7 @@ export const UPDATE_CONSOLIDATE = gql`
       deliveryDate: $deliveryDate
       comment: $comment
       packageIds: $packageIds
+      extraAttributes: $extraAttributes
     ) {
       consolidate {
         id
@@ -76,6 +81,7 @@ export const UPDATE_CONSOLIDATE = gql`
         deliveryDate
         comment
         extraAttributes
+        totalCost
         client {
           id
           fullName
@@ -116,6 +122,7 @@ export interface CreateConsolidateVariables {
   deliveryDate?: string;
   comment?: string;
   sendEmail?: boolean;
+  extraAttributes?: string;
 }
 
 export interface CreateConsolidateResponse {
@@ -127,6 +134,7 @@ export interface CreateConsolidateResponse {
       deliveryDate: string | null;
       comment: string | null;
       extraAttributes: string | null;
+      totalCost: number | null;
       client: {
         id: string;
         fullName: string;
@@ -153,6 +161,7 @@ export interface UpdateConsolidateVariables {
   deliveryDate?: string;
   comment?: string;
   packageIds?: string[];
+  extraAttributes?: string;
 }
 
 export interface UpdateConsolidateResponse {
@@ -164,6 +173,7 @@ export interface UpdateConsolidateResponse {
       deliveryDate: string | null;
       comment: string | null;
       extraAttributes: string | null;
+      totalCost: number | null;
       client: {
         id: string;
         fullName: string;
