@@ -199,7 +199,7 @@ function createApolloClient(): ApolloClient {
             // Cache policies for better performance (Vercel Best Practices 3.3)
             allClients: {
               // Cache clients list with merge strategy
-              keyArgs: ["search", "orderBy"], // Cache based on search and sort parameters
+              keyArgs: ["search", "orderBy", "page", "pageSize"], // Cache based on search, sort, and pagination parameters
               merge(_existing, incoming) {
                 // For pagination, always replace with incoming data
                 // Each page is treated as independent for simplicity

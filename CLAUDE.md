@@ -117,6 +117,19 @@ NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:8000/graphql
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
+## Visual Verification with Playwright MCP
+
+The Playwright MCP server is configured in `.mcp.json` and available during Claude Code sessions. Use it to visually verify UI work:
+
+- **After any visual/UI change** (new components, layout adjustments, style changes, responsive fixes), launch the dev server and use Playwright MCP to take screenshots of the affected pages to confirm the result matches expectations.
+- **Check both locales** (`/es` and `/en`) when changes affect translated content or layout that may shift with different text lengths.
+- **Check responsive behavior** by capturing screenshots at desktop (1280px) and mobile (375px) widths when layout changes are involved.
+- **Verify table rendering** against `docs/TABLE_DESIGN_SPEC.md` when modifying or creating data tables — confirm gradient headers, rounded containers, hover effects, and action button colors render correctly.
+- **Verify typography** against `documents/TYPOGRAPHY_GUIDELINES.md` — confirm Work Sans is used for headings and Inter for body text, and that heading sizes respect the compact scale (no `text-3xl` or larger).
+- **Debug visual issues** by navigating pages, inspecting element states (hover, focus, active), and taking snapshots to compare before/after.
+
+Workflow: `pnpm run dev` to start the server, then use Playwright MCP browser tools (`browser_navigate`, `browser_screenshot`, `browser_click`, etc.) to interact with and capture the running app.
+
 ## Deployment
 
-Netlify via `@netlify/plugin-nextjs`. CI/CD: GitHub Actions runs lint, type-check, tests with coverage (uploaded to Codecov).
+Netlify via `@netlify/plugin-nextjs`. CI/CD: GitHub Actions runs lint, type-check, tests with coverage (uploaded to Codecov), and Playwright E2E tests (report uploaded as artifact).

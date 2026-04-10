@@ -19,6 +19,12 @@ export/
 coverage/
 .nyc_output/
 
+# Playwright
+e2e/.auth/
+e2e/screenshots/
+playwright-report/
+test-results/
+
 # Local env files
 .env.local
 .env.development.local

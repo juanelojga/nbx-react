@@ -54,6 +54,12 @@ export function getConsolidationColumns(
       skeletonVariant: "date",
     },
     {
+      id: "totalCost",
+      header: t("totalCost"),
+      cell: () => null,
+      skeletonWidth: "5rem",
+    },
+    {
       id: "actions",
       header: t("actions"),
       cell: () => null,

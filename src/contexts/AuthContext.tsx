@@ -14,7 +14,6 @@ import { User, UserRole } from "@/types/user";
 import {
   LOGIN_MUTATION,
   type LoginResponse,
-  LOGOUT_MUTATION,
   REFRESH_TOKEN_MUTATION,
   type RefreshTokenResponse,
 } from "@/graphql/mutations/auth";

@@ -172,26 +172,29 @@ export interface UpdateClientResponse {
 }
 
 /**
- * Delete user mutation
+ * Delete client mutation
  * This mutation is restricted to superusers
  */
-export const DELETE_USER = gql`
-  mutation DeleteUser($id: ID!) {
-    deleteUser(id: $id) {
+export const DELETE_CLIENT = gql`
+  mutation DeleteClient($id: ID!, $deleteUser: Boolean) {
+    deleteClient(id: $id, deleteUser: $deleteUser) {
       ok
+      message
     }
   }
 `;
 
 /**
- * TypeScript types for delete user mutation
+ * TypeScript types for delete client mutation
  */
-export interface DeleteUserVariables {
+export interface DeleteClientVariables {
   id: string;
+  deleteUser?: boolean;
 }
 
-export interface DeleteUserResponse {
-  deleteUser: {
+export interface DeleteClientResponse {
+  deleteClient: {
     ok: boolean;
+    message: string | null;
   };
 }

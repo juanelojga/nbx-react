@@ -221,18 +221,19 @@ Represents a package/shipment.
 
 Represents a consolidation of packages.
 
-| Field             | Type          | Description                              |
-| ----------------- | ------------- | ---------------------------------------- |
-| `id`              | ID            | Consolidation ID                         |
-| `description`     | String        | Consolidation description                |
-| `status`          | String        | Current status (see status values below) |
-| `deliveryDate`    | Date          | Expected delivery date                   |
-| `comment`         | String        | Additional comments                      |
-| `extraAttributes` | JSON          | Flexible additional data                 |
-| `client`          | ClientType    | Consolidation owner                      |
-| `packages`        | [PackageType] | List of consolidated packages            |
-| `createdAt`       | DateTime      | Creation timestamp                       |
-| `updatedAt`       | DateTime      | Last update timestamp                    |
+| Field             | Type          | Description                                                                                                                                       |
+| ----------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`              | ID            | Consolidation ID                                                                                                                                  |
+| `description`     | String        | Consolidation description                                                                                                                         |
+| `status`          | String        | Current status (see status values below)                                                                                                          |
+| `deliveryDate`    | Date          | Expected delivery date                                                                                                                            |
+| `comment`         | String        | Additional comments                                                                                                                               |
+| `extraAttributes` | JSON          | Optional extra charges (up to 5 key-value pairs). Values are monetary amounts added to `totalCost`. Format: `{"seguro": "1.00", "cotel": "0.60"}` |
+| `client`          | ClientType    | Consolidation owner                                                                                                                               |
+| `packages`        | [PackageType] | List of consolidated packages                                                                                                                     |
+| `totalCost`       | Float         | Total cost: sum of all package service prices + extra attributes values                                                                           |
+| `createdAt`       | DateTime      | Creation timestamp                                                                                                                                |
+| `updatedAt`       | DateTime      | Last update timestamp                                                                                                                             |
 
 ### DashboardStatsType
 
@@ -1343,14 +1344,15 @@ Creates a new consolidation grouping multiple packages.
 
 **Arguments:**
 
-| Argument       | Type    | Required | Description                              |
-| -------------- | ------- | -------- | ---------------------------------------- |
-| `description`  | String  | Yes      | Consolidation description                |
-| `status`       | String  | Yes      | Initial status                           |
-| `packageIds`   | [ID]    | Yes      | List of package IDs to consolidate       |
-| `deliveryDate` | Date    | No       | Expected delivery date                   |
-| `comment`      | String  | No       | Comments                                 |
-| `sendEmail`    | Boolean | No       | Send notification email (default: false) |
+| Argument          | Type    | Required | Description                                                                                                      |
+| ----------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `description`     | String  | Yes      | Consolidation description                                                                                        |
+| `status`          | String  | Yes      | Initial status                                                                                                   |
+| `packageIds`      | [ID]    | Yes      | List of package IDs to consolidate                                                                               |
+| `deliveryDate`    | Date    | No       | Expected delivery date                                                                                           |
+| `comment`         | String  | No       | Comments                                                                                                         |
+| `sendEmail`       | Boolean | No       | Send notification email (default: false)                                                                         |
+| `extraAttributes` | JSON    | No       | Extra charges as key-value pairs (max 5). Values must be numeric. Example: `{"seguro": "1.00", "cotel": "0.60"}` |
 
 **Valid Initial Statuses:**
 
@@ -1367,11 +1369,14 @@ mutation {
     deliveryDate: "2024-12-25"
     comment: "Handle with care"
     sendEmail: true
+    extraAttributes: "{\"seguro\": \"1.00\", \"cotel\": \"0.60\"}"
   ) {
     consolidate {
       id
       description
       status
+      extraAttributes
+      totalCost
       client {
         fullName
         email
@@ -1397,6 +1402,8 @@ mutation {
 - No package can already belong to another consolidation
 - Status must be a valid Consolidate status
 - Initial status must be `awaiting_payment`, `pending`, or `processing`
+- `extraAttributes` must be a JSON object with at most 5 entries
+- `extraAttributes` values must be numeric (they represent monetary amounts)
 
 **Errors:**
 
@@ -1413,22 +1420,30 @@ Updates an existing consolidation.
 
 **Arguments:**
 
-| Argument       | Type   | Required | Description                         |
-| -------------- | ------ | -------- | ----------------------------------- |
-| `id`           | ID     | Yes      | Consolidation ID                    |
-| `description`  | String | No       | Description                         |
-| `status`       | String | No       | New status (see status transitions) |
-| `deliveryDate` | Date   | No       | Delivery date                       |
-| `comment`      | String | No       | Comments                            |
-| `packageIds`   | [ID]   | No       | New list of package IDs             |
+| Argument          | Type   | Required | Description                                                                                                      |
+| ----------------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `id`              | ID     | Yes      | Consolidation ID                                                                                                 |
+| `description`     | String | No       | Description                                                                                                      |
+| `status`          | String | No       | New status (see status transitions)                                                                              |
+| `deliveryDate`    | Date   | No       | Delivery date                                                                                                    |
+| `comment`         | String | No       | Comments                                                                                                         |
+| `packageIds`      | [ID]   | No       | New list of package IDs                                                                                          |
+| `extraAttributes` | JSON   | No       | Extra charges as key-value pairs (max 5). Values must be numeric. Example: `{"seguro": "1.00", "cotel": "0.60"}` |
 
 ```graphql
 mutation {
-  updateConsolidate(id: 1, status: "in_transit", comment: "Shipped via FedEx") {
+  updateConsolidate(
+    id: 1
+    status: "in_transit"
+    comment: "Shipped via FedEx"
+    extraAttributes: "{\"seguro\": \"2.00\", \"cotel\": \"1.20\"}"
+  ) {
     consolidate {
       id
       status
       comment
+      extraAttributes
+      totalCost
       packages {
         barcode
       }
@@ -1457,7 +1472,7 @@ mutation {
 **Notes:**
 
 - `client` cannot be modified
-- `extraAttributes` is ignored (not modifiable via this mutation)
+- `extraAttributes` values must be numeric and limited to 5 entries
 - When updating `packageIds`, all new packages must belong to the same client
 
 **Errors:**

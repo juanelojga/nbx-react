@@ -10,7 +10,8 @@ jest.mock("@/components/ui/tooltip", () => ({
   ),
   TooltipTrigger: ({
     children,
-    asChild: _,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    asChild,
     ...props
   }: {
     children: React.ReactNode;

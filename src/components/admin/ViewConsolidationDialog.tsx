@@ -12,6 +12,7 @@ import {
 } from "@/graphql/queries/consolidations";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { parseExtraAttributes } from "@/components/admin/ExtraAttributesEditor";
 import {
   Table,
   TableBody,
@@ -168,6 +169,32 @@ export function ViewConsolidationDialog({
                     : undefined
                 }
               />
+              {(() => {
+                const entries = parseExtraAttributes(
+                  consolidation.extraAttributes
+                );
+                if (entries.length === 0) return null;
+                return (
+                  <div className="flex flex-col space-y-1 md:col-span-2">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {t("extraAttributes")}
+                    </span>
+                    <div className="space-y-1">
+                      {entries.map((entry, i) => (
+                        <div
+                          key={i}
+                          className="flex justify-between text-sm text-foreground max-w-xs"
+                        >
+                          <span className="capitalize">{entry.key}</span>
+                          <span className="font-mono">
+                            ${Number(entry.value).toFixed(2)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
