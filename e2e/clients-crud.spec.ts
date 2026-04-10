@@ -271,7 +271,7 @@ test.describe.serial("Clients CRUD", () => {
 
     // Wait for GraphQL response
     const response = await responsePromise;
-    const body = await response.json();
+    await response.json();
 
     // Wait for dialog to close
     await expect(

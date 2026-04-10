@@ -15,7 +15,7 @@ describe("getConsolidationColumns", () => {
   it("returns 7 columns with correct ids", () => {
     const columns = getConsolidationColumns(mockT);
 
-    expect(columns).toHaveLength(7);
+    expect(columns).toHaveLength(8);
     expect(columns.map((c) => c.id)).toEqual([
       "id",
       "client",
@@ -23,6 +23,7 @@ describe("getConsolidationColumns", () => {
       "status",
       "packagesCount",
       "deliveryDate",
+      "totalCost",
       "actions",
     ]);
   });

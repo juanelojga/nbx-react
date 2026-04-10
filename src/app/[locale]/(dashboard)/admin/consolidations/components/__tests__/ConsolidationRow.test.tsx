@@ -91,6 +91,7 @@ const mockConsolidation: ConsolidateType = {
     { id: "pkg-1", barcode: "BC001", description: "Package 1" },
     { id: "pkg-2", barcode: "BC002", description: "Package 2" },
   ],
+  totalCost: 150.0,
   createdAt: "2024-01-01",
   updatedAt: "2024-01-01",
 };
