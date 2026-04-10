@@ -59,7 +59,6 @@ export function useClientDialogs(): UseClientDialogsReturn {
   const handleDeleteClient = useCallback((client: ClientType) => {
     setClientToDelete({
       id: client.id,
-      userId: client.user.id,
       fullName: client.fullName,
       email: client.email,
     });

@@ -6,9 +6,9 @@ import { BaseDialog } from "@/components/ui/base-dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import {
-  DELETE_USER,
-  DeleteUserResponse,
-  DeleteUserVariables,
+  DELETE_CLIENT,
+  DeleteClientResponse,
+  DeleteClientVariables,
 } from "@/graphql/mutations/clients";
 import { toast } from "sonner";
 
@@ -17,7 +17,6 @@ interface DeleteClientDialogProps {
   onOpenChange: (open: boolean) => void;
   client: {
     id: string;
-    userId: string;
     fullName: string;
     email: string;
   } | null;
@@ -32,10 +31,10 @@ export function DeleteClientDialog({
 }: DeleteClientDialogProps) {
   const t = useTranslations("adminClients.deleteDialog");
   const tParent = useTranslations("adminClients");
-  const [deleteUser, { loading }] = useMutation<
-    DeleteUserResponse,
-    DeleteUserVariables
-  >(DELETE_USER, {
+  const [deleteClient, { loading }] = useMutation<
+    DeleteClientResponse,
+    DeleteClientVariables
+  >(DELETE_CLIENT, {
     onCompleted: async () => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
@@ -59,9 +58,10 @@ export function DeleteClientDialog({
   const handleDelete = async () => {
     if (!client) return;
 
-    await deleteUser({
+    await deleteClient({
       variables: {
-        id: client.userId,
+        id: client.id,
+        deleteUser: true,
       },
     }).catch(() => {});
   };

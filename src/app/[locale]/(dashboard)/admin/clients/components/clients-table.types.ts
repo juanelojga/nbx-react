@@ -4,7 +4,6 @@ export type SortField = "full_name" | "email" | "created_at";
 
 export interface ClientToDelete {
   id: string;
-  userId: string;
   fullName: string;
   email: string;
 }

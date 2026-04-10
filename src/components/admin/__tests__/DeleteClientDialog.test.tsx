@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MockedProvider, MockedResponse } from "@/test/MockedProvider";
 import { DeleteClientDialog } from "@/components/admin/DeleteClientDialog";
-import { DELETE_USER } from "@/graphql/mutations/clients";
+import { DELETE_CLIENT } from "@/graphql/mutations/clients";
 import { toast } from "sonner";
 
 jest.mock("next-intl", () => ({
@@ -15,25 +15,24 @@ jest.mock("sonner", () => ({
 
 const mockClient = {
   id: "1",
-  userId: "user-1",
   fullName: "John Doe",
   email: "john@example.com",
 };
 
 const successMock: MockedResponse = {
   request: {
-    query: DELETE_USER,
-    variables: { id: "user-1" },
+    query: DELETE_CLIENT,
+    variables: { id: "1", deleteUser: true },
   },
   result: {
-    data: { deleteUser: { ok: true } },
+    data: { deleteClient: { ok: true, message: null } },
   },
 };
 
 const errorMock: MockedResponse = {
   request: {
-    query: DELETE_USER,
-    variables: { id: "user-1" },
+    query: DELETE_CLIENT,
+    variables: { id: "1", deleteUser: true },
   },
   error: new Error("Network error"),
 };
@@ -86,16 +85,16 @@ describe("DeleteClientDialog", () => {
     expect(defaultProps.onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it("delete triggers mutation with client.userId", async () => {
+  it("delete triggers mutation with client.id", async () => {
     const user = userEvent.setup();
 
     const mutationMock: MockedResponse = {
       request: {
-        query: DELETE_USER,
-        variables: { id: "user-1" },
+        query: DELETE_CLIENT,
+        variables: { id: "1", deleteUser: true },
       },
       result: {
-        data: { deleteUser: { ok: true } },
+        data: { deleteClient: { ok: true, message: null } },
       },
     };
 
@@ -156,11 +155,11 @@ describe("DeleteClientDialog", () => {
 
     const delayedMock: MockedResponse = {
       request: {
-        query: DELETE_USER,
-        variables: { id: "user-1" },
+        query: DELETE_CLIENT,
+        variables: { id: "1", deleteUser: true },
       },
       result: {
-        data: { deleteUser: { ok: true } },
+        data: { deleteClient: { ok: true, message: null } },
       },
       delay: 1000,
     };

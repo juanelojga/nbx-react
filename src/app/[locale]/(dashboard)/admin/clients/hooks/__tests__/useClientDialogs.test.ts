@@ -98,7 +98,6 @@ describe("useClientDialogs", () => {
     expect(result.current.isDeleteDialogOpen).toBe(true);
     expect(result.current.clientToDelete).toEqual({
       id: "client-1",
-      userId: "user-1",
       fullName: "John Doe",
       email: "john@example.com",
     });
