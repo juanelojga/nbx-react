@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures/mockBackend";
 import path from "path";
 
 const screenshotsDir = path.join(__dirname, "screenshots");
@@ -90,7 +90,7 @@ test.describe.serial("Clients CRUD", () => {
 
     // Wait for success toast
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({
       timeout: 10000,
     });
@@ -203,7 +203,7 @@ test.describe.serial("Clients CRUD", () => {
 
     // Wait for success toast
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({
       timeout: 10000,
     });

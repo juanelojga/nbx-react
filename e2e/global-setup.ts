@@ -1,4 +1,5 @@
-import { test as setup, expect } from "@playwright/test";
+import { test as base, expect } from "./fixtures/mockBackend";
+const setup = base;
 import path from "path";
 
 const authFile = path.join(__dirname, ".auth/storage-state.json");
