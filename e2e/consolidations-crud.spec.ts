@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures/mockBackend";
 import path from "path";
 
 const screenshotsDir = path.join(__dirname, "screenshots");
@@ -56,7 +56,7 @@ test.describe.serial("Consolidations CRUD", () => {
     await page.getByRole("button", { name: "Create Client" }).click();
 
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({ timeout: 10000 });
 
     await expect(
@@ -112,14 +112,16 @@ test.describe.serial("Consolidations CRUD", () => {
 
     await page.getByRole("button", { name: "Create Package" }).click();
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("heading", { name: "Create New Package" })
     ).not.toBeVisible();
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByText(testPackage.barcode)).toBeVisible({
+    await expect(
+      page.getByText(testPackage.barcode, { exact: true })
+    ).toBeVisible({
       timeout: 10000,
     });
 
@@ -169,7 +171,7 @@ test.describe.serial("Consolidations CRUD", () => {
     await page.getByRole("button", { name: "Create Consolidation" }).click();
 
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({ timeout: 15000 });
 
     await expect(
@@ -310,7 +312,7 @@ test.describe.serial("Consolidations CRUD", () => {
     });
 
     // Close dialog
-    await dialog.getByRole("button", { name: "Close" }).click();
+    await dialog.getByRole("button", { name: "Close" }).first().click();
     await expect(
       page.getByRole("heading", { name: "View Consolidation Details" })
     ).not.toBeVisible();
@@ -462,7 +464,7 @@ test.describe.serial("Consolidations CRUD", () => {
 
     // Wait for success toast
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({ timeout: 10000 });
 
     // Dialog should close

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures/mockBackend";
 import path from "path";
 
 const screenshotsDir = path.join(__dirname, "screenshots");
@@ -82,7 +82,7 @@ test.describe.serial("Consolidation Flow", () => {
 
     // Wait for success toast
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({ timeout: 10000 });
 
     // Dialog should close
@@ -126,9 +126,9 @@ test.describe.serial("Consolidation Flow", () => {
     await page.getByText(testFullName).click();
 
     // Verify client details are displayed
-    await expect(page.getByText(testFullName)).toBeVisible();
-    await expect(page.getByText(testEmail)).toBeVisible();
-    await expect(page.getByText("Guayaquil, Guayas")).toBeVisible();
+    await expect(page.getByText(testFullName).first()).toBeVisible();
+    await expect(page.getByText(testEmail).first()).toBeVisible();
+    await expect(page.getByText("Guayaquil, Guayas").first()).toBeVisible();
 
     await page.screenshot({
       path: path.join(
@@ -164,7 +164,7 @@ test.describe.serial("Consolidation Flow", () => {
 
     await page.getByRole("button", { name: "Create Package" }).click();
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("heading", { name: "Create New Package" })
@@ -172,9 +172,11 @@ test.describe.serial("Consolidation Flow", () => {
     await page.waitForLoadState("networkidle");
 
     // Verify Package A appears in table
-    await expect(page.getByText(packageA.barcode)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(packageA.barcode, { exact: true })).toBeVisible(
+      {
+        timeout: 10000,
+      }
+    );
 
     // ── Step 2: Create Package B ──────────────────────────────────
 
@@ -191,16 +193,18 @@ test.describe.serial("Consolidation Flow", () => {
 
     await page.getByRole("button", { name: "Create Package" }).click();
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("heading", { name: "Create New Package" })
     ).not.toBeVisible();
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByText(packageB.barcode)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(packageB.barcode, { exact: true })).toBeVisible(
+      {
+        timeout: 10000,
+      }
+    );
 
     // ── Step 2: Create Package C (no realPrice) ───────────────────
 
@@ -217,16 +221,18 @@ test.describe.serial("Consolidation Flow", () => {
 
     await page.getByRole("button", { name: "Create Package" }).click();
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("heading", { name: "Create New Package" })
     ).not.toBeVisible();
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByText(packageC.barcode)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(packageC.barcode, { exact: true })).toBeVisible(
+      {
+        timeout: 10000,
+      }
+    );
 
     await page.screenshot({
       path: path.join(
@@ -286,12 +292,18 @@ test.describe.serial("Consolidation Flow", () => {
     });
 
     // Verify client name is shown
-    await expect(page.getByText(testFullName)).toBeVisible();
+    await expect(page.getByText(testFullName).first()).toBeVisible();
 
     // Verify all 3 package barcodes in the right panel
-    await expect(page.getByText(packageA.barcode)).toBeVisible();
-    await expect(page.getByText(packageB.barcode)).toBeVisible();
-    await expect(page.getByText(packageC.barcode)).toBeVisible();
+    await expect(
+      page.getByText(packageA.barcode, { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText(packageB.barcode, { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText(packageC.barcode, { exact: true })
+    ).toBeVisible();
 
     // Fill description
     await page.locator("#description").fill(testDescription);
@@ -331,7 +343,7 @@ test.describe.serial("Consolidation Flow", () => {
 
     // Wait for success toast
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({ timeout: 15000 });
 
     // ── Step 4: Verify Success Screen ─────────────────────────────
@@ -347,14 +359,14 @@ test.describe.serial("Consolidation Flow", () => {
     expect(createdConsolidationId).toBeTruthy();
 
     // Verify client info
-    await expect(page.getByText(testFullName)).toBeVisible();
-    await expect(page.getByText(testEmail)).toBeVisible();
+    await expect(page.getByText(testFullName).first()).toBeVisible();
+    await expect(page.getByText(testEmail).first()).toBeVisible();
 
     // Verify description
     await expect(page.getByText(testDescription)).toBeVisible();
 
     // Verify status shows "Processing"
-    await expect(page.getByText("Processing")).toBeVisible();
+    await expect(page.getByText("Processing", { exact: true })).toBeVisible();
 
     // Verify statistics: package count = 3
     const statsSection = page.locator(".pt-4.border-t-2");
@@ -367,9 +379,15 @@ test.describe.serial("Consolidation Flow", () => {
     await expect(statsSection.getByText("$165.50")).toBeVisible();
 
     // Verify all package barcodes in the success package list
-    await expect(page.getByText(packageA.barcode)).toBeVisible();
-    await expect(page.getByText(packageB.barcode)).toBeVisible();
-    await expect(page.getByText(packageC.barcode)).toBeVisible();
+    await expect(
+      page.getByText(packageA.barcode, { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText(packageB.barcode, { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText(packageC.barcode, { exact: true })
+    ).toBeVisible();
 
     // Verify action buttons
     await expect(
@@ -690,7 +708,7 @@ test.describe.serial("Consolidation Flow", () => {
     });
 
     // Close dialog
-    await dialog.getByRole("button", { name: "Close" }).click();
+    await dialog.getByRole("button", { name: "Close" }).first().click();
     await expect(
       page.getByRole("heading", { name: "View Consolidation Details" })
     ).not.toBeVisible();
@@ -749,7 +767,7 @@ test.describe.serial("Consolidation Flow", () => {
 
     // Wait for success toast
     await expect(
-      page.locator('[data-sonner-toast][data-type="success"]')
+      page.locator('[data-sonner-toast][data-type="success"]').first()
     ).toBeVisible({ timeout: 10000 });
 
     // Dialog should close
