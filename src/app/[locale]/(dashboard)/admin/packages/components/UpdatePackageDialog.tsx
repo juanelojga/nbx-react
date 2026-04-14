@@ -46,6 +46,7 @@ interface FormData {
   dimensionUnit: string;
   weight: string;
   weightUnit: string;
+  isDocumentHolder: boolean;
   description: string;
   purchaseLink: string;
   purchasedByNarbox: boolean;
@@ -74,6 +75,7 @@ export function UpdatePackageDialog({
     dimensionUnit: "cm",
     weight: "",
     weightUnit: "lb",
+    isDocumentHolder: false,
     description: "",
     purchaseLink: "",
     purchasedByNarbox: false,
@@ -154,6 +156,8 @@ export function UpdatePackageDialog({
             dimensionUnit: pkg.dimensionUnit || "cm",
             weight: pkg.weight?.toString() || "",
             weightUnit: pkg.weightUnit || "lb",
+            isDocumentHolder:
+              pkg.weight === 0.5 && (pkg.weightUnit || "lb") === "lb",
             description: pkg.description || "",
             purchaseLink: pkg.purchaseLink || "",
             purchasedByNarbox: pkg.purchasedByNarbox ?? false,
@@ -176,6 +180,7 @@ export function UpdatePackageDialog({
       dimensionUnit: "cm",
       weight: "",
       weightUnit: "lb",
+      isDocumentHolder: false,
       description: "",
       purchaseLink: "",
       purchasedByNarbox: false,
@@ -193,6 +198,16 @@ export function UpdatePackageDialog({
         ...prev,
         purchasedByNarbox: value === "true",
       }));
+    } else if (field === "isDocumentHolder") {
+      const checked = value === "true";
+      setFormData((prev) => ({
+        ...prev,
+        isDocumentHolder: checked,
+        ...(checked ? { weight: "", weightUnit: "lb" } : {}),
+      }));
+      if (checked && validationErrors.weight) {
+        setValidationErrors((prev) => ({ ...prev, weight: undefined }));
+      }
     } else {
       setFormData((prev) => ({ ...prev, [field]: value }));
     }
@@ -205,12 +220,23 @@ export function UpdatePackageDialog({
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
 
+    // Required: Weight (skipped when Document Holder is selected)
+    if (!formData.isDocumentHolder) {
+      if (!formData.weight.trim()) {
+        errors.weight = t("weightRequired");
+      } else {
+        const weightVal = parseFloat(formData.weight.trim());
+        if (isNaN(weightVal) || weightVal <= 0) {
+          errors.weight = t("positiveNumberError");
+        }
+      }
+    }
+
     // Optional: Numeric fields must be > 0 if provided
     const numericFields = [
       { key: "length", label: "Length" },
       { key: "width", label: "Width" },
       { key: "height", label: "Height" },
-      { key: "weight", label: "Weight" },
       { key: "realPrice", label: "Real price" },
     ];
 
@@ -267,7 +293,9 @@ export function UpdatePackageDialog({
     if (formData.dimensionUnit.trim()) {
       variables.dimensionUnit = formData.dimensionUnit.trim();
     }
-    if (formData.weightUnit.trim()) {
+    if (formData.isDocumentHolder) {
+      variables.weightUnit = "lb";
+    } else if (formData.weightUnit.trim()) {
       variables.weightUnit = formData.weightUnit.trim();
     }
     if (formData.description.trim()) {
@@ -290,7 +318,9 @@ export function UpdatePackageDialog({
     if (formData.height.trim()) {
       variables.height = parseFloat(formData.height.trim());
     }
-    if (formData.weight.trim()) {
+    if (formData.isDocumentHolder) {
+      variables.weight = 0.5;
+    } else if (formData.weight.trim()) {
       variables.weight = parseFloat(formData.weight.trim());
     }
     if (formData.realPrice.trim()) {
@@ -513,51 +543,82 @@ export function UpdatePackageDialog({
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               {t("weightTitle")}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Weight Value */}
-              <div className="space-y-2">
-                <Label htmlFor="weight">{t("weightLabel")}</Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.weight}
-                  onChange={(e) => handleInputChange("weight", e.target.value)}
-                  disabled={isLoading}
-                  aria-invalid={!!validationErrors.weight}
-                  placeholder={t("weightPlaceholder")}
-                />
-                {validationErrors.weight && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.weight}
-                  </p>
-                )}
-              </div>
 
-              {/* Weight Unit */}
-              <div className="space-y-2">
-                <Label htmlFor="weightUnit">{t("unitLabel")}</Label>
-                <Select
-                  value={formData.weightUnit}
-                  onValueChange={(value) =>
-                    handleInputChange("weightUnit", value)
-                  }
-                  disabled={isLoading}
-                >
-                  <SelectTrigger id="weightUnit" className="w-full">
-                    <SelectValue placeholder={t("unitPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="kg">{t("unitKg")}</SelectItem>
-                    <SelectItem value="lb">{t("unitLb")}</SelectItem>
-                    <SelectItem value="g">{t("unitG")}</SelectItem>
-                    <SelectItem value="oz">{t("unitOz")}</SelectItem>
-                  </SelectContent>
-                </Select>
+            {/* Document Holder helper */}
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="isDocumentHolder"
+                checked={formData.isDocumentHolder}
+                onCheckedChange={(checked) =>
+                  handleInputChange(
+                    "isDocumentHolder",
+                    checked === true ? "true" : "false"
+                  )
+                }
+                disabled={isLoading}
+              />
+              <div className="grid gap-1 leading-none">
+                <Label htmlFor="isDocumentHolder" className="cursor-pointer">
+                  {t("documentHolderLabel")}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {t("documentHolderDescription")}
+                </p>
               </div>
             </div>
+
+            {!formData.isDocumentHolder && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Weight Value */}
+                <div className="space-y-2">
+                  <Label htmlFor="weight">
+                    {t("weightLabel")}{" "}
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.weight}
+                    onChange={(e) =>
+                      handleInputChange("weight", e.target.value)
+                    }
+                    disabled={isLoading}
+                    aria-invalid={!!validationErrors.weight}
+                    placeholder={t("weightPlaceholder")}
+                  />
+                  {validationErrors.weight && (
+                    <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                      <span className="text-base">⚠</span>
+                      {validationErrors.weight}
+                    </p>
+                  )}
+                </div>
+
+                {/* Weight Unit */}
+                <div className="space-y-2">
+                  <Label htmlFor="weightUnit">{t("unitLabel")}</Label>
+                  <Select
+                    value={formData.weightUnit}
+                    onValueChange={(value) =>
+                      handleInputChange("weightUnit", value)
+                    }
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger id="weightUnit" className="w-full">
+                      <SelectValue placeholder={t("unitPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="kg">{t("unitKg")}</SelectItem>
+                      <SelectItem value="lb">{t("unitLb")}</SelectItem>
+                      <SelectItem value="g">{t("unitG")}</SelectItem>
+                      <SelectItem value="oz">{t("unitOz")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Pricing */}
