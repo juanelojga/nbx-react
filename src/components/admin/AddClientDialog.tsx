@@ -295,9 +295,10 @@ export function AddClientDialog({
               </Label>
               <Input
                 id="identificationNumber"
+                inputMode="numeric"
                 value={formData.identificationNumber}
                 onChange={(e) =>
-                  handleInputChange("identificationNumber", e.target.value)
+                  handlePhoneInputChange("identificationNumber", e.target.value)
                 }
                 disabled={loading}
                 placeholder={t("identificationNumberPlaceholder")}

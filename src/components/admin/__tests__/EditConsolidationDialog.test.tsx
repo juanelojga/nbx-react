@@ -60,7 +60,6 @@ const mockConsolidation = {
   status: "pending" as const,
   deliveryDate: "2024-06-15",
   comment: "Test comment",
-  extraAttributes: null,
 };
 
 const successMock: MockedResponse = {
