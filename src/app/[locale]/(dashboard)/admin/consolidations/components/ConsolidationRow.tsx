@@ -3,11 +3,6 @@
 import { memo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { TableCell, TableRow } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { TableActionButtons } from "@/components/common/TableActionButtons";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
@@ -67,30 +62,11 @@ export const ConsolidationRow = memo(function ConsolidationRow({
           </p>
         </div>
       </TableCell>
-      <TableCell className="whitespace-normal">
-        <div className="relative max-w-xs">
-          {consolidation.description ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <p className="text-xs transition-colors duration-300 line-clamp-3 text-muted-foreground group-hover:text-foreground cursor-default">
-                  {consolidation.description}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-sm text-[11px]">
-                {consolidation.description}
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <p className="text-xs transition-colors duration-300 text-muted-foreground/40 italic">
-              {"\u2014"}
-            </p>
-          )}
-        </div>
-      </TableCell>
       <TableCell>
         <StatusBadge
           status={consolidation.status}
           label={getStatusLabel(t, consolidation.status)}
+          iconOnly
         />
       </TableCell>
       <TableCell>
@@ -121,6 +97,22 @@ export const ConsolidationRow = memo(function ConsolidationRow({
                     });
                   })()
                 : "\u2014"}
+            </time>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 flex-col justify-center rounded-md bg-muted/50 px-3 backdrop-blur-sm transition-all duration-300 group-hover:bg-muted/80">
+            <time
+              className="text-xs font-medium text-foreground/80 whitespace-nowrap"
+              dateTime={consolidation.createdAt}
+            >
+              {new Date(consolidation.createdAt).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
             </time>
           </div>
         </div>

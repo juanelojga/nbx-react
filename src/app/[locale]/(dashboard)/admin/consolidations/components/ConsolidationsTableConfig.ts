@@ -23,12 +23,6 @@ export function getConsolidationColumns(
       skeletonWidth: "9rem",
     },
     {
-      id: "description",
-      header: t("description"),
-      cell: () => null,
-      skeletonWidth: "10rem",
-    },
-    {
       id: "status",
       header: t("status"),
       cell: () => null,
@@ -50,6 +44,15 @@ export function getConsolidationColumns(
       cell: () => null,
       sortable: true,
       sortField: "delivery_date",
+      skeletonWidth: "7rem",
+      skeletonVariant: "date",
+    },
+    {
+      id: "createdAt",
+      header: t("createdAt"),
+      cell: () => null,
+      sortable: true,
+      sortField: "created_at",
       skeletonWidth: "7rem",
       skeletonVariant: "date",
     },

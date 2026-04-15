@@ -50,6 +50,12 @@ describe("ConsolidationToolbar", () => {
     onClearSearch: jest.fn(),
     statusFilter: "all",
     onStatusFilterChange: jest.fn(),
+    createdAfter: "",
+    createdBefore: "",
+    onCreatedAfterChange: jest.fn(),
+    onCreatedBeforeChange: jest.fn(),
+    onClearDates: jest.fn(),
+    dateRangeError: null,
     isLoading: false,
     isDebouncing: false,
   };

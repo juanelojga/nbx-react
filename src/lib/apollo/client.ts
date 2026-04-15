@@ -208,7 +208,14 @@ function createApolloClient(): ApolloClient {
             },
             allPackages: {
               // Cache packages list
-              keyArgs: ["search", "orderBy", "status"],
+              keyArgs: [
+                "search",
+                "orderBy",
+                "page",
+                "pageSize",
+                "notInConsolidate",
+                "clientId",
+              ],
               merge(_existing, incoming) {
                 // For pagination, always replace with incoming data
                 return incoming;
