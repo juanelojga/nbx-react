@@ -21,16 +21,14 @@ const testPackage = {
 
 // Consolidation creation data
 const testDescription = `CRUD Test Consolidation ${testTimestamp}`;
-const testDeliveryDate = "2026-06-20";
 const testComment = "CRUD test comment for auto-fill verification";
 const extraAttr1 = { name: "Customs Fee", amount: "15.75" };
 const extraAttr2 = { name: "Packing Fee", amount: "8.50" };
 
 // Updated values for edit tests
 const updatedDescription = `${testDescription} UPDATED`;
-const updatedDeliveryDate = "2026-07-10";
+const updatedDeliveryDate = "2026-04-10";
 const updatedComment = "Updated comment after edit";
-const updatedExtraAttr1 = { name: "Customs Fee Revised", amount: "20.00" };
 
 test.describe.serial("Consolidations CRUD", () => {
   // ─── Test 1: Setup — create test client ────────────────────────
@@ -139,13 +137,6 @@ test.describe.serial("Consolidations CRUD", () => {
     // Step 3: Fill ALL consolidation fields
     await page.locator("#description").fill(testDescription);
 
-    // Change status to Processing
-    await page.locator("#status").click();
-    await page.getByRole("option", { name: /Processing/ }).click();
-
-    // Fill delivery date
-    await page.locator("#deliveryDate").fill(testDeliveryDate);
-
     // Fill comment
     await page.locator("#comment").fill(testComment);
 
@@ -169,6 +160,11 @@ test.describe.serial("Consolidations CRUD", () => {
 
     // Submit
     await page.getByRole("button", { name: "Create Consolidation" }).click();
+
+    // Confirm creation in confirmation dialog
+    await page
+      .getByRole("button", { name: "Yes, create consolidation" })
+      .click();
 
     await expect(
       page.locator('[data-sonner-toast][data-type="success"]').first()
@@ -289,7 +285,7 @@ test.describe.serial("Consolidations CRUD", () => {
     await expect(
       dialog.getByText(`${testFullName} (${testEmail})`)
     ).toBeVisible();
-    await expect(dialog.getByText("Processing")).toBeVisible();
+    await expect(dialog.getByText("Awaiting Payment")).toBeVisible();
     await expect(dialog.getByText(testComment)).toBeVisible();
 
     // Verify total cost shows a dollar value
@@ -357,28 +353,11 @@ test.describe.serial("Consolidations CRUD", () => {
 
     // 2. Status — Radix Select renders the selected label in the trigger
     await expect(dialog.locator('[role="combobox"]')).toContainText(
-      "Processing"
+      "Awaiting Payment"
     );
 
-    // 3. Delivery Date
-    await expect(dialog.locator("#deliveryDate")).toHaveValue(testDeliveryDate);
-
-    // 4. Comment
+    // 3. Comment
     await expect(dialog.locator("#comment")).toHaveValue(testComment);
-
-    // 5. Extra Attributes — both entries should be populated
-    await expect(dialog.getByPlaceholder("Charge Name").nth(0)).toHaveValue(
-      extraAttr1.name
-    );
-    await expect(dialog.getByPlaceholder("Amount").nth(0)).toHaveValue(
-      extraAttr1.amount
-    );
-    await expect(dialog.getByPlaceholder("Charge Name").nth(1)).toHaveValue(
-      extraAttr2.name
-    );
-    await expect(dialog.getByPlaceholder("Amount").nth(1)).toHaveValue(
-      extraAttr2.amount
-    );
 
     await page.screenshot({
       path: path.join(screenshotsDir, "crud-consol-edit-autofill-all.png"),
@@ -427,9 +406,9 @@ test.describe.serial("Consolidations CRUD", () => {
     await dialog.locator("#description").clear();
     await dialog.locator("#description").fill(updatedDescription);
 
-    // 2. Change status to "In Transit"
+    // 2. Change status to "Delivered" (required for the delivery date field to render)
     await dialog.locator('[role="combobox"]').click();
-    await page.getByRole("option", { name: "In Transit" }).click();
+    await page.getByRole("option", { name: "Delivered" }).click();
 
     // 3. Update delivery date
     await dialog.locator("#deliveryDate").fill(updatedDeliveryDate);
@@ -437,23 +416,6 @@ test.describe.serial("Consolidations CRUD", () => {
     // 4. Update comment
     await dialog.locator("#comment").clear();
     await dialog.locator("#comment").fill(updatedComment);
-
-    // 5. Update first extra attribute
-    const chargeName0 = dialog.getByPlaceholder("Charge Name").nth(0);
-    await chargeName0.clear();
-    await chargeName0.fill(updatedExtraAttr1.name);
-    const chargeAmount0 = dialog.getByPlaceholder("Amount").nth(0);
-    await chargeAmount0.clear();
-    await chargeAmount0.fill(updatedExtraAttr1.amount);
-
-    // 6. Remove second extra attribute
-    const removeButtons = dialog.locator(
-      'button[class*="hover:text-destructive"]'
-    );
-    await removeButtons.last().click();
-
-    // Verify only 1 charge row remains
-    await expect(dialog.getByPlaceholder("Charge Name")).toHaveCount(1);
 
     await page.screenshot({
       path: path.join(screenshotsDir, "crud-consol-edit-updated-fields.png"),
@@ -514,21 +476,12 @@ test.describe.serial("Consolidations CRUD", () => {
       updatedDescription
     );
     await expect(dialog.locator('[role="combobox"]')).toContainText(
-      "In Transit"
+      "Delivered"
     );
     await expect(dialog.locator("#deliveryDate")).toHaveValue(
       updatedDeliveryDate
     );
     await expect(dialog.locator("#comment")).toHaveValue(updatedComment);
-
-    // Only 1 extra attribute should remain
-    await expect(dialog.getByPlaceholder("Charge Name")).toHaveCount(1);
-    await expect(dialog.getByPlaceholder("Charge Name").first()).toHaveValue(
-      updatedExtraAttr1.name
-    );
-    await expect(dialog.getByPlaceholder("Amount").first()).toHaveValue(
-      updatedExtraAttr1.amount
-    );
 
     await page.screenshot({
       path: path.join(screenshotsDir, "crud-consol-edit-persistence.png"),

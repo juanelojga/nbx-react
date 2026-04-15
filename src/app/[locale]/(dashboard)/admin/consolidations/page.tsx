@@ -41,7 +41,7 @@ export default function AdminConsolidations() {
     getOrderBy,
   } = useConsolidationTableState({
     defaultPageSize: 10,
-    defaultSortField: "delivery_date",
+    defaultSortField: "created_at",
     defaultSortOrder: "desc",
   });
 

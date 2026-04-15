@@ -112,6 +112,8 @@ export function ViewClientDialog({
                 label={t("identificationNumber")}
                 value={client.identificationNumber}
               />
+              <InfoRow label={t("extraEmail1")} value={client.extraEmail1} />
+              <InfoRow label={t("extraEmail2")} value={client.extraEmail2} />
             </div>
           </div>
 

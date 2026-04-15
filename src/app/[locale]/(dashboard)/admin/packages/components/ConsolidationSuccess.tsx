@@ -14,7 +14,6 @@ import {
   Layers,
   ArrowRight,
   RotateCcw,
-  Home,
   Weight,
   DollarSign,
 } from "lucide-react";
@@ -25,17 +24,15 @@ import { cn } from "@/lib/utils";
 interface ConsolidationSuccessProps {
   consolidation: ConsolidateType;
   packages: Package[];
-  onViewDetails: () => void;
   onCreateAnother: () => void;
-  onBackToPackages: () => void;
+  onGoToConsolidations: () => void;
 }
 
 export function ConsolidationSuccess({
   consolidation,
   packages,
-  onViewDetails,
   onCreateAnother,
-  onBackToPackages,
+  onGoToConsolidations,
 }: ConsolidationSuccessProps) {
   const t = useTranslations("adminPackages.success");
 
@@ -437,12 +434,11 @@ export function ConsolidationSuccess({
         <CardContent className="relative p-6">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <Button
-              onClick={onViewDetails}
+              onClick={onGoToConsolidations}
               size="lg"
               className="flex-1 gap-2 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
-              <FileText className="w-5 h-5" />
-              {t("viewDetailsButton")}
+              {t("goToConsolidationsButton")}
               <ArrowRight className="w-5 h-5" />
             </Button>
             <Button
@@ -453,15 +449,6 @@ export function ConsolidationSuccess({
             >
               <RotateCcw className="w-5 h-5" />
               {t("createAnotherButton")}
-            </Button>
-            <Button
-              onClick={onBackToPackages}
-              variant="ghost"
-              size="lg"
-              className="gap-2 h-12 text-base font-semibold hover:bg-muted"
-            >
-              <Home className="w-5 h-5" />
-              {t("backToPackagesButton")}
             </Button>
           </div>
         </CardContent>

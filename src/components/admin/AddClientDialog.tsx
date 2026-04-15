@@ -25,6 +25,8 @@ interface FormData {
   firstName: string;
   lastName: string;
   email: string;
+  extraEmail1: string;
+  extraEmail2: string;
   identificationNumber: string;
   mobilePhoneNumber: string;
   phoneNumber: string;
@@ -44,6 +46,8 @@ const INITIAL_FORM_DATA: FormData = {
   firstName: "",
   lastName: "",
   email: "",
+  extraEmail1: "",
+  extraEmail2: "",
   identificationNumber: "",
   mobilePhoneNumber: "",
   phoneNumber: "",
@@ -132,6 +136,20 @@ export function AddClientDialog({
       errors.email = t("emailInvalid");
     }
 
+    // Extra email validation (only if provided)
+    if (
+      formData.extraEmail1.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.extraEmail1.trim())
+    ) {
+      errors.extraEmail1 = t("extraEmail1Invalid");
+    }
+    if (
+      formData.extraEmail2.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.extraEmail2.trim())
+    ) {
+      errors.extraEmail2 = t("extraEmail2Invalid");
+    }
+
     // Phone number validation (numeric only if provided)
     if (
       formData.mobilePhoneNumber &&
@@ -162,6 +180,12 @@ export function AddClientDialog({
     };
 
     // Add optional fields only if they have values
+    if (formData.extraEmail1.trim()) {
+      variables.extraEmail1 = formData.extraEmail1.trim();
+    }
+    if (formData.extraEmail2.trim()) {
+      variables.extraEmail2 = formData.extraEmail2.trim();
+    }
     if (formData.identificationNumber.trim()) {
       variables.identificationNumber = formData.identificationNumber.trim();
     }
@@ -295,13 +319,76 @@ export function AddClientDialog({
               </Label>
               <Input
                 id="identificationNumber"
+                inputMode="numeric"
                 value={formData.identificationNumber}
                 onChange={(e) =>
-                  handleInputChange("identificationNumber", e.target.value)
+                  handlePhoneInputChange("identificationNumber", e.target.value)
                 }
                 disabled={loading}
                 placeholder={t("identificationNumberPlaceholder")}
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Extra Emails Section */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {t("extraEmailsSection")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="extraEmail1">{t("extraEmail1")}</Label>
+              <Input
+                id="extraEmail1"
+                type="email"
+                value={formData.extraEmail1}
+                onChange={(e) =>
+                  handleInputChange("extraEmail1", e.target.value)
+                }
+                disabled={loading}
+                aria-invalid={!!validationErrors.extraEmail1}
+                aria-describedby={
+                  validationErrors.extraEmail1 ? "extraEmail1-error" : undefined
+                }
+                placeholder={t("extraEmail1Placeholder")}
+              />
+              {validationErrors.extraEmail1 && (
+                <p
+                  id="extraEmail1-error"
+                  className="text-sm text-destructive font-medium flex items-center gap-1"
+                >
+                  <span className="text-base">⚠</span>
+                  {validationErrors.extraEmail1}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="extraEmail2">{t("extraEmail2")}</Label>
+              <Input
+                id="extraEmail2"
+                type="email"
+                value={formData.extraEmail2}
+                onChange={(e) =>
+                  handleInputChange("extraEmail2", e.target.value)
+                }
+                disabled={loading}
+                aria-invalid={!!validationErrors.extraEmail2}
+                aria-describedby={
+                  validationErrors.extraEmail2 ? "extraEmail2-error" : undefined
+                }
+                placeholder={t("extraEmail2Placeholder")}
+              />
+              {validationErrors.extraEmail2 && (
+                <p
+                  id="extraEmail2-error"
+                  className="text-sm text-destructive font-medium flex items-center gap-1"
+                >
+                  <span className="text-base">⚠</span>
+                  {validationErrors.extraEmail2}
+                </p>
+              )}
             </div>
           </div>
         </div>

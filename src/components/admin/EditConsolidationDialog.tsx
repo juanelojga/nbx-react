@@ -23,12 +23,6 @@ import {
 } from "@/graphql/mutations/consolidations";
 import { toast } from "sonner";
 import { ConsolidationStatus } from "@/lib/validation/status";
-import {
-  ExtraAttributesEditor,
-  ExtraAttributeEntry,
-  parseExtraAttributes,
-  serializeExtraAttributes,
-} from "@/components/admin/ExtraAttributesEditor";
 
 interface EditConsolidationDialogProps {
   open: boolean;
@@ -39,7 +33,6 @@ interface EditConsolidationDialogProps {
     status: ConsolidationStatus;
     deliveryDate: string | null;
     comment: string | null;
-    extraAttributes: string | null;
   } | null;
   onConsolidationUpdated?: () => void | Promise<void>;
 }
@@ -49,7 +42,6 @@ interface FormData {
   status: ConsolidationStatus;
   deliveryDate: string;
   comment: string;
-  extraAttributes: ExtraAttributeEntry[];
 }
 
 interface ValidationErrors {
@@ -68,12 +60,14 @@ export function EditConsolidationDialog({
     status: "pending",
     deliveryDate: "",
     comment: "",
-    extraAttributes: [],
   });
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
     {}
   );
+
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   // Track the last processed consolidation to avoid unnecessary re-renders
   const lastConsolidationIdRef = useRef<string | null>(null);
@@ -89,9 +83,6 @@ export function EditConsolidationDialog({
             status: consolidation.status,
             deliveryDate: consolidation.deliveryDate || "",
             comment: consolidation.comment || "",
-            extraAttributes: parseExtraAttributes(
-              consolidation.extraAttributes
-            ),
           });
           setValidationErrors({});
         });
@@ -145,26 +136,8 @@ export function EditConsolidationDialog({
         errors.status = t("statusRequired");
       }
 
-      // Validate extra attributes
-      const seenKeys = new Set<string>();
-      for (let i = 0; i < formData.extraAttributes.length; i++) {
-        const entry = formData.extraAttributes[i];
-        const hasKey = entry.key.trim() !== "";
-        const hasValue = entry.value.trim() !== "";
-        if (hasKey || hasValue) {
-          if (!hasKey) {
-            errors[`extraAttributes_${i}_key`] = t("chargeNameRequired");
-          }
-          if (!hasValue) {
-            errors[`extraAttributes_${i}_value`] = t("chargeAmountRequired");
-          } else if (isNaN(Number(entry.value))) {
-            errors[`extraAttributes_${i}_value`] = t("chargeAmountInvalid");
-          }
-          if (hasKey && seenKeys.has(entry.key.trim().toLowerCase())) {
-            errors[`extraAttributes_${i}_key`] = t("duplicateChargeName");
-          }
-          if (hasKey) seenKeys.add(entry.key.trim().toLowerCase());
-        }
+      if (formData.deliveryDate && formData.deliveryDate > todayStr) {
+        errors.deliveryDate = t("deliveryDateFuture");
       }
 
       setValidationErrors(errors);
@@ -178,12 +151,11 @@ export function EditConsolidationDialog({
         status: formData.status,
         deliveryDate: formData.deliveryDate || undefined,
         comment: formData.comment.trim() || undefined,
-        extraAttributes: serializeExtraAttributes(formData.extraAttributes),
       };
 
       await updateConsolidate({ variables }).catch(() => {});
     },
-    [consolidation, formData, updateConsolidate, t]
+    [consolidation, formData, updateConsolidate, t, todayStr]
   );
 
   const handleCancel = () => {
@@ -236,10 +208,14 @@ export function EditConsolidationDialog({
           <Select
             value={formData.status}
             onValueChange={(value) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 status: value as ConsolidationStatus,
-              })
+                deliveryDate:
+                  value === "delivered" && !prev.deliveryDate
+                    ? todayStr
+                    : prev.deliveryDate,
+              }))
             }
             disabled={loading}
           >
@@ -269,18 +245,29 @@ export function EditConsolidationDialog({
         </div>
 
         {/* Delivery Date */}
-        <div className="space-y-2">
-          <Label htmlFor="deliveryDate">{t("deliveryDate")}</Label>
-          <Input
-            id="deliveryDate"
-            type="date"
-            value={formData.deliveryDate}
-            onChange={(e) =>
-              setFormData({ ...formData, deliveryDate: e.target.value })
-            }
-            disabled={loading}
-          />
-        </div>
+        {formData.status === "delivered" && (
+          <div className="space-y-2">
+            <Label htmlFor="deliveryDate">{t("deliveryDate")}</Label>
+            <Input
+              id="deliveryDate"
+              type="date"
+              value={formData.deliveryDate}
+              max={todayStr}
+              onChange={(e) =>
+                setFormData({ ...formData, deliveryDate: e.target.value })
+              }
+              disabled={loading}
+              className={
+                validationErrors.deliveryDate ? "border-destructive" : ""
+              }
+            />
+            {validationErrors.deliveryDate && (
+              <p className="text-sm text-destructive">
+                {validationErrors.deliveryDate}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Comment */}
         <div className="space-y-2">
@@ -296,24 +283,6 @@ export function EditConsolidationDialog({
             rows={3}
           />
         </div>
-
-        {/* Extra Attributes */}
-        <ExtraAttributesEditor
-          value={formData.extraAttributes}
-          onChange={(entries) =>
-            setFormData({ ...formData, extraAttributes: entries })
-          }
-          disabled={loading}
-          labels={{
-            title: t("extraAttributesLabel"),
-            description: t("extraAttributesDescription"),
-            addCharge: t("addCharge"),
-            chargeName: t("chargeName"),
-            chargeAmount: t("chargeAmount"),
-            maxChargesReached: t("maxChargesReached"),
-          }}
-          errors={validationErrors}
-        />
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button

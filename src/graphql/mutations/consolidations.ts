@@ -63,7 +63,6 @@ export const UPDATE_CONSOLIDATE = gql`
     $deliveryDate: Date
     $comment: String
     $packageIds: [ID]
-    $extraAttributes: JSONString
   ) {
     updateConsolidate(
       id: $id
@@ -72,7 +71,6 @@ export const UPDATE_CONSOLIDATE = gql`
       deliveryDate: $deliveryDate
       comment: $comment
       packageIds: $packageIds
-      extraAttributes: $extraAttributes
     ) {
       consolidate {
         id
@@ -161,7 +159,6 @@ export interface UpdateConsolidateVariables {
   deliveryDate?: string;
   comment?: string;
   packageIds?: string[];
-  extraAttributes?: string;
 }
 
 export interface UpdateConsolidateResponse {

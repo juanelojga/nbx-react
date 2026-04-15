@@ -60,7 +60,6 @@ const mockConsolidation = {
   status: "pending" as const,
   deliveryDate: "2024-06-15",
   comment: "Test comment",
-  extraAttributes: null,
 };
 
 const successMock: MockedResponse = {
@@ -146,7 +145,6 @@ describe("EditConsolidationDialog", () => {
       ).toBeInTheDocument();
     });
 
-    expect(screen.getByDisplayValue("2024-06-15")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Test comment")).toBeInTheDocument();
 
     const statusSelect = screen.getByTestId("status-select");

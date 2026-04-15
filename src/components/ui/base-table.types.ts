@@ -33,6 +33,11 @@ export interface SelectionConfig<T> {
   onSelectionChange: (ids: Set<string>) => void;
   getItemId: (item: T) => string;
   selectionBarContent?: React.ReactNode;
+  selectionLabels?: {
+    selectedLabel?: React.ReactNode;
+    clearLabel?: React.ReactNode;
+    message?: string;
+  };
 }
 
 export interface EmptyStateConfig {

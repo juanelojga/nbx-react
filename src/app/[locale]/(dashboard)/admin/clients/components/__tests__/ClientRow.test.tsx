@@ -59,6 +59,8 @@ const mockClient: ClientType = {
     lastName: "Doe",
   },
   email: "john@example.com",
+  extraEmail1: null,
+  extraEmail2: null,
   identificationNumber: "123456",
   state: "Guayas",
   city: "Guayaquil",

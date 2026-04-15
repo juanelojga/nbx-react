@@ -26,6 +26,8 @@ export const GET_ALL_CLIENTS = gql`
           lastName
         }
         email
+        extraEmail1
+        extraEmail2
         identificationNumber
         state
         city
@@ -62,6 +64,8 @@ export interface ClientType {
   id: string;
   user: MeType;
   email: string;
+  extraEmail1: string | null;
+  extraEmail2: string | null;
   identificationNumber: string | null;
   state: string | null;
   city: string | null;
@@ -104,6 +108,8 @@ export const GET_CLIENT = gql`
     client(id: $id) {
       id
       email
+      extraEmail1
+      extraEmail2
       identificationNumber
       state
       city
@@ -125,6 +131,8 @@ export const GET_CLIENT = gql`
 export interface ClientDetailType {
   id: string;
   email: string;
+  extraEmail1: string | null;
+  extraEmail2: string | null;
   identificationNumber: string | null;
   state: string | null;
   city: string | null;

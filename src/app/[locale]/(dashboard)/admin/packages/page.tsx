@@ -131,9 +131,8 @@ export default function AdminPackages() {
             <ConsolidationSuccess
               consolidation={wizard.createdConsolidation}
               packages={wizard.packages}
-              onViewDetails={wizard.handleViewDetails}
               onCreateAnother={wizard.handleCreateAnother}
-              onBackToPackages={wizard.handleBackToPackages}
+              onGoToConsolidations={wizard.handleGoToConsolidations}
             />
           </div>
         )}
