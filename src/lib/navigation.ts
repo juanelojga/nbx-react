@@ -1,6 +1,7 @@
 import {
   Home,
   Package,
+  PackageSearch,
   BarChart3,
   Search,
   Plus,
@@ -36,6 +37,11 @@ export const adminNavItems: NavItem[] = [
     icon: Package,
   },
   { labelKey: "admin.clients", href: "/admin/clients", icon: UserCog },
+  {
+    labelKey: "admin.packagesManagement",
+    href: "/admin/packages-management",
+    icon: PackageSearch,
+  },
   {
     labelKey: "admin.consolidations",
     href: "/admin/consolidations",
