@@ -8,6 +8,8 @@ export const CREATE_CLIENT = gql`
     $buildingNumber: String
     $city: String
     $email: String!
+    $extraEmail1: String
+    $extraEmail2: String
     $firstName: String!
     $identificationNumber: String
     $lastName: String!
@@ -21,6 +23,8 @@ export const CREATE_CLIENT = gql`
       buildingNumber: $buildingNumber
       city: $city
       email: $email
+      extraEmail1: $extraEmail1
+      extraEmail2: $extraEmail2
       firstName: $firstName
       identificationNumber: $identificationNumber
       lastName: $lastName
@@ -34,6 +38,8 @@ export const CREATE_CLIENT = gql`
         id
         fullName
         email
+        extraEmail1
+        extraEmail2
         identificationNumber
         state
         city
@@ -56,6 +62,8 @@ export interface CreateClientVariables {
   buildingNumber?: string;
   city?: string;
   email: string;
+  extraEmail1?: string;
+  extraEmail2?: string;
   firstName: string;
   identificationNumber?: string;
   lastName: string;
@@ -72,6 +80,8 @@ export interface CreateClientResponse {
       id: string;
       fullName: string;
       email: string;
+      extraEmail1: string | null;
+      extraEmail2: string | null;
       identificationNumber: string | null;
       state: string | null;
       city: string | null;
@@ -95,6 +105,8 @@ export const UPDATE_CLIENT = gql`
     $id: ID!
     $firstName: String
     $lastName: String
+    $extraEmail1: String
+    $extraEmail2: String
     $identificationNumber: String
     $state: String
     $city: String
@@ -108,6 +120,8 @@ export const UPDATE_CLIENT = gql`
       id: $id
       firstName: $firstName
       lastName: $lastName
+      extraEmail1: $extraEmail1
+      extraEmail2: $extraEmail2
       identificationNumber: $identificationNumber
       state: $state
       city: $city
@@ -121,6 +135,8 @@ export const UPDATE_CLIENT = gql`
         id
         fullName
         email
+        extraEmail1
+        extraEmail2
         city
         state
         mobilePhoneNumber
@@ -142,6 +158,8 @@ export interface UpdateClientVariables {
   id: string;
   firstName?: string;
   lastName?: string;
+  extraEmail1?: string;
+  extraEmail2?: string;
   identificationNumber?: string;
   state?: string;
   city?: string;
@@ -158,6 +176,8 @@ export interface UpdateClientResponse {
       id: string;
       fullName: string;
       email: string;
+      extraEmail1: string | null;
+      extraEmail2: string | null;
       city: string | null;
       state: string | null;
       mobilePhoneNumber: string | null;

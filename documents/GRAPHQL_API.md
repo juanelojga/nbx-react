@@ -171,24 +171,26 @@ Represents the currently authenticated user with client info.
 
 Represents a client/customer.
 
-| Field                  | Type     | Description                       |
-| ---------------------- | -------- | --------------------------------- |
-| `id`                   | ID       | Client ID                         |
-| `firstName`            | String   | First name                        |
-| `lastName`             | String   | Last name                         |
-| `fullName`             | String   | Computed full name (first + last) |
-| `email`                | String   | Email address                     |
-| `identificationNumber` | String   | ID/Document number                |
-| `state`                | String   | State/Province                    |
-| `city`                 | String   | City                              |
-| `mainStreet`           | String   | Main street address               |
-| `secondaryStreet`      | String   | Secondary street address          |
-| `buildingNumber`       | String   | Building number                   |
-| `mobilePhoneNumber`    | String   | Mobile phone                      |
-| `phoneNumber`          | String   | Landline phone                    |
-| `createdAt`            | DateTime | Creation timestamp                |
-| `updatedAt`            | DateTime | Last update timestamp             |
-| `user`                 | UserType | Associated user account           |
+| Field                  | Type     | Description                                                               |
+| ---------------------- | -------- | ------------------------------------------------------------------------- |
+| `id`                   | ID       | Client ID                                                                 |
+| `firstName`            | String   | First name                                                                |
+| `lastName`             | String   | Last name                                                                 |
+| `fullName`             | String   | Computed full name (first + last)                                         |
+| `email`                | String   | Email address (primary, unique, immutable after creation)                 |
+| `extraEmail1`          | String   | Optional extra email, CC'd on consolidate arrived/delivered notifications |
+| `extraEmail2`          | String   | Optional extra email, CC'd on consolidate arrived/delivered notifications |
+| `identificationNumber` | String   | ID/Document number                                                        |
+| `state`                | String   | State/Province                                                            |
+| `city`                 | String   | City                                                                      |
+| `mainStreet`           | String   | Main street address                                                       |
+| `secondaryStreet`      | String   | Secondary street address                                                  |
+| `buildingNumber`       | String   | Building number                                                           |
+| `mobilePhoneNumber`    | String   | Mobile phone                                                              |
+| `phoneNumber`          | String   | Landline phone                                                            |
+| `createdAt`            | DateTime | Creation timestamp                                                        |
+| `updatedAt`            | DateTime | Last update timestamp                                                     |
+| `user`                 | UserType | Associated user account                                                   |
 
 ### PackageType
 
@@ -1029,19 +1031,21 @@ Creates a new client with associated user account.
 
 **Arguments:**
 
-| Argument               | Type   | Required | Description        |
-| ---------------------- | ------ | -------- | ------------------ |
-| `firstName`            | String | Yes      | First name         |
-| `lastName`             | String | Yes      | Last name          |
-| `email`                | String | Yes      | Email address      |
-| `identificationNumber` | String | No       | ID/Document number |
-| `state`                | String | No       | State/Province     |
-| `city`                 | String | No       | City               |
-| `mainStreet`           | String | No       | Main street        |
-| `secondaryStreet`      | String | No       | Secondary street   |
-| `buildingNumber`       | String | No       | Building number    |
-| `mobilePhoneNumber`    | String | No       | Mobile phone       |
-| `phoneNumber`          | String | No       | Landline phone     |
+| Argument               | Type   | Required | Description                                            |
+| ---------------------- | ------ | -------- | ------------------------------------------------------ |
+| `firstName`            | String | Yes      | First name                                             |
+| `lastName`             | String | Yes      | Last name                                              |
+| `email`                | String | Yes      | Email address (primary)                                |
+| `extraEmail1`          | String | No       | Optional extra email CC'd on consolidate notifications |
+| `extraEmail2`          | String | No       | Optional extra email CC'd on consolidate notifications |
+| `identificationNumber` | String | No       | ID/Document number                                     |
+| `state`                | String | No       | State/Province                                         |
+| `city`                 | String | No       | City                                                   |
+| `mainStreet`           | String | No       | Main street                                            |
+| `secondaryStreet`      | String | No       | Secondary street                                       |
+| `buildingNumber`       | String | No       | Building number                                        |
+| `mobilePhoneNumber`    | String | No       | Mobile phone                                           |
+| `phoneNumber`          | String | No       | Landline phone                                         |
 
 ```graphql
 mutation {
@@ -1095,19 +1099,21 @@ Updates an existing client's information.
 
 **Arguments:**
 
-| Argument               | Type   | Required | Description        |
-| ---------------------- | ------ | -------- | ------------------ |
-| `id`                   | ID     | Yes      | Client ID          |
-| `firstName`            | String | No       | First name         |
-| `lastName`             | String | No       | Last name          |
-| `identificationNumber` | String | No       | ID/Document number |
-| `state`                | String | No       | State/Province     |
-| `city`                 | String | No       | City               |
-| `mainStreet`           | String | No       | Main street        |
-| `secondaryStreet`      | String | No       | Secondary street   |
-| `buildingNumber`       | String | No       | Building number    |
-| `mobilePhoneNumber`    | String | No       | Mobile phone       |
-| `phoneNumber`          | String | No       | Landline phone     |
+| Argument               | Type   | Required | Description                                                                 |
+| ---------------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| `id`                   | ID     | Yes      | Client ID                                                                   |
+| `firstName`            | String | No       | First name                                                                  |
+| `lastName`             | String | No       | Last name                                                                   |
+| `extraEmail1`          | String | No       | Optional extra email CC'd on consolidate notifications (pass `""` to clear) |
+| `extraEmail2`          | String | No       | Optional extra email CC'd on consolidate notifications (pass `""` to clear) |
+| `identificationNumber` | String | No       | ID/Document number                                                          |
+| `state`                | String | No       | State/Province                                                              |
+| `city`                 | String | No       | City                                                                        |
+| `mainStreet`           | String | No       | Main street                                                                 |
+| `secondaryStreet`      | String | No       | Secondary street                                                            |
+| `buildingNumber`       | String | No       | Building number                                                             |
+| `mobilePhoneNumber`    | String | No       | Mobile phone                                                                |
+| `phoneNumber`          | String | No       | Landline phone                                                              |
 
 ```graphql
 mutation {
@@ -1130,10 +1136,12 @@ mutation {
 **Notes:**
 
 - `email` and `user` cannot be modified through this mutation
+- `extraEmail1` / `extraEmail2` are editable; pass an empty string to clear a value. Format is validated; uniqueness is not enforced.
 
 **Errors:**
 
 - `PermissionDenied`: If regular user tries to update another client
+- `ValidationError`: If `extraEmail1` or `extraEmail2` is not a valid email address
 
 ---
 

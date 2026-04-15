@@ -44,6 +44,8 @@ export function useClientDialogs(): UseClientDialogsReturn {
       firstName: client.user.firstName || "",
       lastName: client.user.lastName || "",
       email: client.email,
+      extraEmail1: client.extraEmail1,
+      extraEmail2: client.extraEmail2,
       identificationNumber: client.identificationNumber,
       mobilePhoneNumber: client.mobilePhoneNumber,
       phoneNumber: client.phoneNumber,

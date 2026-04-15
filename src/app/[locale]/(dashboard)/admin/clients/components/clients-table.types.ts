@@ -13,6 +13,8 @@ export interface ClientToEdit {
   firstName: string;
   lastName: string;
   email: string;
+  extraEmail1: string | null;
+  extraEmail2: string | null;
   identificationNumber: string | null;
   mobilePhoneNumber: string | null;
   phoneNumber: string | null;

@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "@/lib/navigation";
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { ClientType } from "@/graphql/queries/clients";
 import {
   RESOLVE_ALL_PACKAGES,
@@ -35,13 +34,12 @@ export interface UseConsolidationWizardReturn {
   handleBackToStep2: () => void;
   handleConsolidationCreated: (consolidation: ConsolidateType) => void;
   handleCreateAnother: () => void;
-  handleViewDetails: () => void;
   handleSelectionChange: (packageIds: Set<string>) => void;
   handleRemovePackage: (packageId: string) => void;
   handleClearAll: () => void;
   handleRetryLoad: () => void;
   handleRefetchPackages: () => Promise<void>;
-  handleBackToPackages: () => void;
+  handleGoToConsolidations: () => void;
 }
 
 export function useConsolidationWizard(): UseConsolidationWizardReturn {
@@ -126,10 +124,6 @@ export function useConsolidationWizard(): UseConsolidationWizardReturn {
     setCreatedConsolidation(null);
   }, []);
 
-  const handleViewDetails = useCallback(() => {
-    toast.info("Consolidation details view coming soon");
-  }, []);
-
   const handleSelectionChange = useCallback((packageIds: Set<string>) => {
     setSelectedPackages(packageIds);
   }, []);
@@ -156,8 +150,8 @@ export function useConsolidationWizard(): UseConsolidationWizardReturn {
     await refetch();
   }, [refetch]);
 
-  const handleBackToPackages = useCallback(() => {
-    router.push("/admin/packages");
+  const handleGoToConsolidations = useCallback(() => {
+    router.push("/admin/consolidations");
   }, [router]);
 
   return {
@@ -176,12 +170,11 @@ export function useConsolidationWizard(): UseConsolidationWizardReturn {
     handleBackToStep2,
     handleConsolidationCreated,
     handleCreateAnother,
-    handleViewDetails,
     handleSelectionChange,
     handleRemovePackage,
     handleClearAll,
     handleRetryLoad,
     handleRefetchPackages,
-    handleBackToPackages,
+    handleGoToConsolidations,
   };
 }

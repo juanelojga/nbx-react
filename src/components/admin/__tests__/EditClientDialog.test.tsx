@@ -18,6 +18,8 @@ const mockClient = {
   firstName: "John",
   lastName: "Doe",
   email: "john@example.com",
+  extraEmail1: null,
+  extraEmail2: null,
   identificationNumber: "1234567890",
   mobilePhoneNumber: "0991234567",
   phoneNumber: "042345678",
