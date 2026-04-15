@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
 import { TableActionButtons } from "@/components/common/TableActionButtons";
 import {
   BaseTable,
@@ -17,7 +16,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Package as PackageIcon, X, Sparkles } from "lucide-react";
+import { Package as PackageIcon, Sparkles } from "lucide-react";
 import { Package } from "../types";
 
 // Dynamically import dialog components for better bundle splitting
@@ -257,35 +256,16 @@ export function PackagesTable({
     [t]
   );
 
-  const selectionBarContent = useMemo(
-    () => (
-      <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
-          <Sparkles className="h-5 w-5 animate-pulse text-primary-foreground" />
-        </div>
-        <div>
-          <div className="text-sm font-bold text-foreground">
-            {t("selectedCount", {
-              count: selectedPackages.size,
-              plural: selectedPackages.size !== 1 ? "s" : "",
-            })}
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {t("selectToConsolidate")}
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onSelectionChange(new Set())}
-          className="gap-2 rounded-xl border-2 border-border/50 bg-background/80 font-semibold shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive hover:shadow-md active:scale-95"
-        >
-          <X className="h-4 w-4" />
-          {t("clearSelection")}
-        </Button>
-      </div>
-    ),
-    [t, selectedPackages.size, onSelectionChange]
+  const selectionLabels = useMemo(
+    () => ({
+      selectedLabel: t("selectedCount", {
+        count: selectedPackages.size,
+        plural: selectedPackages.size !== 1 ? "s" : "",
+      }),
+      clearLabel: t("clearSelection"),
+      message: t("selectToConsolidate"),
+    }),
+    [t, selectedPackages.size]
   );
 
   const renderRow = useCallback(
@@ -321,7 +301,7 @@ export function PackagesTable({
           selectedIds: selectedPackages,
           onSelectionChange,
           getItemId: (pkg) => pkg.id,
-          selectionBarContent,
+          selectionLabels,
         }}
         emptyState={emptyState}
       />

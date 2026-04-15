@@ -235,6 +235,9 @@ export function BaseTable<T>({
           selectedCount={selection.selectedIds.size}
           onClearSelection={() => selection.onSelectionChange(new Set())}
           actions={selection.selectionBarContent}
+          selectedLabel={selection.selectionLabels?.selectedLabel}
+          clearLabel={selection.selectionLabels?.clearLabel}
+          message={selection.selectionLabels?.message}
         />
       )}
 
