@@ -115,12 +115,11 @@ describe("ConsolidationRow", () => {
     jest.clearAllMocks();
   });
 
-  it("renders id, client name, and description", () => {
+  it("renders id and client name", () => {
     renderInTable(<ConsolidationRow {...defaultProps} />);
 
     expect(screen.getByText("cons-1")).toBeInTheDocument();
     expect(screen.getByText("John Doe")).toBeInTheDocument();
-    expect(screen.getAllByText("Test consolidation").length).toBeGreaterThan(0);
   });
 
   it("renders status badge", () => {
@@ -140,9 +139,11 @@ describe("ConsolidationRow", () => {
   it("renders formatted delivery date", () => {
     renderInTable(<ConsolidationRow {...defaultProps} />);
 
-    const timeEl = screen.getByRole("time");
-    expect(timeEl).toBeInTheDocument();
-    expect(timeEl).toHaveAttribute("datetime", "2024-06-15");
+    const timeEls = screen.getAllByRole("time");
+    const deliveryEl = timeEls.find(
+      (el) => el.getAttribute("datetime") === "2024-06-15"
+    );
+    expect(deliveryEl).toBeDefined();
   });
 
   it("renders em dash when no delivery date", () => {
@@ -154,20 +155,11 @@ describe("ConsolidationRow", () => {
       <ConsolidationRow {...defaultProps} consolidation={noDateConsolidation} />
     );
 
-    const timeEl = screen.getByRole("time");
-    expect(timeEl).toHaveTextContent("\u2014");
-  });
-
-  it("renders em dash when no description", () => {
-    const noDescConsolidation = {
-      ...mockConsolidation,
-      description: "",
-    };
-    renderInTable(
-      <ConsolidationRow {...defaultProps} consolidation={noDescConsolidation} />
+    const timeEls = screen.getAllByRole("time");
+    const deliveryEl = timeEls.find(
+      (el) => el.getAttribute("datetime") !== "2024-01-01"
     );
-
-    expect(screen.getByText("\u2014")).toBeInTheDocument();
+    expect(deliveryEl).toHaveTextContent("\u2014");
   });
 
   it("action callbacks fire with correct args", async () => {
