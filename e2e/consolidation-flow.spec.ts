@@ -38,7 +38,6 @@ const packageC = {
 // Consolidation form data
 const testDescription = `E2E Consolidation ${testTimestamp}`;
 const updatedDescription = `${testDescription} updated`;
-const testDeliveryDate = "2026-05-15";
 const testComment = "E2E test consolidation comment";
 
 // Extra attributes
@@ -308,13 +307,6 @@ test.describe.serial("Consolidation Flow", () => {
     // Fill description
     await page.locator("#description").fill(testDescription);
 
-    // Change status to "Processing"
-    await page.locator("#status").click();
-    await page.getByRole("option", { name: /Processing/ }).click();
-
-    // Fill delivery date
-    await page.locator("#deliveryDate").fill(testDeliveryDate);
-
     // Fill comment
     await page.locator("#comment").fill(testComment);
 
@@ -341,6 +333,11 @@ test.describe.serial("Consolidation Flow", () => {
     // Submit the consolidation
     await page.getByRole("button", { name: "Create Consolidation" }).click();
 
+    // Confirm creation in confirmation dialog
+    await page
+      .getByRole("button", { name: "Yes, create consolidation" })
+      .click();
+
     // Wait for success toast
     await expect(
       page.locator('[data-sonner-toast][data-type="success"]').first()
@@ -365,8 +362,10 @@ test.describe.serial("Consolidation Flow", () => {
     // Verify description
     await expect(page.getByText(testDescription)).toBeVisible();
 
-    // Verify status shows "Processing"
-    await expect(page.getByText("Processing", { exact: true })).toBeVisible();
+    // Verify status shows "Awaiting Payment" (default for newly created consolidations)
+    await expect(
+      page.getByText("Awaiting Payment", { exact: true })
+    ).toBeVisible();
 
     // Verify statistics: package count = 3
     const statsSection = page.locator(".pt-4.border-t-2");
@@ -391,13 +390,10 @@ test.describe.serial("Consolidation Flow", () => {
 
     // Verify action buttons
     await expect(
-      page.getByRole("button", { name: "View Consolidation Details" })
+      page.getByRole("button", { name: "Go to Consolidations" })
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Create Another" })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Back to Packages" })
     ).toBeVisible();
 
     await page.screenshot({
@@ -674,7 +670,7 @@ test.describe.serial("Consolidation Flow", () => {
     await expect(
       dialog.getByText(`${testFullName} (${testEmail})`)
     ).toBeVisible();
-    await expect(dialog.getByText("Processing")).toBeVisible();
+    await expect(dialog.getByText("Awaiting Payment")).toBeVisible();
     await expect(dialog.getByText(testComment)).toBeVisible();
 
     // Verify total cost shows a dollar value

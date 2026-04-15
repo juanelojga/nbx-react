@@ -145,7 +145,6 @@ describe("EditConsolidationDialog", () => {
       ).toBeInTheDocument();
     });
 
-    expect(screen.getByDisplayValue("2024-06-15")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Test comment")).toBeInTheDocument();
 
     const statusSelect = screen.getByTestId("status-select");
