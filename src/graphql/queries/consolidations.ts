@@ -11,6 +11,8 @@ export const GET_ALL_CONSOLIDATES = gql`
     $pageSize: Int
     $orderBy: String
     $status: String
+    $createdAfter: Date
+    $createdBefore: Date
   ) {
     allConsolidates(
       search: $search
@@ -18,6 +20,8 @@ export const GET_ALL_CONSOLIDATES = gql`
       pageSize: $pageSize
       orderBy: $orderBy
       status: $status
+      createdAfter: $createdAfter
+      createdBefore: $createdBefore
     ) {
       results {
         id
@@ -156,6 +160,8 @@ export interface GetAllConsolidatesVariables {
   pageSize?: number;
   orderBy?: string;
   status?: string;
+  createdAfter?: string;
+  createdBefore?: string;
 }
 
 export interface GetConsolidateByIdVariables {

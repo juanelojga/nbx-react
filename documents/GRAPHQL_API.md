@@ -532,13 +532,15 @@ Returns a paginated list of consolidations with filtering and sorting capabiliti
 
 **Arguments:**
 
-| Argument   | Type   | Required | Default       | Description                                             |
-| ---------- | ------ | -------- | ------------- | ------------------------------------------------------- |
-| `search`   | String | No       | -             | Search by client name or email (case-insensitive)       |
-| `page`     | Int    | No       | 1             | Page number for pagination                              |
-| `pageSize` | Int    | No       | 10            | Number of items per page (valid: 10, 20, 50, 100)       |
-| `orderBy`  | String | No       | `-created_at` | Field to order by. Prefix with `-` for descending order |
-| `status`   | String | No       | -             | Filter by consolidation status                          |
+| Argument        | Type   | Required | Default       | Description                                                                                        |
+| --------------- | ------ | -------- | ------------- | -------------------------------------------------------------------------------------------------- |
+| `search`        | String | No       | -             | Search by client name or email (case-insensitive)                                                  |
+| `page`          | Int    | No       | 1             | Page number for pagination                                                                         |
+| `pageSize`      | Int    | No       | 10            | Number of items per page (valid: 10, 20, 50, 100)                                                  |
+| `orderBy`       | String | No       | `-created_at` | Field to order by. Prefix with `-` for descending order                                            |
+| `status`        | String | No       | -             | Filter by consolidation status                                                                     |
+| `createdAfter`  | Date   | No       | -             | Return only consolidates created on or after this date (inclusive, day granularity, `YYYY-MM-DD`)  |
+| `createdBefore` | Date   | No       | -             | Return only consolidates created on or before this date (inclusive, day granularity, `YYYY-MM-DD`) |
 
 **Valid `orderBy` fields:**
 
@@ -628,6 +630,27 @@ query {
 ```
 
 **Note**: The `search` parameter performs a case-insensitive search across the client's first name, last name, and email address.
+
+**Example - Filter by creation date range:**
+
+```graphql
+query {
+  allConsolidates(
+    createdAfter: "2026-04-01"
+    createdBefore: "2026-04-15"
+    orderBy: "-created_at"
+  ) {
+    results {
+      id
+      status
+      createdAt
+    }
+    totalCount
+  }
+}
+```
+
+Both `createdAfter` and `createdBefore` are inclusive and independent — either may be provided alone for an open-ended range.
 
 **Returns**: `ConsolidateConnection`
 

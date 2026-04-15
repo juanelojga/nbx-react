@@ -1,5 +1,10 @@
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
   Truck,
@@ -23,6 +28,7 @@ interface StatusBadgeProps {
   status: StatusType;
   label: string;
   className?: string;
+  iconOnly?: boolean;
 }
 
 const statusConfig: Record<
@@ -88,9 +94,38 @@ const defaultStatusConfig = {
   borderClass: "border-gray-300 dark:border-gray-800",
 };
 
-export function StatusBadge({ status, label, className }: StatusBadgeProps) {
+export function StatusBadge({
+  status,
+  label,
+  className,
+  iconOnly,
+}: StatusBadgeProps) {
   const config = statusConfig[status] || defaultStatusConfig;
   const Icon = config.icon;
+
+  if (iconOnly) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge
+            aria-label={label}
+            className={cn(
+              "border-2 hover:scale-105 transition-transform duration-200 p-1.5",
+              config.bgClass,
+              config.textClass,
+              config.borderClass,
+              className
+            )}
+          >
+            <Icon className="h-3.5 w-3.5" />
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="text-[11px]">
+          {label}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
 
   return (
     <Badge

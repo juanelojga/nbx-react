@@ -23,11 +23,14 @@ import {
   CreatePackageResponse,
 } from "@/graphql/mutations/packages";
 import { toast } from "sonner";
+import { ClientAutocomplete } from "@/components/admin/ClientAutocomplete";
+import type { ClientType } from "@/graphql/queries/clients";
 
 interface AddPackageDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  clientId: string;
+  clientId?: string;
+  showClientSelector?: boolean;
   onPackageCreated?: () => void | Promise<void>;
 }
 
@@ -58,9 +61,11 @@ export function AddPackageDialog({
   open,
   onOpenChange,
   clientId,
+  showClientSelector = false,
   onPackageCreated,
 }: AddPackageDialogProps) {
   const t = useTranslations("adminPackages.addDialog");
+  const [selectedClient, setSelectedClient] = useState<ClientType | null>(null);
   const [formData, setFormData] = useState<FormData>({
     barcode: "",
     courier: "",
@@ -127,6 +132,7 @@ export function AddPackageDialog({
       comments: "",
     });
     setValidationErrors({});
+    setSelectedClient(null);
     onOpenChange(false);
   };
 
@@ -157,6 +163,11 @@ export function AddPackageDialog({
 
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
+
+    // Required: Client (when selector is shown)
+    if (showClientSelector && !selectedClient) {
+      errors.clientId = t("clientRequired");
+    }
 
     // Required: Barcode (min length 3)
     if (!formData.barcode.trim()) {
@@ -240,11 +251,18 @@ export function AddPackageDialog({
       return;
     }
 
+    const effectiveClientId = showClientSelector
+      ? selectedClient?.id
+      : clientId;
+    if (!effectiveClientId) {
+      return;
+    }
+
     // Prepare variables - only include non-empty optional fields
     const variables: CreatePackageVariables = {
       barcode: formData.barcode.trim(),
       courier: formData.courier.trim(),
-      clientId: clientId,
+      clientId: effectiveClientId,
       weight: formData.isDocumentHolder
         ? 0.5
         : parseFloat(formData.weight.trim()),
@@ -307,6 +325,32 @@ export function AddPackageDialog({
       icon={Plus}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        {showClientSelector && (
+          <div className="space-y-2">
+            <Label>
+              {t("clientLabel")} <span className="text-destructive">*</span>
+            </Label>
+            <ClientAutocomplete
+              selectedClient={selectedClient}
+              onClientSelect={(client) => {
+                setSelectedClient(client);
+                if (client && validationErrors.clientId) {
+                  setValidationErrors((prev) => ({
+                    ...prev,
+                    clientId: undefined,
+                  }));
+                }
+              }}
+            />
+            {validationErrors.clientId && (
+              <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                <span className="text-base">⚠</span>
+                {validationErrors.clientId}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Basic Information */}
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">

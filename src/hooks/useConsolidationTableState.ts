@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useRouter, usePathname } from "@/lib/navigation";
 import { useSearchParams } from "next/navigation";
+import { todayISO, isValidISODate } from "@/lib/date/todayISO";
 
 type SortField = "delivery_date" | "status" | "created_at";
 type SortOrder = "asc" | "desc";
@@ -12,6 +13,8 @@ export interface ConsolidationTableState {
   sortField: SortField;
   sortOrder: SortOrder;
   status: string; // Status filter
+  createdAfter: string; // YYYY-MM-DD or empty
+  createdBefore: string; // YYYY-MM-DD or empty
 }
 
 interface UseConsolidationTableStateOptions {
@@ -55,6 +58,30 @@ export function useConsolidationTableState(
     // Parse status filter
     const status = searchParams.get("status") || "all";
 
+    // Parse createdAfter / createdBefore. If neither is present in the URL,
+    // default both to today (project timezone). If only one is present, respect
+    // it. If either is malformed, fall back to today for that bound. If the
+    // resulting range is inverted, fall back to today/today.
+    const hasAfterParam = searchParams.has("createdAfter");
+    const hasBeforeParam = searchParams.has("createdBefore");
+    let createdAfter = "";
+    let createdBefore = "";
+    if (!hasAfterParam && !hasBeforeParam) {
+      const today = todayISO();
+      createdAfter = today;
+      createdBefore = today;
+    } else {
+      const rawAfter = searchParams.get("createdAfter") || "";
+      const rawBefore = searchParams.get("createdBefore") || "";
+      createdAfter = rawAfter && isValidISODate(rawAfter) ? rawAfter : "";
+      createdBefore = rawBefore && isValidISODate(rawBefore) ? rawBefore : "";
+      if (createdAfter && createdBefore && createdAfter > createdBefore) {
+        const today = todayISO();
+        createdAfter = today;
+        createdBefore = today;
+      }
+    }
+
     // Parse page parameter (default to 1)
     const pageParam = searchParams.get("page");
     const page = pageParam ? Math.max(1, parseInt(pageParam, 10)) : 1;
@@ -93,6 +120,8 @@ export function useConsolidationTableState(
       sortField,
       sortOrder,
       status,
+      createdAfter,
+      createdBefore,
     };
   }, [searchParams, defaultPageSize, defaultSortField, defaultSortOrder]);
 
@@ -122,6 +151,40 @@ export function useConsolidationTableState(
           params.set("status", newState.status);
         } else {
           params.delete("status");
+        }
+      }
+
+      // Update createdAfter / createdBefore parameters.
+      // We always set both params (possibly to empty) when either is touched,
+      // so the parser can distinguish "user explicitly cleared" from "first
+      // load (default to today)". If both end up cleared AND the other date
+      // params are also cleared, drop both entirely.
+      if (
+        newState.createdAfter !== undefined ||
+        newState.createdBefore !== undefined
+      ) {
+        const nextAfter =
+          newState.createdAfter !== undefined
+            ? newState.createdAfter
+            : state.createdAfter;
+        const nextBefore =
+          newState.createdBefore !== undefined
+            ? newState.createdBefore
+            : state.createdBefore;
+        if (!nextAfter && !nextBefore) {
+          params.set("createdAfter", "");
+          params.set("createdBefore", "");
+        } else {
+          if (nextAfter) {
+            params.set("createdAfter", nextAfter);
+          } else {
+            params.set("createdAfter", "");
+          }
+          if (nextBefore) {
+            params.set("createdBefore", nextBefore);
+          } else {
+            params.set("createdBefore", "");
+          }
         }
       }
 
@@ -175,6 +238,8 @@ export function useConsolidationTableState(
       defaultSortOrder,
       state.sortField,
       state.sortOrder,
+      state.createdAfter,
+      state.createdBefore,
     ]
   );
 

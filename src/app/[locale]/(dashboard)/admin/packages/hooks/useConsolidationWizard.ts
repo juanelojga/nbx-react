@@ -70,6 +70,7 @@ export function useConsolidationWizard(): UseConsolidationWizardReturn {
       page_size: 20,
       order_by: "-created_at",
       search: "",
+      notInConsolidate: true,
     }),
     [selectedClient]
   );

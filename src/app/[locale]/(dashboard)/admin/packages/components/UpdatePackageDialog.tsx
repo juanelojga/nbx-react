@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Pencil, AlertCircle } from "lucide-react";
+import { ClientAutocomplete } from "@/components/admin/ClientAutocomplete";
+import type { ClientType } from "@/graphql/queries/clients";
 import {
   UPDATE_PACKAGE,
   UpdatePackageVariables,
@@ -34,6 +36,7 @@ interface UpdatePackageDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   packageId: string | null;
+  showClientSelector?: boolean;
   onPackageUpdated?: () => void | Promise<void>;
 }
 
@@ -63,9 +66,11 @@ export function UpdatePackageDialog({
   open,
   onOpenChange,
   packageId,
+  showClientSelector = false,
   onPackageUpdated,
 }: UpdatePackageDialogProps) {
   const t = useTranslations("adminPackages.editDialog");
+  const [selectedClient, setSelectedClient] = useState<ClientType | null>(null);
   const [formData, setFormData] = useState<FormData>({
     courier: "",
     otherCourier: "",
@@ -165,6 +170,13 @@ export function UpdatePackageDialog({
             arrivalDate: formatDateForInput(pkg.arrivalDate),
             comments: pkg.comments || "",
           });
+          if (pkg.client) {
+            setSelectedClient({
+              id: pkg.client.id,
+              fullName: pkg.client.fullName,
+              email: pkg.client.email,
+            } as ClientType);
+          }
         });
       }
     }
@@ -189,6 +201,8 @@ export function UpdatePackageDialog({
       comments: "",
     });
     setValidationErrors({});
+    setSelectedClient(null);
+    lastPackageIdRef.current = null;
     onOpenChange(false);
   };
 
@@ -219,6 +233,10 @@ export function UpdatePackageDialog({
 
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
+
+    if (showClientSelector && !selectedClient) {
+      errors.clientId = t("clientRequired");
+    }
 
     // Required: Weight (skipped when Document Holder is selected)
     if (!formData.isDocumentHolder) {
@@ -335,6 +353,10 @@ export function UpdatePackageDialog({
       variables.arrivalDate = formData.arrivalDate.trim();
     }
 
+    if (showClientSelector && selectedClient) {
+      variables.clientId = selectedClient.id;
+    }
+
     await updatePackage({ variables }).catch(() => {});
   };
 
@@ -370,6 +392,32 @@ export function UpdatePackageDialog({
       {/* Form */}
       {data?.package && !queryLoading && (
         <form onSubmit={handleSubmit} className="space-y-6">
+          {showClientSelector && (
+            <div className="space-y-2">
+              <Label>
+                {t("clientLabel")} <span className="text-destructive">*</span>
+              </Label>
+              <ClientAutocomplete
+                selectedClient={selectedClient}
+                onClientSelect={(client) => {
+                  setSelectedClient(client);
+                  if (client && validationErrors.clientId) {
+                    setValidationErrors((prev) => ({
+                      ...prev,
+                      clientId: undefined,
+                    }));
+                  }
+                }}
+              />
+              {validationErrors.clientId && (
+                <p className="text-sm text-destructive font-medium flex items-center gap-1">
+                  <span className="text-base">⚠</span>
+                  {validationErrors.clientId}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Barcode (Read-only) */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">

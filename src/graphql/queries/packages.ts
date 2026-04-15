@@ -5,11 +5,12 @@ import { gql } from "@apollo/client";
  */
 export const RESOLVE_ALL_PACKAGES = gql`
   query ResolveAllPackages(
-    $client_id: ID!
+    $client_id: ID
     $page: Int
     $page_size: Int
     $order_by: String
     $search: String
+    $notInConsolidate: Boolean
   ) {
     allPackages(
       clientId: $client_id
@@ -17,6 +18,7 @@ export const RESOLVE_ALL_PACKAGES = gql`
       pageSize: $page_size
       orderBy: $order_by
       search: $search
+      notInConsolidate: $notInConsolidate
     ) {
       results {
         id
@@ -30,6 +32,11 @@ export const RESOLVE_ALL_PACKAGES = gql`
         weight
         weightUnit
         createdAt
+        client {
+          id
+          fullName
+          email
+        }
       }
       totalCount
       page
@@ -91,6 +98,11 @@ export interface PackageType {
   weight: number | null;
   weightUnit: string | null;
   createdAt: string;
+  client: {
+    id: string;
+    fullName: string;
+    email: string;
+  } | null;
 }
 
 export interface PackageDetailType {
@@ -136,11 +148,12 @@ export interface ResolveAllPackagesResponse {
 }
 
 export interface ResolveAllPackagesVariables {
-  client_id: number;
+  client_id?: number | null;
   page?: number;
   page_size?: number;
   order_by?: string;
   search?: string;
+  notInConsolidate?: boolean;
 }
 
 export interface GetPackageResponse {

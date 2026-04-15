@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useConsolidationTableState } from "@/hooks/useConsolidationTableState";
@@ -31,6 +32,10 @@ import {
   getPaginationLabels,
 } from "./components/ConsolidationsTableConfig";
 import { ConsolidationDialogs } from "./components/ConsolidationDialogs";
+import {
+  validateDateRange,
+  type DateRangeError,
+} from "@/lib/validation/consolidationFilters";
 
 export default function AdminConsolidations() {
   const t = useTranslations("adminConsolidations");
@@ -51,7 +56,71 @@ export default function AdminConsolidations() {
     sortField,
     sortOrder,
     status: statusFilter,
+    createdAfter,
+    createdBefore,
   } = urlState;
+
+  // Local draft state so the inputs reflect typing immediately while we
+  // validate before pushing to the URL/query.
+  const [createdAfterInput, setCreatedAfterInput] = useState(createdAfter);
+  const [createdBeforeInput, setCreatedBeforeInput] = useState(createdBefore);
+  const [dateRangeError, setDateRangeError] = useState<DateRangeError>(null);
+
+  const commitDateRange = useCallback(
+    (nextAfter: string, nextBefore: string) => {
+      const err = validateDateRange(nextAfter, nextBefore);
+      setDateRangeError(err);
+      if (err) return;
+      updateURL({
+        createdAfter: nextAfter,
+        createdBefore: nextBefore,
+        page: 1,
+      });
+    },
+    [updateURL]
+  );
+
+  const handleCreatedAfterChange = useCallback(
+    (value: string) => {
+      setCreatedAfterInput(value);
+      commitDateRange(value, createdBeforeInput);
+    },
+    [commitDateRange, createdBeforeInput]
+  );
+
+  const handleCreatedBeforeChange = useCallback(
+    (value: string) => {
+      setCreatedBeforeInput(value);
+      commitDateRange(createdAfterInput, value);
+    },
+    [commitDateRange, createdAfterInput]
+  );
+
+  // On first mount, if the URL has no date params at all, persist the
+  // defaulted "today / today" range into the URL so the active filter is
+  // visible and shareable.
+  const rawSearchParams = useSearchParams();
+  const didSyncDefaults = useRef(false);
+  useEffect(() => {
+    if (didSyncDefaults.current) return;
+    didSyncDefaults.current = true;
+    if (
+      !rawSearchParams.has("createdAfter") &&
+      !rawSearchParams.has("createdBefore") &&
+      createdAfter &&
+      createdBefore
+    ) {
+      updateURL({ createdAfter, createdBefore });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleClearDates = useCallback(() => {
+    setCreatedAfterInput("");
+    setCreatedBeforeInput("");
+    setDateRangeError(null);
+    updateURL({ createdAfter: "", createdBefore: "", page: 1 });
+  }, [updateURL]);
 
   const handleSearchChange = useCallback(
     (search: string, resetPage: number) => {
@@ -91,6 +160,12 @@ export default function AdminConsolidations() {
   }
   if (statusFilter !== "all") {
     queryVariables.status = statusFilter;
+  }
+  if (createdAfter) {
+    queryVariables.createdAfter = createdAfter;
+  }
+  if (createdBefore) {
+    queryVariables.createdBefore = createdBefore;
   }
 
   const { data, loading, error, refetch } = useQuery<
@@ -192,6 +267,12 @@ export default function AdminConsolidations() {
       onClearSearch={handleClearSearch}
       statusFilter={statusFilter}
       onStatusFilterChange={handleStatusFilterChange}
+      createdAfter={createdAfterInput}
+      createdBefore={createdBeforeInput}
+      onCreatedAfterChange={handleCreatedAfterChange}
+      onCreatedBeforeChange={handleCreatedBeforeChange}
+      onClearDates={handleClearDates}
+      dateRangeError={dateRangeError}
       isLoading={loading}
       isDebouncing={isDebouncing}
     />

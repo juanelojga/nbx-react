@@ -41,8 +41,8 @@ export function useClientDialogs(): UseClientDialogsReturn {
   const handleEditClient = useCallback((client: ClientType) => {
     setClientToEdit({
       id: client.id,
-      firstName: client.user.firstName || "",
-      lastName: client.user.lastName || "",
+      firstName: client.user?.firstName || "",
+      lastName: client.user?.lastName || "",
       email: client.email,
       extraEmail1: client.extraEmail1,
       extraEmail2: client.extraEmail2,

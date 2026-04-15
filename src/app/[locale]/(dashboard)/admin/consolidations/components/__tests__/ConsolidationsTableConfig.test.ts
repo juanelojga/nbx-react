@@ -12,17 +12,17 @@ const mockT = (key: string, values?: Record<string, unknown>) => {
 };
 
 describe("getConsolidationColumns", () => {
-  it("returns 7 columns with correct ids", () => {
+  it("returns 8 columns with correct ids", () => {
     const columns = getConsolidationColumns(mockT);
 
     expect(columns).toHaveLength(8);
     expect(columns.map((c) => c.id)).toEqual([
       "id",
       "client",
-      "description",
       "status",
       "packagesCount",
       "deliveryDate",
+      "createdAt",
       "totalCost",
       "actions",
     ]);
@@ -32,9 +32,10 @@ describe("getConsolidationColumns", () => {
     const columns = getConsolidationColumns(mockT);
 
     const sortableColumns = columns.filter((c) => c.sortable);
-    expect(sortableColumns).toHaveLength(2);
+    expect(sortableColumns).toHaveLength(3);
     expect(sortableColumns[0].sortField).toBe("status");
     expect(sortableColumns[1].sortField).toBe("delivery_date");
+    expect(sortableColumns[2].sortField).toBe("created_at");
   });
 
   it("actions column is right-aligned", () => {
