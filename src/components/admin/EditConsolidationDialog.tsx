@@ -66,6 +66,9 @@ export function EditConsolidationDialog({
     {}
   );
 
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
   // Track the last processed consolidation to avoid unnecessary re-renders
   const lastConsolidationIdRef = useRef<string | null>(null);
 
@@ -133,6 +136,10 @@ export function EditConsolidationDialog({
         errors.status = t("statusRequired");
       }
 
+      if (formData.deliveryDate && formData.deliveryDate > todayStr) {
+        errors.deliveryDate = t("deliveryDateFuture");
+      }
+
       setValidationErrors(errors);
       if (Object.keys(errors).length > 0) {
         return;
@@ -148,7 +155,7 @@ export function EditConsolidationDialog({
 
       await updateConsolidate({ variables }).catch(() => {});
     },
-    [consolidation, formData, updateConsolidate, t]
+    [consolidation, formData, updateConsolidate, t, todayStr]
   );
 
   const handleCancel = () => {
@@ -201,10 +208,14 @@ export function EditConsolidationDialog({
           <Select
             value={formData.status}
             onValueChange={(value) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 status: value as ConsolidationStatus,
-              })
+                deliveryDate:
+                  value === "delivered" && !prev.deliveryDate
+                    ? todayStr
+                    : prev.deliveryDate,
+              }))
             }
             disabled={loading}
           >
@@ -234,18 +245,29 @@ export function EditConsolidationDialog({
         </div>
 
         {/* Delivery Date */}
-        <div className="space-y-2">
-          <Label htmlFor="deliveryDate">{t("deliveryDate")}</Label>
-          <Input
-            id="deliveryDate"
-            type="date"
-            value={formData.deliveryDate}
-            onChange={(e) =>
-              setFormData({ ...formData, deliveryDate: e.target.value })
-            }
-            disabled={loading}
-          />
-        </div>
+        {formData.status === "delivered" && (
+          <div className="space-y-2">
+            <Label htmlFor="deliveryDate">{t("deliveryDate")}</Label>
+            <Input
+              id="deliveryDate"
+              type="date"
+              value={formData.deliveryDate}
+              max={todayStr}
+              onChange={(e) =>
+                setFormData({ ...formData, deliveryDate: e.target.value })
+              }
+              disabled={loading}
+              className={
+                validationErrors.deliveryDate ? "border-destructive" : ""
+              }
+            />
+            {validationErrors.deliveryDate && (
+              <p className="text-sm text-destructive">
+                {validationErrors.deliveryDate}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Comment */}
         <div className="space-y-2">

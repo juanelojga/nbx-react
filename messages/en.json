@@ -337,6 +337,7 @@
       "commentPlaceholder": "Add any additional notes...",
       "descriptionRequired": "Description is required",
       "statusRequired": "Please select a valid status",
+      "deliveryDateFuture": "Delivery date cannot be in the future",
       "cancel": "Cancel",
       "updating": "Updating...",
       "updateConsolidation": "Update Consolidation",

@@ -148,7 +148,12 @@ export function ViewConsolidationDialog({
                 label={t("deliveryDate")}
                 value={
                   consolidation.deliveryDate
-                    ? new Date(consolidation.deliveryDate).toLocaleDateString()
+                    ? (() => {
+                        const [y, m, d] = consolidation.deliveryDate
+                          .split("-")
+                          .map(Number);
+                        return new Date(y, m - 1, d).toLocaleDateString();
+                      })()
                     : undefined
                 }
               />

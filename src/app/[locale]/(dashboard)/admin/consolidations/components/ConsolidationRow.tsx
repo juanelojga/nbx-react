@@ -110,14 +110,16 @@ export const ConsolidationRow = memo(function ConsolidationRow({
               dateTime={consolidation.deliveryDate || undefined}
             >
               {consolidation.deliveryDate
-                ? new Date(consolidation.deliveryDate).toLocaleDateString(
-                    undefined,
-                    {
+                ? (() => {
+                    const [y, m, d] = consolidation.deliveryDate
+                      .split("-")
+                      .map(Number);
+                    return new Date(y, m - 1, d).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
-                    }
-                  )
+                    });
+                  })()
                 : "\u2014"}
             </time>
           </div>
