@@ -303,6 +303,7 @@
     "clearDates": "Clear dates",
     "invalidDate": "Invalid date",
     "invalidDateRange": "'Created after' must be on or before 'Created before'",
+    "futureDate": "Future dates are not allowed",
     "allStatuses": "All statuses",
     "allClients": "All clients",
     "packages": "{count} packages",

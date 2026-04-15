@@ -303,6 +303,7 @@
     "clearDates": "Limpiar fechas",
     "invalidDate": "Fecha inválida",
     "invalidDateRange": "'Creado después de' debe ser igual o anterior a 'Creado antes de'",
+    "futureDate": "No se permiten fechas futuras",
     "allStatuses": "Todos los estados",
     "allClients": "Todos los clientes",
     "packages": "{count} paquetes",

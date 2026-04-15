@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Search, X } from "lucide-react";
 import type { DateRangeError } from "@/lib/validation/consolidationFilters";
+import { todayISO } from "@/lib/date/todayISO";
 
 interface ConsolidationToolbarProps {
   searchInput: string;
@@ -45,6 +46,7 @@ export function ConsolidationToolbar({
   isDebouncing,
 }: ConsolidationToolbarProps) {
   const t = useTranslations("adminConsolidations");
+  const today = todayISO();
 
   return (
     <div className="mb-6 flex flex-col gap-4">
@@ -108,6 +110,7 @@ export function ConsolidationToolbar({
               type="date"
               value={createdAfter}
               onChange={(e) => onCreatedAfterChange(e.target.value)}
+              max={today}
               className="w-full sm:w-[180px]"
               aria-invalid={!!dateRangeError}
             />
@@ -124,6 +127,7 @@ export function ConsolidationToolbar({
               type="date"
               value={createdBefore}
               onChange={(e) => onCreatedBeforeChange(e.target.value)}
+              max={today}
               className="w-full sm:w-[180px]"
               aria-invalid={!!dateRangeError}
             />
