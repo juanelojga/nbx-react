@@ -654,7 +654,6 @@
       "statusDelivered": "Delivered",
       "statusCancelled": "Cancelled",
       "statusValidationError": "Please select a valid status",
-      "deliveryDateLabel": "Delivery Date (Optional)",
       "commentLabel": "Comment (Optional)",
       "commentPlaceholder": "Add any additional notes...",
       "sendEmailLabel": "Send email notification to client",
@@ -677,7 +676,19 @@
       "chargeAmountInvalid": "Amount must be a valid number",
       "duplicateChargeName": "Duplicate charge name",
       "selectedPackagesTitle": "Selected Packages",
-      "packagesCount": "{count} package{plural} to consolidate"
+      "packagesCount": "{count} package{plural} to consolidate",
+      "confirmCreate": {
+        "title": "Create this consolidation?",
+        "description": "Please review carefully before confirming. Once created, key details of this consolidation cannot be changed.",
+        "warningTitle": "The following cannot be edited after creation:",
+        "warningPackages": "Included packages",
+        "warningWeights": "Package weights",
+        "warningValues": "Declared values and prices",
+        "warningExtras": "Extra charges and attributes",
+        "cancel": "Cancel",
+        "confirm": "Yes, create consolidation",
+        "creating": "Creating..."
+      }
     },
     "success": {
       "title": "Consolidation Created Successfully!",

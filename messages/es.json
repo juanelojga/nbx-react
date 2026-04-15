@@ -653,7 +653,6 @@
       "statusDelivered": "Entregado",
       "statusCancelled": "Cancelado",
       "statusValidationError": "Por favor selecciona un estado válido",
-      "deliveryDateLabel": "Fecha de Entrega (Opcional)",
       "commentLabel": "Comentario (Opcional)",
       "commentPlaceholder": "Agrega notas adicionales...",
       "sendEmailLabel": "Enviar notificación por correo al cliente",
@@ -676,7 +675,19 @@
       "chargeAmountInvalid": "El monto debe ser un número válido",
       "duplicateChargeName": "Nombre de cargo duplicado",
       "selectedPackagesTitle": "Paquetes Seleccionados",
-      "packagesCount": "{count} paquete{plural} para consolidar"
+      "packagesCount": "{count} paquete{plural} para consolidar",
+      "confirmCreate": {
+        "title": "¿Crear esta consolidación?",
+        "description": "Por favor revisa cuidadosamente antes de confirmar. Una vez creada, los detalles clave de esta consolidación no podrán modificarse.",
+        "warningTitle": "Lo siguiente no podrá editarse después de crearse:",
+        "warningPackages": "Paquetes incluidos",
+        "warningWeights": "Pesos de los paquetes",
+        "warningValues": "Valores declarados y precios",
+        "warningExtras": "Cargos y atributos adicionales",
+        "cancel": "Cancelar",
+        "confirm": "Sí, crear consolidación",
+        "creating": "Creando..."
+      }
     },
     "success": {
       "title": "¡Consolidación Creada Exitosamente!",

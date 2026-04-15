@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,13 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, ArrowLeft, Send, Package as PackageIcon } from "lucide-react";
@@ -29,12 +22,12 @@ import {
 } from "@/graphql/mutations/consolidations";
 import { ClientType } from "@/graphql/queries/clients";
 import { Package } from "../types";
-import { ConsolidationStatus } from "@/lib/validation/status";
 import {
   ExtraAttributesEditor,
   ExtraAttributeEntry,
   serializeExtraAttributes,
 } from "@/components/admin/ExtraAttributesEditor";
+import { ConfirmCreateConsolidationDialog } from "./ConfirmCreateConsolidationDialog";
 
 interface ConsolidationFormProps {
   selectedClient: ClientType;
@@ -50,20 +43,6 @@ interface ConsolidationFormProps {
 const getConsolidationSchema = (t: (key: string) => string) =>
   z.object({
     description: z.string().min(1, t("descriptionRequired")),
-    status: z.enum(
-      [
-        "awaiting_payment",
-        "pending",
-        "processing",
-        "in_transit",
-        "delivered",
-        "cancelled",
-      ],
-      {
-        error: t("statusValidationError"),
-      }
-    ),
-    deliveryDate: z.string().optional(),
     comment: z.string().optional(),
     extraAttributes: z
       .array(z.object({ key: z.string(), value: z.string() }))
@@ -75,8 +54,6 @@ const getConsolidationSchema = (t: (key: string) => string) =>
 
 type ConsolidationFormData = {
   description: string;
-  status: ConsolidationStatus;
-  deliveryDate?: string;
   comment?: string;
   extraAttributes?: ExtraAttributeEntry[];
   sendEmail?: boolean;
@@ -102,13 +79,15 @@ export function ConsolidationForm({
     resolver: zodResolver(getConsolidationSchema(t)),
     defaultValues: {
       description: "",
-      status: "pending",
-      deliveryDate: "",
       comment: "",
       extraAttributes: [],
       sendEmail: true,
     },
   });
+
+  const [pendingData, setPendingData] = useState<ConsolidationFormData | null>(
+    null
+  );
 
   // eslint-disable-next-line react-hooks/incompatible-library -- React Hook Form's watch() is required for form state tracking
   const sendEmail = watch("sendEmail");
@@ -139,30 +118,33 @@ export function ConsolidationForm({
     selectedPackages.has(pkg.id)
   );
 
-  // Form submission handler
-  const onSubmit = useCallback(
-    async (data: ConsolidationFormData) => {
-      try {
-        await createConsolidate({
-          variables: {
-            description: data.description,
-            status: data.status,
-            packageIds: Array.from(selectedPackages),
-            deliveryDate: data.deliveryDate || undefined,
-            comment: data.comment || undefined,
-            sendEmail: data.sendEmail,
-            extraAttributes: serializeExtraAttributes(
-              data.extraAttributes || []
-            ),
-          },
-        });
-      } catch (err) {
-        // Error handled by onError callback
-        console.error("Consolidation creation error:", err);
-      }
-    },
-    [createConsolidate, selectedPackages]
-  );
+  // Form submission handler — opens confirmation dialog instead of firing mutation
+  const onSubmit = useCallback((data: ConsolidationFormData) => {
+    setPendingData(data);
+  }, []);
+
+  const onConfirmCreate = useCallback(async () => {
+    if (!pendingData) return;
+    try {
+      await createConsolidate({
+        variables: {
+          description: pendingData.description,
+          status: "awaiting_payment",
+          packageIds: Array.from(selectedPackages),
+          comment: pendingData.comment || undefined,
+          sendEmail: pendingData.sendEmail,
+          extraAttributes: serializeExtraAttributes(
+            pendingData.extraAttributes || []
+          ),
+        },
+      });
+      setPendingData(null);
+    } catch (err) {
+      // Error handled by onError callback
+      console.error("Consolidation creation error:", err);
+      setPendingData(null);
+    }
+  }, [createConsolidate, pendingData, selectedPackages]);
 
   return (
     <div className="space-y-6">
@@ -384,98 +366,6 @@ export function ConsolidationForm({
                   )}
                 </div>
 
-                {/* Status */}
-                <div className="space-y-3 form-field-stagger-2">
-                  <Label
-                    htmlFor="status"
-                    className="text-sm font-semibold uppercase tracking-wide text-foreground/80"
-                  >
-                    {t("statusLabel")} <span className="text-primary">*</span>
-                  </Label>
-                  <Select
-                    defaultValue="pending"
-                    onValueChange={(value) =>
-                      setValue("status", value as ConsolidationStatus)
-                    }
-                    disabled={loading}
-                  >
-                    <SelectTrigger
-                      id="status"
-                      className="h-11 text-base transition-all focus:ring-2 focus:ring-primary/20"
-                    >
-                      <SelectValue placeholder={t("statusPlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        value="awaiting_payment"
-                        className="status-badge"
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                          {t("statusAwaitingPayment")}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="pending" className="status-badge">
-                        <span className="inline-flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
-                          {t("statusPending")}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="processing" className="status-badge">
-                        <span className="inline-flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                          {t("statusProcessing")}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="in_transit" className="status-badge">
-                        <span className="inline-flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                          {t("statusInTransit")}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="delivered" className="status-badge">
-                        <span className="inline-flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                          {t("statusDelivered")}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="cancelled" className="status-badge">
-                        <span className="inline-flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                          {t("statusCancelled")}
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.status && (
-                    <p className="text-sm text-destructive font-medium animate-in slide-in-from-top-1">
-                      {errors.status.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* Delivery Date */}
-                <div className="space-y-3 form-field-stagger-3">
-                  <Label
-                    htmlFor="deliveryDate"
-                    className="text-sm font-semibold uppercase tracking-wide text-foreground/80"
-                  >
-                    {t("deliveryDateLabel")}
-                  </Label>
-                  <Input
-                    id="deliveryDate"
-                    type="date"
-                    {...register("deliveryDate")}
-                    disabled={loading}
-                    className="h-11 text-base transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary barcode-text"
-                  />
-                  {errors.deliveryDate && (
-                    <p className="text-sm text-destructive font-medium animate-in slide-in-from-top-1">
-                      {errors.deliveryDate.message}
-                    </p>
-                  )}
-                </div>
-
                 {/* Comment */}
                 <div className="space-y-3 form-field-stagger-4">
                   <Label
@@ -645,6 +535,15 @@ export function ConsolidationForm({
           </Card>
         </div>
       </div>
+
+      <ConfirmCreateConsolidationDialog
+        open={pendingData !== null}
+        onOpenChange={(open) => {
+          if (!open && !loading) setPendingData(null);
+        }}
+        onConfirm={onConfirmCreate}
+        loading={loading}
+      />
     </div>
   );
 }
