@@ -1,7 +1,7 @@
 # Development image — source code is NOT copied here.
 # The project root is mounted as a volume at runtime (see docker-compose.yml),
 # so changes on the host are immediately reflected inside the container.
-FROM node:24-alpine
+FROM node:26-alpine
 
 # Install libc compatibility for certain native modules on Alpine
 RUN apk add --no-cache libc6-compat
