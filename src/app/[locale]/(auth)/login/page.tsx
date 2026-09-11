@@ -16,7 +16,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { ErrorAlert } from "@/components/common/ErrorAlert";
 import LanguageSelector from "@/components/LanguageSelector";
-import { useLoginRateLimit } from "@/hooks/useRateLimit";
+import { useLoginRateLimit } from "@/hooks/useLoginRateLimit";
+import { getDefaultRoute } from "@/lib/auth/getDefaultRoute";
 import { sanitizeEmail } from "@/lib/validation/sanitizeEmail";
 import { validateEmail, validatePassword } from "@/lib/validation/auth";
 
@@ -36,10 +37,7 @@ export default function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectPath = user.isSuperuser
-        ? "/admin/dashboard"
-        : "/client/dashboard";
-      router.push(redirectPath);
+      router.push(getDefaultRoute(user.role));
     }
   }, [isAuthenticated, user, router]);
 

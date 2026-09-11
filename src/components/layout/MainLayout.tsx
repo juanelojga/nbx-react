@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
+import type { UserRole } from "@/types/user";
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  userRole: "admin" | "client";
+  userRole: UserRole;
 }
 
 const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";

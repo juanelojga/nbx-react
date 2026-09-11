@@ -12,7 +12,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserRoleString } from "@/lib/auth/user-role";
+import { UserRole } from "@/types/user";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -52,8 +52,7 @@ export function Header({
     return user.email.slice(0, 2).toUpperCase();
   };
 
-  const isAdmin =
-    user?.role !== undefined && getUserRoleString(user.role) === "admin";
+  const isAdmin = user?.role === UserRole.ADMIN;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-blue-200/60 bg-blue-50 shadow-sm shadow-blue-900/5">

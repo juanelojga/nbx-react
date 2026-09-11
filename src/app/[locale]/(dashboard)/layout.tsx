@@ -1,9 +1,8 @@
 "use client";
 
-import { MainLayout } from "@/components/layout/MainLayout";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
+import { MainLayout } from "@/components/layout/MainLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserRoleString } from "@/lib/auth/user-role";
 
 export default function DashboardLayout({
   children,
@@ -14,11 +13,7 @@ export default function DashboardLayout({
 
   return (
     <ProtectedRoute>
-      {user && (
-        <MainLayout userRole={getUserRoleString(user.role)}>
-          {children}
-        </MainLayout>
-      )}
+      {user && <MainLayout userRole={user.role}>{children}</MainLayout>}
     </ProtectedRoute>
   );
 }

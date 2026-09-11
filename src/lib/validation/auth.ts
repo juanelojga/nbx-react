@@ -72,4 +72,3 @@ export function validatePassword(
     error: result.error.issues[0]?.message || "Invalid password",
   };
 }
-

@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  useApolloClient,
+  useLazyQuery,
+  useMutation,
+} from "@apollo/client/react";
 import React, {
   createContext,
   useCallback,
@@ -8,29 +13,27 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useRouter } from "@/i18n/navigation";
-import { useLazyQuery, useMutation } from "@apollo/client/react";
-import { User, UserRole } from "@/types/user";
-import {
-  LOGIN_MUTATION,
-  type LoginResponse,
-  REFRESH_TOKEN_MUTATION,
-  type RefreshTokenResponse,
-} from "@/graphql/mutations/auth";
+
+import { LOGIN_MUTATION, type LoginResponse } from "@/graphql/mutations/auth";
 import {
   GET_CURRENT_USER,
   type GetCurrentUserResponse,
 } from "@/graphql/queries/auth";
+import { useRouter } from "@/i18n/navigation";
+import { authEvents, SESSION_EXPIRED_EVENT } from "@/lib/auth/authEvents";
+import { getDefaultRoute } from "@/lib/auth/getDefaultRoute";
+import { mapBackendUser } from "@/lib/auth/mapBackendUser";
+import { refreshAccessToken } from "@/lib/auth/refreshAccessToken";
 import {
   clearTokens,
   getAccessToken,
   getRefreshToken,
-  isTokenExpired,
   isRefreshTokenExpired,
+  isTokenExpired,
   saveTokens,
 } from "@/lib/auth/tokens";
-import { apolloClient } from "@/lib/apollo/client";
 import { logger } from "@/lib/logger";
+import type { User } from "@/types/user";
 
 interface AuthContextType {
   user: User | null;
@@ -38,7 +41,7 @@ interface AuthContextType {
   error: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -47,159 +50,54 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-// Global variable to track ongoing refresh to prevent race conditions
-let refreshPromise: Promise<string | null> | null = null;
-
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
+  const client = useApolloClient();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [loginMutation] = useMutation<LoginResponse>(LOGIN_MUTATION);
-  const [refreshTokenMutation] = useMutation<RefreshTokenResponse>(
-    REFRESH_TOKEN_MUTATION
-  );
-  // revokeToken on the backend reads from cookies; tokens are in localStorage
   const [getCurrentUser, { loading: userLoading }] =
-    useLazyQuery<GetCurrentUserResponse>(GET_CURRENT_USER);
-
-  const isAuthenticated = !!user;
-
-  /**
-   * Map backend user to frontend user type
-   */
-  const mapBackendUserToUser = (
-    backendUser: GetCurrentUserResponse["me"]
-  ): User => {
-    return {
-      id: backendUser.id,
-      email: backendUser.email,
-      firstName: backendUser.firstName,
-      lastName: backendUser.lastName,
-      role: backendUser.isSuperuser ? UserRole.ADMIN : UserRole.CLIENT,
-      isSuperuser: backendUser.isSuperuser,
-    };
-  };
+    useLazyQuery<GetCurrentUserResponse>(GET_CURRENT_USER, {
+      fetchPolicy: "network-only",
+    });
 
   /**
-   * Perform token refresh with deduplication
-   * Prevents multiple simultaneous refresh attempts
+   * Restore the session from stored tokens on mount.
    */
-  const performTokenRefresh = async (): Promise<string | null> => {
-    // If a refresh is already in progress, return that promise
-    if (refreshPromise) {
-      return refreshPromise;
-    }
-
-    // Create new refresh promise
-    refreshPromise = (async () => {
-      try {
-        const refreshToken = getRefreshToken();
-        if (!refreshToken) {
-          throw new Error("No refresh token available");
-        }
-
-        const { data } = await refreshTokenMutation({
-          variables: { refreshToken },
-        });
-
-        if (data?.refreshWithToken) {
-          const newAccessToken = data.refreshWithToken.token;
-          const newRefreshToken = data.refreshWithToken.refreshToken;
-          const refreshExpiresIn = data.refreshWithToken.refreshExpiresIn;
-          // Save new tokens (backend may rotate refresh token)
-          saveTokens(newAccessToken, newRefreshToken, refreshExpiresIn);
-          return newAccessToken;
-        }
-
-        throw new Error("Token refresh failed: Invalid response");
-      } catch (err) {
-        logger.error("Failed to refresh token:", err);
-        clearTokens();
-        setUser(null);
-        return null;
-      } finally {
-        refreshPromise = null;
-      }
-    })();
-
-    return refreshPromise;
-  };
-
-  /**
-   * Refresh the access token using the refresh token
-   */
-  const refreshAccessToken = async (): Promise<string | null> => {
-    return performTokenRefresh();
-  };
-
-  /**
-   * Load user data from the server
-   * Optimized to defer await and parallelize token validation
-   */
-  const loadUser = async (): Promise<void> => {
+  const loadUser = useCallback(async (): Promise<void> => {
     try {
       let token = getAccessToken();
-      const refreshToken = getRefreshToken();
-
-      // Check if tokens exist
-      if (!token || !refreshToken) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      // Check token expiration status
-      const isAccessExpired = isTokenExpired(token);
-      const isRefreshExpired = isRefreshTokenExpired();
-
-      // Check if refresh token is expired
-      if (isRefreshExpired) {
+      if (!token || !getRefreshToken() || isRefreshTokenExpired()) {
         clearTokens();
         setUser(null);
-        setLoading(false);
         return;
       }
 
-      // Refresh access token if needed
-      if (isAccessExpired) {
+      if (isTokenExpired(token)) {
         token = await refreshAccessToken();
         if (!token) {
           setUser(null);
-          setLoading(false);
           return;
         }
       }
 
-      // Fetch current user
       const { data, error: queryError } = await getCurrentUser();
+      if (queryError) throw queryError;
 
-      if (queryError) {
-        throw queryError;
-      }
-
-      if (data?.me) {
-        const user = mapBackendUserToUser(data.me);
-        setUser(user);
-        setError(null);
-      } else {
-        setUser(null);
-      }
+      setUser(data?.me ? mapBackendUser(data.me) : null);
+      setError(null);
     } catch (err) {
-      logger.error("Failed to load user:", err);
+      logger.error("Failed to restore session", err);
       clearTokens();
       setUser(null);
       setError("Failed to load user session");
     } finally {
       setLoading(false);
     }
-  };
+  }, [getCurrentUser]);
 
-  /**
-   * Login with email and password
-   * Optimized to eliminate waterfall: token save and user fetch happen in parallel
-   */
   const login = useCallback(
     async (email: string, password: string): Promise<void> => {
       setLoading(true);
@@ -209,49 +107,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const { data } = await loginMutation({
           variables: { email, password },
         });
-
         if (!data?.emailAuth) {
           throw new Error("Invalid response from server");
         }
 
-        const {
-          token: accessToken,
-          refreshToken,
-          refreshExpiresIn,
-        } = data.emailAuth;
+        const { token, refreshToken, refreshExpiresIn } = data.emailAuth;
+        saveTokens(token, refreshToken, refreshExpiresIn);
 
-        // Optimization: Start user fetch immediately after saving tokens
-        // saveTokens is synchronous, so we defer the await on getCurrentUser
-        saveTokens(accessToken, refreshToken, refreshExpiresIn);
-        const userFetchPromise = getCurrentUser();
-
-        // Now await the user fetch
-        const { data: currentUserData } = await userFetchPromise;
-
+        const { data: currentUserData } = await getCurrentUser();
         if (!currentUserData?.me) {
           throw new Error("Failed to fetch user data");
         }
 
-        const user = mapBackendUserToUser(currentUserData.me);
-
-        // Set user
-        setUser(user);
-
-        // Redirect based on isSuperuser
-        const redirectPath = currentUserData.me.isSuperuser
-          ? "/admin/dashboard"
-          : "/client/dashboard";
-
-        router.push(redirectPath);
+        const nextUser = mapBackendUser(currentUserData.me);
+        setUser(nextUser);
+        router.push(getDefaultRoute(nextUser.role));
       } catch (err: unknown) {
-        const errorMessage =
+        const message =
           err instanceof Error
             ? err.message
             : "Login failed. Please check your credentials.";
-
-        setError(errorMessage);
-        logger.error("Login error:", err);
-        throw new Error(errorMessage);
+        setError(message);
+        logger.error("Login error", err);
+        throw new Error(message);
       } finally {
         setLoading(false);
       }
@@ -259,54 +137,55 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [loginMutation, getCurrentUser, router]
   );
 
-  /**
-   * Logout user
-   * Optimized to parallelize backend logout and cache clearing
-   */
   const logout = useCallback(async (): Promise<void> => {
+    // Server-side revocation needs the refresh token in an httpOnly cookie
+    // (backend follow-up); until then logout is local only.
     try {
-      // revokeToken reads the refresh token from a cookie on the backend.
-      // Tokens are stored in localStorage (not cookies), so the revoke call
-      // will always fail with "Refresh token not found in cookies".
-      // We skip it and rely on local cleanup; the token expires naturally.
-      await (apolloClient ? apolloClient.clearStore() : Promise.resolve());
+      await client.clearStore();
     } catch (err) {
-      logger.error("Logout error:", err);
+      logger.error("Failed to clear Apollo store on logout", err);
     }
-
-    // Clear local state
     clearTokens();
     setUser(null);
     setError(null);
-
-    // Redirect to login
     router.push("/login");
+  }, [client, router]);
+
+  useEffect(() => {
+    void loadUser();
+  }, [loadUser]);
+
+  // The Apollo link chain signals unrecoverable auth failures here so the
+  // redirect stays locale-aware instead of using window.location.
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setUser(null);
+      setError(null);
+      router.push("/login");
+    };
+    authEvents.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+    return () =>
+      authEvents.removeEventListener(
+        SESSION_EXPIRED_EVENT,
+        handleSessionExpired
+      );
   }, [router]);
 
-  // Initialize auth on mount
-  useEffect(() => {
-    loadUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Memoize the context value to prevent unnecessary re-renders
-  // Only recompute when dependencies change
-  const value: AuthContextType = useMemo(
+  const value = useMemo<AuthContextType>(
     () => ({
       user,
       loading: loading || userLoading,
       error,
-      isAuthenticated,
+      isAuthenticated: user !== null,
       login,
       logout,
     }),
-    [user, loading, userLoading, error, isAuthenticated, login, logout]
+    [user, loading, userLoading, error, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Custom hook to use the auth context
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
