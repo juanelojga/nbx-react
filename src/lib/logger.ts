@@ -19,9 +19,11 @@ export const logger: Logger = {
     if (isDevelopment) console.warn(message, ...args);
   },
   info: (message, ...args) => {
+    // eslint-disable-next-line no-console -- logger is the sanctioned console wrapper
     if (isDevelopment) console.info(message, ...args);
   },
   debug: (message, ...args) => {
+    // eslint-disable-next-line no-console -- logger is the sanctioned console wrapper
     if (isDevelopment) console.debug(message, ...args);
   },
 };

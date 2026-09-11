@@ -1,8 +1,9 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { BaseDialog } from "@/components/common/BaseDialog";
 import type { LucideIcon } from "lucide-react";
+import React from "react";
+
+import { BaseDialog } from "@/components/common/BaseDialog";
 
 const MockIcon = ((props: React.SVGProps<SVGSVGElement>) => (
   <svg data-testid="mock-icon" {...props} />
@@ -232,7 +233,7 @@ describe("BaseDialog Component", () => {
       const dialog = screen.getByRole("dialog");
       const closeButton = dialog.querySelector(
         "button[data-slot='dialog-close']"
-      ) as HTMLElement;
+      )!;
       await user.click(closeButton);
 
       await waitFor(() => {

@@ -1,8 +1,11 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { TablePagination, TablePaginationProps } from "../table-pagination";
-import { PaginationState } from "../base-table.types";
+
+import { type PaginationState } from "../base-table.types";
+import {
+  TablePagination,
+  type TablePaginationProps,
+} from "../table-pagination";
 
 /* ============================================================================
  * Mock Data & Helpers

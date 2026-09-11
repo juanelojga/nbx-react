@@ -1,5 +1,5 @@
-import type * as React from "react";
 import type { LucideIcon } from "lucide-react";
+import type * as React from "react";
 
 import type { Button } from "@/components/ui/button";
 

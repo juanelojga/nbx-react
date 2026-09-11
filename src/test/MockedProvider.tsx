@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import {
   ApolloClient,
   ApolloLink,
@@ -8,18 +7,19 @@ import {
   Observable,
 } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
-import { print, visit, type DocumentNode } from "graphql";
+import type { FormattedExecutionResult } from "graphql";
+import { type DocumentNode, print, visit } from "graphql";
+import React from "react";
 
 import { addTypenames } from "@/test/addTypenames";
-import type { FormattedExecutionResult } from "graphql";
 
 interface MockedResponse {
   request: {
     query: unknown;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     variables?: Record<string, any>;
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   result?: any;
   error?: Error;
   delay?: number;
@@ -41,7 +41,7 @@ class CompatMockLink extends ApolloLink {
     this.mocks = [...mocks];
   }
 
-  request(
+  override request(
     operation: ApolloLink.Operation
   ): Observable<FormattedExecutionResult> {
     const stripTypename = (doc: DocumentNode): DocumentNode =>

@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+
 import type { UseClientDialogsReturn } from "../hooks/useClientDialogs";
 
 const AddClientDialog = dynamic(

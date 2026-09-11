@@ -5,9 +5,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import LanguageSelector from "@/components/LanguageSelector";
 import { ErrorAlert } from "@/components/common/ErrorAlert";
 import { FormFieldWrapper } from "@/components/common/FormFieldWrapper";
+import LanguageSelector from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -79,7 +79,7 @@ export function LoginForm() {
         <div className="flex justify-end mb-2">
           <LanguageSelector />
         </div>
-        <CardTitle className="text-2xl font-extrabold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <CardTitle className="font-heading text-2xl font-extrabold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           {t("title")}
         </CardTitle>
         <CardDescription className="text-center text-base">

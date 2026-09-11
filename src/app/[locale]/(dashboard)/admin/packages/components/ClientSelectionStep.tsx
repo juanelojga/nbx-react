@@ -1,10 +1,11 @@
 "use client";
 
+import { ArrowRight, CheckCircle2, Package } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Package, CheckCircle2 } from "lucide-react";
+
 import { ClientAutocomplete } from "@/components/admin/ClientAutocomplete";
-import { ClientType } from "@/graphql/queries/clients";
+import { Button } from "@/components/ui/button";
+import { type ClientType } from "@/graphql/queries/clients";
 
 interface ClientSelectionStepProps {
   selectedClient: ClientType | null;

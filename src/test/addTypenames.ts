@@ -11,6 +11,7 @@ import {
   isCompositeType,
   isObjectType,
   Kind,
+  OperationTypeNode,
   type SelectionSetNode,
 } from "graphql";
 
@@ -43,10 +44,10 @@ export function addTypenames<T>(document: DocumentNode, data: T): T {
   const operation = document.definitions.find(
     (definition) => definition.kind === Kind.OPERATION_DEFINITION
   );
-  if (!operation || operation.kind !== Kind.OPERATION_DEFINITION) return data;
+  if (operation?.kind !== Kind.OPERATION_DEFINITION) return data;
 
   const rootType =
-    operation.operation === "mutation"
+    operation.operation === OperationTypeNode.MUTATION
       ? schema.getMutationType()
       : schema.getQueryType();
   if (!rootType) return data;

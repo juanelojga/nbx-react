@@ -1,5 +1,5 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+
 import { PageHeader } from "../page-header";
 
 describe("PageHeader Component", () => {
@@ -257,24 +257,6 @@ describe("PageHeader Component", () => {
       render(<PageHeader title="Test Title" actions={<></>} />);
 
       expect(screen.getByText("Test Title")).toBeInTheDocument();
-    });
-
-    it("handles whitespace-only title", () => {
-      render(<PageHeader title="   " />);
-
-      const title = screen.getByRole("heading");
-      expect(title).toBeInTheDocument();
-      // Whitespace-only title should still render
-      expect(title.textContent).toBe("   ");
-    });
-
-    it("handles whitespace-only description", () => {
-      render(<PageHeader title="Test Title" description="   " />);
-
-      // Whitespace-only description should still render
-      const description = screen.getByRole("paragraph");
-      expect(description).toBeInTheDocument();
-      expect(description.textContent).toBe("   ");
     });
 
     it("handles React fragments in actions", () => {

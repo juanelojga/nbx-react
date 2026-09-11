@@ -81,6 +81,6 @@ describe("PackageRow", () => {
 
   it("applies the stagger delay", () => {
     renderRow({ animationDelay: 120 });
-    expect(screen.getByRole("row").style.animationDelay).toBe("120ms");
+    expect(screen.getByRole("row")).toHaveStyle({ animationDelay: "120ms" });
   });
 });

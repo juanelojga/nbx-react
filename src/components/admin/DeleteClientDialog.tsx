@@ -1,16 +1,13 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+
 import { BaseDialog } from "@/components/common/BaseDialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Loader2 } from "lucide-react";
-import {
-  DELETE_CLIENT,
-  DeleteClientResponse,
-  DeleteClientVariables,
-} from "@/graphql/mutations/clients";
-import { toast } from "sonner";
+import { DELETE_CLIENT } from "@/graphql/mutations/clients";
 
 interface DeleteClientDialogProps {
   open: boolean;
@@ -31,11 +28,8 @@ export function DeleteClientDialog({
 }: DeleteClientDialogProps) {
   const t = useTranslations("adminClients.deleteDialog");
   const tParent = useTranslations("adminClients");
-  const [deleteClient, { loading }] = useMutation<
-    DeleteClientResponse,
-    DeleteClientVariables
-  >(DELETE_CLIENT, {
-    onCompleted: async () => {
+  const [deleteClient, { loading }] = useMutation(DELETE_CLIENT, {
+    onCompleted: () => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
           name: client?.fullName || client?.email || "",
@@ -44,7 +38,7 @@ export function DeleteClientDialog({
       onOpenChange(false);
       // Trigger table refresh
       if (onClientDeleted) {
-        await onClientDeleted();
+        void onClientDeleted();
       }
     },
     onError: (error) => {

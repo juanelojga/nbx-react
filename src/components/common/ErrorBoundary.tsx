@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Component, type ErrorInfo, type ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 
 import { ErrorBoundaryFallback } from "@/components/common/ErrorBoundaryFallback";
 import { logger } from "@/lib/logger";
@@ -20,13 +20,13 @@ interface State {
  * fallback instead of unmounting the whole tree.
  */
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
+  override state: State = { hasError: false };
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     logger.error("ErrorBoundary caught an error", error, info.componentStack);
   }
 
@@ -34,7 +34,7 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: undefined });
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         this.props.fallback ?? (

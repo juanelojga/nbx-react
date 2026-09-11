@@ -41,7 +41,7 @@ function run(link: ApolloLink, operationName = "Ping") {
 
 /** Terminal link that fails with an auth error `failures` times, then succeeds. */
 function flakyTerminal(failures: number) {
-  const seenHeaders: Array<Record<string, string>> = [];
+  const seenHeaders: Record<string, string>[] = [];
   let calls = 0;
   const link = new ApolloLink((operation) => {
     seenHeaders.push(operation.getContext().headers ?? {});

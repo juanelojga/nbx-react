@@ -12,11 +12,7 @@ import { ClientFormFields } from "@/components/admin/ClientFormFields";
 import { BaseDialog } from "@/components/common/BaseDialog";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import {
-  CREATE_CLIENT,
-  type CreateClientResponse,
-  type CreateClientVariables,
-} from "@/graphql/mutations/clients";
+import { CREATE_CLIENT } from "@/graphql/mutations/clients";
 import { toCreateClientVariables } from "@/lib/clients/toCreateClientVariables";
 import {
   type ClientFormValues,
@@ -50,18 +46,15 @@ export function AddClientDialog({
     onOpenChange(false);
   }, [form, onOpenChange]);
 
-  const [createClient, { loading }] = useMutation<
-    CreateClientResponse,
-    CreateClientVariables
-  >(CREATE_CLIENT, {
-    onCompleted: async (data) => {
+  const [createClient, { loading }] = useMutation(CREATE_CLIENT, {
+    onCompleted: (data) => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
           fullName: data.createClient?.client?.fullName ?? "",
         }),
       });
       handleClose();
-      await onClientCreated?.();
+      void onClientCreated?.();
     },
     onError: (error) => {
       toast.error(t("errorTitle"), {

@@ -4,7 +4,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ComingSoonCard } from "@/components/common/ComingSoonCard";
 import { PageHeader } from "@/components/data-display/page-header";
 
-type Props = { params: Promise<{ locale: string }> };
+interface Props {
+  params: Promise<{ locale: string }>;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;

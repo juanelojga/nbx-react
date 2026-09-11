@@ -165,6 +165,8 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Inter for body/data. `--font-inter` is set on <body> by next/font. */
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
@@ -181,7 +183,9 @@
   h5,
   h6 {
     @apply tracking-tight;
-    font-family: var(--font-heading);
+    /* Work Sans for headings; falls back to the body font. */
+    font-family:
+      var(--font-work-sans), var(--font-inter), ui-sans-serif, sans-serif;
     color: rgb(var(--brand-text-primary));
   }
 

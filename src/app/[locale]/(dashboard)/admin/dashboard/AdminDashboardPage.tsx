@@ -1,47 +1,39 @@
 "use client";
 
-import { useCallback } from "react";
 import { useQuery } from "@apollo/client/react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  Layers,
+  Package,
+  RefreshCw,
+  Users,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useCallback } from "react";
 
-import { compact } from "@/lib/graphql/compact";
 import { PageHeader } from "@/components/data-display/page-header";
+import { StatCard } from "@/components/data-display/stat-card";
+import { StatusBadge } from "@/components/data-display/status-badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { StatCard } from "@/components/data-display/stat-card";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { StatusBadge } from "@/components/data-display/status-badge";
+import { GET_DASHBOARD } from "@/graphql/queries/dashboard";
 import { Link } from "@/i18n/navigation";
-import {
-  GET_DASHBOARD,
-  GetDashboardResponse,
-  GetDashboardVariables,
-} from "@/graphql/queries/dashboard";
-import { ConsolidationStatus } from "@/types/consolidation";
-import {
-  Package,
-  Users,
-  AlertCircle,
-  Layers,
-  RefreshCw,
-  AlertTriangle,
-} from "lucide-react";
+import { compact } from "@/lib/graphql/compact";
 
 const RECENT_LIMIT = 5;
 
 export function AdminDashboardPage() {
   const t = useTranslations("adminDashboard");
 
-  const { data, loading, error, refetch } = useQuery<
-    GetDashboardResponse,
-    GetDashboardVariables
-  >(GET_DASHBOARD, {
+  const { data, loading, error, refetch } = useQuery(GET_DASHBOARD, {
     variables: {
       recentPackagesLimit: RECENT_LIMIT,
       recentConsolidationsLimit: RECENT_LIMIT,
@@ -50,7 +42,7 @@ export function AdminDashboardPage() {
   });
 
   const handleRefresh = useCallback(() => {
-    refetch();
+    void refetch();
   }, [refetch]);
 
   const stats = data?.dashboard?.stats;
@@ -247,10 +239,7 @@ export function AdminDashboardPage() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0 ml-2">
-                      <StatusBadge
-                        status={con.status as ConsolidationStatus}
-                        label={con.status}
-                      />
+                      <StatusBadge status={con.status} label={con.status} />
                       <p className="text-xs text-muted-foreground">
                         {new Date(con.createdAt).toLocaleDateString()}
                       </p>

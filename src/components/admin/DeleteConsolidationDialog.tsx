@@ -1,16 +1,13 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+
 import { BaseDialog } from "@/components/common/BaseDialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Loader2 } from "lucide-react";
-import {
-  DELETE_CONSOLIDATE,
-  DeleteConsolidateResponse,
-  DeleteConsolidateVariables,
-} from "@/graphql/mutations/consolidations";
-import { toast } from "sonner";
+import { DELETE_CONSOLIDATE } from "@/graphql/mutations/consolidations";
 
 interface DeleteConsolidationDialogProps {
   open: boolean;
@@ -36,17 +33,14 @@ export function DeleteConsolidationDialog({
   const t = useTranslations("adminConsolidations.deleteDialog");
   const tParent = useTranslations("adminConsolidations");
 
-  const [deleteConsolidate, { loading }] = useMutation<
-    DeleteConsolidateResponse,
-    DeleteConsolidateVariables
-  >(DELETE_CONSOLIDATE, {
-    onCompleted: async () => {
+  const [deleteConsolidate, { loading }] = useMutation(DELETE_CONSOLIDATE, {
+    onCompleted: () => {
       toast.success(t("successTitle"), {
         description: t("successDescription"),
       });
       onOpenChange(false);
       if (onConsolidationDeleted) {
-        await onConsolidationDeleted();
+        void onConsolidationDeleted();
       }
     },
     onError: (error) => {

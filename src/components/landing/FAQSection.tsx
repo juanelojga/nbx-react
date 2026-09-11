@@ -1,5 +1,5 @@
-import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function FAQSection() {
   const t = useTranslations("landing.faq");
@@ -27,15 +27,13 @@ export function FAQSection() {
               className="group bg-slate-50 border border-border/60 rounded-2xl md:rounded-full p-1 overflow-hidden transition-all duration-300 open:bg-white open:shadow-lg open:shadow-blue-900/5 open:rounded-2xl"
             >
               <summary className="flex items-center justify-between cursor-pointer list-none px-6 py-4 font-semibold text-foreground select-none">
-                <span className="text-base sm:text-lg pr-4">
-                  {t(faq.q as Parameters<typeof t>[0])}
-                </span>
+                <span className="text-base sm:text-lg pr-4">{t(faq.q)}</span>
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-open:-rotate-180 transition-transform duration-300 text-[#1976D2]">
                   <ChevronDown className="w-5 h-5" />
                 </span>
               </summary>
               <div className="px-6 pb-6 pt-2 text-muted-foreground leading-relaxed animate-in fade-in slide-in-from-top-4 duration-300">
-                {t(faq.a as Parameters<typeof t>[0])}
+                {t(faq.a)}
               </div>
             </details>
           ))}

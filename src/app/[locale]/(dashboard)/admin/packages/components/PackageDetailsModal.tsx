@@ -1,16 +1,13 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
+import { AlertCircle, Loader2, Package as PackageIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+
 import { BaseDialog } from "@/components/common/BaseDialog";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, Package as PackageIcon, Loader2 } from "lucide-react";
-import {
-  GET_PACKAGE,
-  GetPackageResponse,
-  GetPackageVariables,
-} from "@/graphql/queries/packages";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { GET_PACKAGE } from "@/graphql/queries/packages";
 
 interface InfoRowProps {
   label: string;
@@ -42,10 +39,7 @@ export function PackageDetailsModal({
   packageId,
 }: PackageDetailsModalProps) {
   const t = useTranslations("adminPackages.detailsModal");
-  const { data, loading, error } = useQuery<
-    GetPackageResponse,
-    GetPackageVariables
-  >(GET_PACKAGE, {
+  const { data, loading, error } = useQuery(GET_PACKAGE, {
     variables: { id: parseInt(packageId || "0") },
     skip: !packageId || !open, // Skip query if no packageId or dialog is closed
   });

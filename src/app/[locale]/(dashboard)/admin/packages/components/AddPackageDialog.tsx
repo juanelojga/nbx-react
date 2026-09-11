@@ -14,11 +14,7 @@ import { BaseDialog } from "@/components/common/BaseDialog";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  CREATE_PACKAGE,
-  type CreatePackageResponse,
-  type CreatePackageVariables,
-} from "@/graphql/mutations/packages";
+import { CREATE_PACKAGE } from "@/graphql/mutations/packages";
 import type { ClientType } from "@/graphql/queries/clients";
 import { toCreatePackageVariables } from "@/lib/packages/toCreatePackageVariables";
 import {
@@ -65,18 +61,15 @@ export function AddPackageDialog({
     onOpenChange(false);
   }, [form, clientId, onOpenChange]);
 
-  const [createPackage, { loading }] = useMutation<
-    CreatePackageResponse,
-    CreatePackageVariables
-  >(CREATE_PACKAGE, {
-    onCompleted: async (data) => {
+  const [createPackage, { loading }] = useMutation(CREATE_PACKAGE, {
+    onCompleted: (data) => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
           barcode: data.createPackage?.package?.barcode ?? "",
         }),
       });
       handleClose();
-      await onPackageCreated?.();
+      void onPackageCreated?.();
     },
     onError: (error) => {
       toast.error(t("errorTitle"), { description: error.message });

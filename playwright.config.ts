@@ -1,90 +1,65 @@
+import path from "node:path";
+
 import { defineConfig, devices } from "@playwright/test";
-import path from "path";
+
+const isCI = Boolean(process.env.CI);
+const storageState = path.join(__dirname, "e2e/.auth/storage-state.json");
 
 /**
- * See https://playwright.dev/docs/test-configuration.
+ * E2E tests run against the Next.js app with all GraphQL traffic intercepted
+ * by e2e/fixtures/mockBackend.ts — no Django backend is required.
+ *
+ * CI serves the production build (`pnpm build` runs first in the workflow);
+ * locally the dev server is reused when it is already running.
  */
 export default defineConfig({
   testDir: "./e2e",
-  /* Run tests in files in parallel */
+  outputDir: "test-results",
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  forbidOnly: isCI,
+  retries: isCI ? 2 : 0,
+  workers: isCI ? 1 : undefined,
+  reporter: isCI
+    ? [["github"], ["html", { open: "never" }]]
+    : [["list"], ["html", { open: "never" }]],
+  expect: { timeout: 10_000 },
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: "http://localhost:3000",
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
-    /* Screenshot output directory */
     screenshot: "off",
   },
-
-  /* Configure projects for major browsers */
   projects: [
-    {
-      name: "setup",
-      testMatch: /global-setup\.ts/,
-    },
+    { name: "setup", testMatch: /global-setup\.ts/ },
     {
       name: "chromium",
-      use: {
-        ...devices["Desktop Chrome"],
-        storageState: path.join(__dirname, "e2e/.auth/storage-state.json"),
-      },
+      use: { ...devices["Desktop Chrome"], storageState },
       dependencies: ["setup"],
     },
-
-    {
-      name: "firefox",
-      use: {
-        ...devices["Desktop Firefox"],
-        storageState: path.join(__dirname, "e2e/.auth/storage-state.json"),
-      },
-      dependencies: ["setup"],
-    },
-
-    {
-      name: "webkit",
-      use: {
-        ...devices["Desktop Safari"],
-        storageState: path.join(__dirname, "e2e/.auth/storage-state.json"),
-      },
-      dependencies: ["setup"],
-    },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+    // Extra browsers only locally: the in-memory mock store is shared per
+    // worker, so CI keeps a single browser for deterministic data.
+    ...(isCI
+      ? []
+      : [
+          {
+            name: "firefox",
+            use: { ...devices["Desktop Firefox"], storageState },
+            dependencies: ["setup"],
+          },
+          {
+            name: "webkit",
+            use: { ...devices["Desktop Safari"], storageState },
+            dependencies: ["setup"],
+          },
+        ]),
   ],
-
-  /* Run your local dev server before starting the tests */
   webServer: {
-    command: "docker compose up",
+    command: isCI ? "pnpm start" : "pnpm dev",
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    reuseExistingServer: !isCI,
+    timeout: 120_000,
+    env: {
+      NEXT_PUBLIC_GRAPHQL_ENDPOINT: "http://localhost:8000/graphql",
+      NEXT_TELEMETRY_DISABLED: "1",
+    },
   },
 });

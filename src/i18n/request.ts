@@ -1,5 +1,7 @@
+import type { AbstractIntlMessages } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
-import { routing, type Locale } from "./routing";
+
+import { type Locale, routing } from "./routing";
 
 export default getRequestConfig(async ({ requestLocale }) => {
   // This typically corresponds to the `[locale]` segment
@@ -12,7 +14,11 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
-    messages: (await import(`../../messages/${locale}.json`)).default,
+    messages: (
+      (await import(`../../messages/${locale}.json`)) as {
+        default: AbstractIntlMessages;
+      }
+    ).default,
     timeZone: "America/Guayaquil",
   };
 });

@@ -1,22 +1,20 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
-import { BaseDialog } from "@/components/common/BaseDialog";
-import { Button } from "@/components/ui/button";
 import { AlertCircle, Eye, Loader2, Package } from "lucide-react";
-import {
-  GET_CONSOLIDATE_BY_ID,
-  GetConsolidateByIdResponse,
-  GetConsolidateByIdVariables,
-} from "@/graphql/queries/consolidations";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { StatusBadge } from "@/components/data-display/status-badge";
-import { parseExtraAttributes } from "@/lib/consolidations/parseExtraAttributes";
-import { getViewConsolidationPackageColumns } from "@/components/admin/viewConsolidationPackageColumns";
-import { BaseTable } from "@/components/data-display/base-table";
-import { getStatusLabel } from "@/lib/consolidations/getStatusLabel";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+
+import { getViewConsolidationPackageColumns } from "@/components/admin/viewConsolidationPackageColumns";
+import { BaseDialog } from "@/components/common/BaseDialog";
+import { BaseTable } from "@/components/data-display/base-table";
+import { StatusBadge } from "@/components/data-display/status-badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { GET_CONSOLIDATE_BY_ID } from "@/graphql/queries/consolidations";
+import { getStatusLabel } from "@/lib/consolidations/getStatusLabel";
+import { parseExtraAttributes } from "@/lib/consolidations/parseExtraAttributes";
+import { parseISODate } from "@/lib/date/parseISODate";
 
 interface InfoRowProps {
   label: string;
@@ -48,10 +46,7 @@ export function ViewConsolidationDialog({
   const t = useTranslations("adminConsolidations.viewDialog");
   const tStatus = useTranslations("adminConsolidations");
 
-  const { data, loading, error } = useQuery<
-    GetConsolidateByIdResponse,
-    GetConsolidateByIdVariables
-  >(GET_CONSOLIDATE_BY_ID, {
+  const { data, loading, error } = useQuery(GET_CONSOLIDATE_BY_ID, {
     variables: { id: consolidationId || "" },
     skip: !consolidationId || !open,
   });
@@ -131,16 +126,9 @@ export function ViewConsolidationDialog({
               </div>
               <InfoRow
                 label={t("deliveryDate")}
-                value={
-                  consolidation.deliveryDate
-                    ? (() => {
-                        const [y, m, d] = consolidation.deliveryDate
-                          .split("-")
-                          .map(Number);
-                        return new Date(y, m - 1, d).toLocaleDateString();
-                      })()
-                    : undefined
-                }
+                value={parseISODate(
+                  consolidation.deliveryDate ?? ""
+                )?.toLocaleDateString()}
               />
               <InfoRow label={t("comment")} value={consolidation.comment} />
               <InfoRow

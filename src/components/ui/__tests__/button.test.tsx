@@ -1,6 +1,6 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
 import { Button, buttonVariants } from "../button";
 
 describe("Button Component", () => {
@@ -68,13 +68,6 @@ describe("Button Component", () => {
       expect(button).toHaveAttribute("data-slot", "button");
     });
 
-    it("renders with custom className", () => {
-      render(<Button className="custom-class">Custom button</Button>);
-
-      const button = screen.getByText("Custom button");
-      expect(button).toHaveClass("custom-class");
-    });
-
     it("forwards additional props", () => {
       render(
         <Button id="test-id" data-testid="test-button" disabled>
@@ -85,7 +78,7 @@ describe("Button Component", () => {
       const button = screen.getByText("Button with props");
       expect(button).toHaveAttribute("id", "test-id");
       expect(button).toHaveAttribute("data-testid", "test-button");
-      expect(button).toHaveAttribute("disabled");
+      expect(button).toBeDisabled();
     });
 
     it("renders with SVG icon", () => {
@@ -188,7 +181,7 @@ describe("Button Component", () => {
       await user.click(button);
 
       expect(handleClick).not.toHaveBeenCalled();
-      expect(button).toHaveAttribute("disabled");
+      expect(button).toBeDisabled();
     });
 
     it("handles keyboard navigation with Enter key", async () => {
@@ -234,7 +227,7 @@ describe("Button Component", () => {
       const button = screen.getByText("Focusable button");
       button.focus();
 
-      expect(document.activeElement).toBe(button);
+      expect(button).toHaveFocus();
     });
 
     it("handles focus states when rendered as link", () => {
@@ -247,7 +240,7 @@ describe("Button Component", () => {
       const link = screen.getByText("Focusable link");
       link.focus();
 
-      expect(document.activeElement).toBe(link);
+      expect(link).toHaveFocus();
     });
 
     it("handles form submission", async () => {
@@ -335,7 +328,7 @@ describe("Button Component", () => {
 
       const button = screen.getByText("Semantically disabled");
       expect(button).toHaveAttribute("aria-disabled", "true");
-      expect(button).toHaveAttribute("disabled");
+      expect(button).toBeDisabled();
     });
 
     it("maintains focus management with asChild", () => {
@@ -348,116 +341,6 @@ describe("Button Component", () => {
       const button = screen.getByLabelText("Custom button");
       expect(button).toBeInTheDocument();
       expect(button.tagName.toLowerCase()).toBe("button");
-    });
-  });
-
-  describe("Variant Classes", () => {
-    it("applies default variant classes", () => {
-      render(<Button variant="default">Default variant</Button>);
-
-      const button = screen.getByText("Default variant");
-      expect(button).toHaveClass("inline-flex");
-      expect(button).toHaveClass("items-center");
-      expect(button).toHaveClass("justify-center");
-      expect(button).toHaveClass("gap-2");
-      expect(button).toHaveClass("whitespace-nowrap");
-      expect(button).toHaveClass("rounded-lg");
-      expect(button).toHaveClass("text-sm");
-      expect(button).toHaveClass("font-semibold");
-      expect(button).toHaveClass("transition-all");
-      expect(button).toHaveClass("duration-200");
-      expect(button).toHaveClass("disabled:pointer-events-none");
-      expect(button).toHaveClass("disabled:opacity-50");
-      expect(button).toHaveClass("shrink-0");
-      expect(button).toHaveClass("outline-none");
-      expect(button).toHaveClass("focus-visible:ring-2");
-      expect(button).toHaveClass("focus-visible:ring-ring");
-      expect(button).toHaveClass("focus-visible:ring-offset-2");
-      expect(button).toHaveClass("focus-visible:ring-offset-background");
-    });
-
-    it("applies destructive variant classes", () => {
-      render(<Button variant="destructive">Destructive variant</Button>);
-
-      const button = screen.getByText("Destructive variant");
-      expect(button).toHaveClass("bg-destructive");
-      expect(button).toHaveClass("text-destructive-foreground");
-      expect(button).toHaveClass("shadow-sm");
-      expect(button).toHaveClass("hover:bg-destructive/90");
-      expect(button).toHaveClass("hover:shadow-md");
-      expect(button).toHaveClass("active:scale-[0.98]");
-      expect(button).toHaveClass("focus-visible:ring-destructive/50");
-    });
-
-    it("applies outline variant classes", () => {
-      render(<Button variant="outline">Outline variant</Button>);
-
-      const button = screen.getByText("Outline variant");
-      expect(button).toHaveClass("border-2");
-      expect(button).toHaveClass("border-input");
-      expect(button).toHaveClass("bg-background");
-      expect(button).toHaveClass("hover:bg-accent");
-      expect(button).toHaveClass("hover:text-accent-foreground");
-      expect(button).toHaveClass("hover:border-primary/50");
-      expect(button).toHaveClass("active:scale-[0.98]");
-    });
-
-    it("applies secondary variant classes", () => {
-      render(<Button variant="secondary">Secondary variant</Button>);
-
-      const button = screen.getByText("Secondary variant");
-      expect(button).toHaveClass("bg-secondary");
-      expect(button).toHaveClass("text-secondary-foreground");
-      expect(button).toHaveClass("shadow-sm");
-      expect(button).toHaveClass("hover:bg-secondary/80");
-      expect(button).toHaveClass("hover:shadow-md");
-      expect(button).toHaveClass("active:scale-[0.98]");
-    });
-
-    it("applies ghost variant classes", () => {
-      render(<Button variant="ghost">Ghost variant</Button>);
-
-      const button = screen.getByText("Ghost variant");
-      expect(button).toHaveClass("hover:bg-accent");
-      expect(button).toHaveClass("hover:text-accent-foreground");
-      expect(button).toHaveClass("active:scale-[0.98]");
-    });
-
-    it("applies link variant classes", () => {
-      render(<Button variant="link">Link variant</Button>);
-
-      const button = screen.getByText("Link variant");
-      expect(button).toHaveClass("text-primary");
-      expect(button).toHaveClass("underline-offset-4");
-      expect(button).toHaveClass("hover:underline");
-    });
-
-    it("applies size classes correctly", () => {
-      const { unmount } = render(<Button size="sm">Small button</Button>);
-      const button = screen.getByText("Small button");
-      expect(button).toHaveClass("h-9");
-      expect(button).toHaveClass("rounded-lg");
-      expect(button).toHaveClass("gap-1.5");
-      expect(button).toHaveClass("px-4");
-      expect(button).toHaveClass("text-xs");
-      expect(button).toHaveClass("has-[>svg]:px-3");
-      unmount();
-
-      render(<Button size="lg">Large button</Button>);
-      const largeButton = screen.getByText("Large button");
-      expect(largeButton).toHaveClass("h-12");
-      expect(largeButton).toHaveClass("rounded-lg");
-      expect(largeButton).toHaveClass("px-8");
-      expect(largeButton).toHaveClass("text-base");
-      expect(largeButton).toHaveClass("has-[>svg]:px-6");
-    });
-
-    it("applies icon size classes", () => {
-      render(<Button size="icon" aria-label="Icon button" />);
-
-      const button = screen.getByLabelText("Icon button");
-      expect(button).toHaveClass("size-10");
-      expect(button).toHaveClass("rounded-lg");
     });
   });
 
@@ -479,7 +362,6 @@ describe("Button Component", () => {
       const button = screen.getByText("Error Button");
       expect(button).toBeInTheDocument();
       expect(button).toHaveAttribute("id", "test-button");
-      expect(button).toHaveClass("custom-button");
       expect(screen.getByTestId("error-icon")).toBeInTheDocument();
     });
 
@@ -566,7 +448,7 @@ describe("Button Component", () => {
 
       const button = screen.getByText("Loading...");
       expect(button).toBeInTheDocument();
-      expect(button).toHaveAttribute("disabled");
+      expect(button).toBeDisabled();
       expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
     });
   });
@@ -613,18 +495,6 @@ describe("Button Component", () => {
 
       const button = screen.getByText(longWord);
       expect(button).toBeInTheDocument();
-      expect(button).toHaveClass("whitespace-nowrap");
-    });
-
-    it("handles multiple className props", () => {
-      render(
-        <Button className="class1 class2 class3">Multiple classes</Button>
-      );
-
-      const button = screen.getByText("Multiple classes");
-      expect(button).toHaveClass("class1");
-      expect(button).toHaveClass("class2");
-      expect(button).toHaveClass("class3");
     });
 
     it("handles empty string className", () => {

@@ -2,13 +2,14 @@
 
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { StepHeader } from "./components/StepHeader";
+
 import { ClientSelectionStep } from "./components/ClientSelectionStep";
-import { PackageSelectionStep } from "./components/PackageSelectionStep";
 import { ConsolidationForm } from "./components/ConsolidationForm";
 import { ConsolidationSuccess } from "./components/ConsolidationSuccess";
-import { useConsolidationWizard } from "./hooks/useConsolidationWizard";
+import { PackageSelectionStep } from "./components/PackageSelectionStep";
+import { StepHeader } from "./components/StepHeader";
 import { useAddPackageDialog } from "./hooks/useAddPackageDialog";
+import { useConsolidationWizard } from "./hooks/useConsolidationWizard";
 
 // Dynamically import dialog component for better bundle splitting
 const AddPackageDialog = dynamic(

@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
+import { PageHeader } from "@/components/data-display/page-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
-import { PageHeader } from "@/components/data-display/page-header";
 
 interface ListPageShellProps {
   title: string;

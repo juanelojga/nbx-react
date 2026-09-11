@@ -70,3 +70,4 @@ next-env.d.ts
 *.bak
 blob-report/
 playwright/.cache/
+.playwright-mcp/

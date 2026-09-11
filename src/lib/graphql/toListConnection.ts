@@ -2,7 +2,7 @@ import type { ListConnection } from "@/hooks/useAdminListPage";
 import { compact } from "@/lib/graphql/compact";
 
 interface NullableConnection<TItem> {
-  results?: ReadonlyArray<TItem | null> | null;
+  results?: readonly (TItem | null)[] | null;
   totalCount?: number | null;
   hasNext?: boolean | null;
   hasPrevious?: boolean | null;

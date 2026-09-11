@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
+
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
+
 import type { ConsolidationToDelete } from "../components/consolidations-table.types";
 
 export interface UseConsolidationDialogsReturn {

@@ -1,18 +1,15 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "@/i18n/navigation";
 import { useQuery } from "@apollo/client/react";
-
-import { compact } from "@/lib/graphql/compact";
 import { useTranslations } from "next-intl";
-import { ClientType } from "@/graphql/queries/clients";
-import {
-  GET_ALL_PACKAGES,
-  GetAllPackagesResponse,
-  GetAllPackagesVariables,
-} from "@/graphql/queries/packages";
-import { ConsolidateType } from "@/graphql/queries/consolidations";
+import { useCallback, useMemo, useState } from "react";
+
+import { type ClientType } from "@/graphql/queries/clients";
+import { type ConsolidateType } from "@/graphql/queries/consolidations";
+import { GET_ALL_PACKAGES } from "@/graphql/queries/packages";
+import { useRouter } from "@/i18n/navigation";
+import { compact } from "@/lib/graphql/compact";
+
 import type { Package } from "../types";
 
 interface Step {
@@ -77,10 +74,7 @@ export function useConsolidationWizard(): UseConsolidationWizardReturn {
     [selectedClient]
   );
 
-  const { data, loading, error, refetch } = useQuery<
-    GetAllPackagesResponse,
-    GetAllPackagesVariables
-  >(GET_ALL_PACKAGES, {
+  const { data, loading, error, refetch } = useQuery(GET_ALL_PACKAGES, {
     variables: queryVariables,
     skip: currentStep !== 2 || !selectedClient,
     fetchPolicy: "network-only",
@@ -145,7 +139,7 @@ export function useConsolidationWizard(): UseConsolidationWizardReturn {
 
   const handleRetryLoad = useCallback(() => {
     if (refetch) {
-      refetch();
+      void refetch();
     }
   }, [refetch]);
 

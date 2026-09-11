@@ -27,12 +27,13 @@ const httpLink = new HttpLink({
 
 /** Attaches the JWT, refreshing it first when it is about to expire. */
 const authLink = new SetContextLink(async ({ headers }) => {
+  const previous = (headers ?? {}) as Record<string, string>;
   let token = getAccessToken();
   if (token && isTokenExpired(token)) {
     token = await refreshAccessToken();
   }
   return {
-    headers: { ...headers, authorization: token ? `JWT ${token}` : "" },
+    headers: { ...previous, authorization: token ? `JWT ${token}` : "" },
   };
 });
 

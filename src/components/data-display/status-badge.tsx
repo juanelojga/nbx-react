@@ -1,4 +1,14 @@
+import {
+  CheckCircle2,
+  Clock,
+  DollarSign,
+  HelpCircle,
+  Loader,
+  Truck,
+  XCircle,
+} from "lucide-react";
 import * as React from "react";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -6,16 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import {
-  Truck,
-  CheckCircle2,
-  Clock,
-  HelpCircle,
-  DollarSign,
-  Loader,
-  XCircle,
-} from "lucide-react";
-import { ConsolidationStatus } from "@/types/consolidation";
+import { type ConsolidationStatus } from "@/types/consolidation";
 
 /**
  * Status Badge Component

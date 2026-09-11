@@ -62,8 +62,11 @@ export function createErrorLink({
             observer.error(error);
             return;
           }
-          operation.setContext(({ headers = {} }) => ({
-            headers: { ...headers, authorization: `JWT ${token}` },
+          operation.setContext(({ headers }) => ({
+            headers: {
+              ...((headers ?? {}) as Record<string, string>),
+              authorization: `JWT ${token}`,
+            },
             authRetried: true,
           }));
           // `forward` resumes the chain after this link, so a second auth

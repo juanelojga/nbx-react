@@ -1,5 +1,6 @@
-import { test, expect } from "./fixtures/mockBackend";
 import path from "path";
+
+import { expect, test } from "./fixtures/mockBackend";
 
 const screenshotsDir = path.join(__dirname, "screenshots");
 
@@ -87,7 +88,7 @@ test.describe.serial("Consolidation Flow", () => {
     // Dialog should close
     await expect(
       page.getByRole("heading", { name: "Add New Client" })
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await page.screenshot({
       path: path.join(screenshotsDir, "consolidation-client-created.png"),
@@ -167,7 +168,7 @@ test.describe.serial("Consolidation Flow", () => {
     ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("heading", { name: "Create New Package" })
-    ).not.toBeVisible();
+    ).toBeHidden();
     await page.waitForLoadState("networkidle");
 
     // Verify Package A appears in table
@@ -196,7 +197,7 @@ test.describe.serial("Consolidation Flow", () => {
     ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("heading", { name: "Create New Package" })
-    ).not.toBeVisible();
+    ).toBeHidden();
     await page.waitForLoadState("networkidle");
 
     await expect(page.getByText(packageB.barcode, { exact: true })).toBeVisible(
@@ -224,7 +225,7 @@ test.describe.serial("Consolidation Flow", () => {
     ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("heading", { name: "Create New Package" })
-    ).not.toBeVisible();
+    ).toBeHidden();
     await page.waitForLoadState("networkidle");
 
     await expect(page.getByText(packageC.barcode, { exact: true })).toBeVisible(
@@ -454,7 +455,7 @@ test.describe.serial("Consolidation Flow", () => {
     await page.getByRole("button", { name: "Cancel" }).click();
     await expect(
       page.getByRole("heading", { name: "Create New Package" })
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   // ─── Test 4: Extra attributes max limit ─────────────────────────
@@ -692,8 +693,8 @@ test.describe.serial("Consolidation Flow", () => {
     // Verify per-package realPrice in the table
     // Package A: $45.00, Package B: $120.50, Package C: -
     const packageRows = dialog.locator("tbody tr");
-    const rowCount = await packageRows.count();
-    expect(rowCount).toBe(3);
+    const rowCount = packageRows;
+    await expect(rowCount).toHaveCount(3);
 
     // Check that $45.00 and $120.50 appear in the Real Price column
     await expect(dialog.getByText("$45.00")).toBeVisible();
@@ -707,7 +708,7 @@ test.describe.serial("Consolidation Flow", () => {
     await dialog.getByRole("button", { name: "Close" }).first().click();
     await expect(
       page.getByRole("heading", { name: "View Consolidation Details" })
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   // ─── Test 9: Edit consolidation ─────────────────────────────────
@@ -769,7 +770,7 @@ test.describe.serial("Consolidation Flow", () => {
     // Dialog should close
     await expect(
       page.getByRole("heading", { name: "Edit Consolidation" })
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await page.screenshot({
       path: path.join(screenshotsDir, "consolidation-after-edit.png"),

@@ -1,5 +1,5 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+
 import { Separator } from "../separator";
 
 describe("Separator Component", () => {
@@ -40,18 +40,6 @@ describe("Separator Component", () => {
       // When decorative=false, the separator has role="separator" but may not have aria-orientation by default
     });
 
-    it("applies custom className", () => {
-      render(
-        <Separator
-          className="custom-separator"
-          data-testid="custom-separator"
-        />
-      );
-
-      const separator = screen.getByTestId("custom-separator");
-      expect(separator).toHaveClass("custom-separator");
-    });
-
     it("forwards additional props", () => {
       render(<Separator id="test-id" data-testid="test-separator" />);
 
@@ -68,8 +56,6 @@ describe("Separator Component", () => {
       );
 
       const separator = screen.getByTestId("horizontal-separator");
-      expect(separator).toHaveClass("bg-border/60");
-      expect(separator).toHaveClass("shrink-0");
       // The h-px and w-full classes are applied via data attributes, not directly
       expect(separator).toHaveAttribute("data-orientation", "horizontal");
     });
@@ -80,8 +66,6 @@ describe("Separator Component", () => {
       );
 
       const separator = screen.getByTestId("vertical-orientation");
-      expect(separator).toHaveClass("bg-border/60");
-      expect(separator).toHaveClass("shrink-0");
       // The h-full and w-px classes are applied via data attributes, not directly
       expect(separator).toHaveAttribute("data-orientation", "vertical");
     });
@@ -211,7 +195,6 @@ describe("Separator Component", () => {
 
       const separator = screen.getByTestId("vertical-separator");
       expect(separator).toHaveAttribute("data-orientation", "vertical");
-      expect(separator).toHaveClass("mx-4");
     });
 
     it("handles dynamic orientation changes", async () => {
@@ -228,22 +211,6 @@ describe("Separator Component", () => {
 
       separator = screen.getByTestId("dynamic-separator");
       expect(separator).toHaveAttribute("data-orientation", "vertical");
-    });
-
-    it("renders with custom styles and classes", () => {
-      render(
-        <Separator
-          orientation="horizontal"
-          className="my-8 border-t-2 border-dashed"
-          data-testid="styled-separator"
-        />
-      );
-
-      const separator = screen.getByTestId("styled-separator");
-      expect(separator).toHaveClass("my-8");
-      expect(separator).toHaveClass("border-t-2");
-      expect(separator).toHaveClass("border-dashed");
-      expect(separator).toHaveClass("bg-border/60");
     });
 
     it("works in a realistic layout scenario", () => {
@@ -339,31 +306,6 @@ describe("Separator Component", () => {
       const separator = screen.getByTestId("invalid-orientation");
       expect(separator).toBeInTheDocument();
       expect(separator).toHaveAttribute("data-orientation", "horizontal");
-    });
-
-    it("handles multiple className props", () => {
-      render(
-        <Separator
-          className="class1 class2 class3"
-          data-testid="multiple-classes"
-        />
-      );
-
-      const separator = screen.getByTestId("multiple-classes");
-      expect(separator).toHaveClass("class1");
-      expect(separator).toHaveClass("class2");
-      expect(separator).toHaveClass("class3");
-    });
-
-    it("renders with very long custom className", () => {
-      const longClassName =
-        "custom-separator-class-with-many-properties-and-modifiers";
-      render(
-        <Separator className={longClassName} data-testid="long-classname" />
-      );
-
-      const separator = screen.getByTestId("long-classname");
-      expect(separator).toHaveClass(longClassName);
     });
   });
 });

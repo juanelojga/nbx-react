@@ -1,11 +1,12 @@
 "use client";
 
-import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { EnhancedTable } from "@/components/data-display/enhanced-table/EnhancedTable";
-import { EnhancedTableHeader } from "@/components/data-display/enhanced-table/EnhancedTableHeader";
 import { EnhancedTableHead } from "@/components/data-display/enhanced-table/EnhancedTableHead";
+import { EnhancedTableHeader } from "@/components/data-display/enhanced-table/EnhancedTableHeader";
+import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { ColumnDef } from "./base-table.types";
+
+import { type ColumnDef } from "./base-table.types";
 
 export const skeletonVariantClasses: Record<string, string> = {
   text: "h-4 rounded-md",
@@ -49,7 +50,7 @@ export function TableSkeleton<T>({
             </TableRow>
           </EnhancedTableHeader>
           <TableBody>
-            {[...Array(rowCount)].map((_, index) => (
+            {Array.from({ length: rowCount }).map((_, index) => (
               <TableRow
                 key={index}
                 style={{
@@ -67,15 +68,15 @@ export function TableSkeleton<T>({
                   <TableCell key={col.id}>
                     {col.skeletonVariant === "actions" ? (
                       <div className="flex items-center justify-end gap-1.5">
-                        {[...Array(col.skeletonActionCount || 3)].map(
-                          (_, i) => (
-                            <div
-                              key={i}
-                              className="h-9 w-9 animate-pulse rounded-lg bg-muted/60"
-                              style={{ animationDelay: `${i * 50}ms` }}
-                            />
-                          )
-                        )}
+                        {Array.from({
+                          length: col.skeletonActionCount || 3,
+                        }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="h-9 w-9 animate-pulse rounded-lg bg-muted/60"
+                            style={{ animationDelay: `${i * 50}ms` }}
+                          />
+                        ))}
                       </div>
                     ) : (
                       <div

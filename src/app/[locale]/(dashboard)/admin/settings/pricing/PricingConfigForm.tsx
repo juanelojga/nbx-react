@@ -14,15 +14,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  UPDATE_PRICING_CONFIG,
-  type UpdatePricingConfigResponse,
-  type UpdatePricingConfigVariables,
-} from "@/graphql/mutations/pricing";
-import {
-  GET_PRICING_CONFIG,
-  type GetPricingConfigResponse,
-} from "@/graphql/queries/pricing";
+import { UPDATE_PRICING_CONFIG } from "@/graphql/mutations/pricing";
+import { GET_PRICING_CONFIG } from "@/graphql/queries/pricing";
 import {
   createPricingFormSchema,
   type PricingFormValues,
@@ -47,33 +40,32 @@ export function PricingConfigForm() {
     formState: { errors },
   } = form;
 
-  const { data, loading, error } =
-    useQuery<GetPricingConfigResponse>(GET_PRICING_CONFIG);
+  const { data, loading, error } = useQuery(GET_PRICING_CONFIG);
   const config = data?.pricingConfig;
 
   useEffect(() => {
     if (config) {
       reset({
-        transportationRatePerLb: String(config.transportationRatePerLb),
-        serviceFeePercentage: String(config.serviceFeePercentage),
+        transportationRatePerLb: config.transportationRatePerLb,
+        serviceFeePercentage: config.serviceFeePercentage,
       });
     }
   }, [config, reset]);
 
-  const [updatePricingConfig, { loading: saving }] = useMutation<
-    UpdatePricingConfigResponse,
-    UpdatePricingConfigVariables
-  >(UPDATE_PRICING_CONFIG, {
-    onCompleted: () => {
-      toast.success(t("successTitle"), {
-        description: t("successDescription"),
-      });
-    },
-    onError: (err) => {
-      toast.error(t("errorTitle"), { description: err.message });
-    },
-    refetchQueries: [{ query: GET_PRICING_CONFIG }],
-  });
+  const [updatePricingConfig, { loading: saving }] = useMutation(
+    UPDATE_PRICING_CONFIG,
+    {
+      onCompleted: () => {
+        toast.success(t("successTitle"), {
+          description: t("successDescription"),
+        });
+      },
+      onError: (err) => {
+        toast.error(t("errorTitle"), { description: err.message });
+      },
+      refetchQueries: [{ query: GET_PRICING_CONFIG }],
+    }
+  );
 
   const onSubmit = form.handleSubmit(async (values) => {
     await updatePricingConfig({

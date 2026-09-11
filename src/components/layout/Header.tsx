@@ -1,6 +1,10 @@
 "use client";
 
 import { Menu, PanelLeft, PanelLeftClose } from "lucide-react";
+import { useTranslations } from "next-intl";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
-
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types/user";
 

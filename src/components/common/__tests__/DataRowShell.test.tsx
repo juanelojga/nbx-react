@@ -16,7 +16,7 @@ describe("DataRowShell", () => {
     );
 
     const row = screen.getByRole("row");
-    expect(row.style.animationDelay).toBe("200ms");
+    expect(row).toHaveStyle({ animationDelay: "200ms" });
     expect(screen.getByTitle("Barcode BC-1")).toHaveTextContent("BC-1");
   });
 });

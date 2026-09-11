@@ -1,13 +1,14 @@
+import { render, screen } from "@testing-library/react";
 import React from "react";
-import { render, act } from "@testing-library/react";
-import { ClientDialogs } from "../ClientDialogs";
+
 import type { UseClientDialogsReturn } from "../../hooks/useClientDialogs";
+import { ClientDialogs } from "../ClientDialogs";
 
 // Mock next/dynamic to render components synchronously
 jest.mock("next/dynamic", () => {
   return (loader: () => Promise<{ default: React.ComponentType }>) => {
     let Component: React.ComponentType | null = null;
-    loader().then((mod) => {
+    void loader().then((mod) => {
       Component = mod.default;
     });
     return function DynamicComponent(props: Record<string, unknown>) {
@@ -62,38 +63,29 @@ describe("ClientDialogs", () => {
   const defaultProps = { dialogs, onRefresh: jest.fn() };
 
   it("renders all 4 dialogs", async () => {
-    let result: ReturnType<typeof render>;
+    render(<ClientDialogs {...defaultProps} />);
+    expect(await screen.findByTestId("view-dialog")).toBeInTheDocument();
 
-    await act(async () => {
-      result = render(<ClientDialogs {...defaultProps} />);
-    });
-
-    expect(result!.getByTestId("add-dialog")).toBeInTheDocument();
-    expect(result!.getByTestId("delete-dialog")).toBeInTheDocument();
-    expect(result!.getByTestId("edit-dialog")).toBeInTheDocument();
-    expect(result!.getByTestId("view-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("add-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("edit-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("view-dialog")).toBeInTheDocument();
   });
 
   it("passes onRefresh as created/updated/deleted callbacks", async () => {
     const onRefresh = jest.fn();
-    let result: ReturnType<typeof render>;
+    render(<ClientDialogs {...defaultProps} onRefresh={onRefresh} />);
+    expect(await screen.findByTestId("view-dialog")).toBeInTheDocument();
 
-    await act(async () => {
-      result = render(
-        <ClientDialogs {...defaultProps} onRefresh={onRefresh} />
-      );
-    });
-
-    expect(result!.getByTestId("add-dialog")).toBeInTheDocument();
-    expect(result!.getByTestId("delete-dialog")).toBeInTheDocument();
-    expect(result!.getByTestId("edit-dialog")).toBeInTheDocument();
-    expect(result!.getByTestId("view-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("add-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("edit-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("view-dialog")).toBeInTheDocument();
   });
 });
 
 describe("ClientDialogs open state", () => {
   it("forwards the open flags from the hook result", async () => {
-    let result: ReturnType<typeof render>;
     const dialogs: UseClientDialogsReturn = {
       isAddDialogOpen: true,
       setIsAddDialogOpen: jest.fn(),
@@ -111,21 +103,18 @@ describe("ClientDialogs open state", () => {
       handleDeleteClient: jest.fn(),
     };
 
-    await act(async () => {
-      result = render(
-        <ClientDialogs dialogs={dialogs} onRefresh={jest.fn()} />
-      );
-    });
+    render(<ClientDialogs dialogs={dialogs} onRefresh={jest.fn()} />);
+    expect(await screen.findByTestId("view-dialog")).toBeInTheDocument();
 
-    expect(result!.getByTestId("add-dialog")).toHaveAttribute(
+    expect(screen.getByTestId("add-dialog")).toHaveAttribute(
       "data-open",
       "true"
     );
-    expect(result!.getByTestId("edit-dialog")).toHaveAttribute(
+    expect(screen.getByTestId("edit-dialog")).toHaveAttribute(
       "data-open",
       "true"
     );
-    expect(result!.getByTestId("delete-dialog")).toHaveAttribute(
+    expect(screen.getByTestId("delete-dialog")).toHaveAttribute(
       "data-open",
       "false"
     );

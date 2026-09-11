@@ -1,6 +1,6 @@
 import type {
-  SortSelection,
   SortOrder,
+  SortSelection,
 } from "@/lib/table/table-url-state.types";
 
 /**

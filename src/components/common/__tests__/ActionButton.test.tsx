@@ -1,8 +1,9 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import React from "react";
+
 import { ActionButton } from "../ActionButton";
-import { TableAction } from "../table-action-buttons.types";
+import { type TableAction } from "../table-action-buttons.types";
 
 jest.mock("@/components/ui/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => (

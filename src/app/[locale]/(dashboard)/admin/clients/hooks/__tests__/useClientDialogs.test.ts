@@ -1,6 +1,8 @@
-import { renderHook, act } from "@testing-library/react";
-import { useClientDialogs } from "../useClientDialogs";
+import { act, renderHook } from "@testing-library/react";
+
 import type { ClientType } from "@/graphql/queries/clients";
+
+import { useClientDialogs } from "../useClientDialogs";
 
 const mockClient: ClientType = {
   id: "client-1",

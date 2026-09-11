@@ -1,8 +1,9 @@
-import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import LanguageSelector from "@/components/LanguageSelector";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+
+import LanguageSelector from "@/components/LanguageSelector";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 
 export function LandingHeader() {
   const t = useTranslations("landing.header");

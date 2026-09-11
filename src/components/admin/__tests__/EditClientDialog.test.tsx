@@ -1,10 +1,10 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedProvider, MockedResponse } from "@/test/MockedProvider";
+import { toast } from "sonner";
+
 import { EditClientDialog } from "@/components/admin/EditClientDialog";
 import { UPDATE_CLIENT } from "@/graphql/mutations/clients";
-import { toast } from "sonner";
+import { MockedProvider, type MockedResponse } from "@/test/MockedProvider";
 
 jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
@@ -47,7 +47,7 @@ describe("EditClientDialog", () => {
       </MockedProvider>
     );
 
-    expect(container.innerHTML).toBe("");
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("prefills form from client prop", async () => {

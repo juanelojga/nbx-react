@@ -1,16 +1,13 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
-import { BaseDialog } from "@/components/common/BaseDialog";
-import { Button } from "@/components/ui/button";
 import { AlertCircle, Eye, Loader2 } from "lucide-react";
-import {
-  GET_CLIENT,
-  GetClientResponse,
-  GetClientVariables,
-} from "@/graphql/queries/clients";
+import { useTranslations } from "next-intl";
+
+import { BaseDialog } from "@/components/common/BaseDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { GET_CLIENT } from "@/graphql/queries/clients";
 
 interface InfoRowProps {
   label: string;
@@ -41,10 +38,7 @@ export function ViewClientDialog({
 }: ViewClientDialogProps) {
   const t = useTranslations("adminClients.viewDialog");
   const tParent = useTranslations("adminClients");
-  const { data, loading, error } = useQuery<
-    GetClientResponse,
-    GetClientVariables
-  >(GET_CLIENT, {
+  const { data, loading, error } = useQuery(GET_CLIENT, {
     variables: { id: clientId || "" },
     skip: !clientId || !open, // Skip query if no clientId or dialog is closed
   });

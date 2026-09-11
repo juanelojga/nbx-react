@@ -10,10 +10,10 @@ import { SearchToolbar } from "@/components/common/SearchToolbar";
 import { BaseTable } from "@/components/data-display/base-table";
 import { Button } from "@/components/ui/button";
 import {
-  type PackageType,
   GET_ALL_PACKAGES,
   type GetAllPackagesResponse,
   type GetAllPackagesVariables,
+  type PackageType,
 } from "@/graphql/queries/packages";
 import { useAdminListPage } from "@/hooks/useAdminListPage";
 import { toListConnection } from "@/lib/graphql/toListConnection";

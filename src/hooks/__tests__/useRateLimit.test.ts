@@ -59,18 +59,22 @@ describe("useRateLimit", () => {
   });
 
   it("persists the lock across remounts when a storage key is given", () => {
-    const first = renderHook(() => useRateLimit(1, 60_000, "rl-test"));
+    const { result: firstResult, unmount } = renderHook(() =>
+      useRateLimit(1, 60_000, "rl-test")
+    );
     act(() => {
-      first.result.current.attempt();
+      firstResult.current.attempt();
     });
-    first.unmount();
+    unmount();
 
-    const second = renderHook(() => useRateLimit(1, 60_000, "rl-test"));
-    expect(second.result.current.isLocked).toBe(true);
+    const { result: secondResult } = renderHook(() =>
+      useRateLimit(1, 60_000, "rl-test")
+    );
+    expect(secondResult.current.isLocked).toBe(true);
 
     let verdict = true;
     act(() => {
-      verdict = second.result.current.attempt();
+      verdict = secondResult.current.attempt();
     });
     expect(verdict).toBe(false);
   });

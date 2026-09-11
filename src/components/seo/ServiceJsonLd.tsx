@@ -1,10 +1,10 @@
 import { siteConfig } from "@/lib/site-config";
 
 interface ServiceJsonLdProps {
-  services: Array<{
+  services: {
     name: string;
     description: string;
-  }>;
+  }[];
 }
 
 export function ServiceJsonLd({ services }: ServiceJsonLdProps) {

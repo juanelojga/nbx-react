@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+
+import type { UserRole } from "@/types/user";
+
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
-import type { UserRole } from "@/types/user";
 
 interface MainLayoutProps {
   children: React.ReactNode;

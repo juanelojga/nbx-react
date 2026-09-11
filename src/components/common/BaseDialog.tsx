@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+
 import { type BaseDialogProps, type BaseDialogSize } from "./base-dialog.types";
 
 const sizeClasses: Record<BaseDialogSize, string> = {

@@ -1,6 +1,8 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -9,8 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { PaginationState, PaginationLabels } from "./base-table.types";
+
+import {
+  type PaginationLabels,
+  type PaginationState,
+} from "./base-table.types";
 
 export interface TablePaginationProps {
   pagination: PaginationState;

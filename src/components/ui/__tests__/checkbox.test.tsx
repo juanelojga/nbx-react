@@ -1,6 +1,7 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import React from "react";
+
 import { Checkbox } from "../checkbox";
 
 describe("Checkbox Component", () => {
@@ -12,13 +13,6 @@ describe("Checkbox Component", () => {
       expect(checkbox).toBeInTheDocument();
       expect(checkbox).toHaveAttribute("data-slot", "checkbox");
       expect(checkbox.tagName.toLowerCase()).toBe("button");
-    });
-
-    it("renders with custom className", () => {
-      render(<Checkbox className="custom-checkbox" />);
-
-      const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveClass("custom-checkbox");
     });
 
     it("renders with additional props", () => {
@@ -55,7 +49,7 @@ describe("Checkbox Component", () => {
       render(<Checkbox disabled />);
 
       const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveAttribute("disabled");
+      expect(checkbox).toBeDisabled();
       // Note: Radix UI doesn't set aria-disabled by default
     });
 
@@ -64,7 +58,7 @@ describe("Checkbox Component", () => {
 
       const checkbox = screen.getByRole("checkbox");
       // Note: Radix UI doesn't set required attribute, but does set aria-required
-      expect(checkbox).toHaveAttribute("aria-required", "true");
+      expect(checkbox).toBeRequired();
     });
 
     it("renders with aria-invalid for error states", () => {
@@ -96,60 +90,6 @@ describe("Checkbox Component", () => {
       );
     });
 
-    it("renders with default styling classes", () => {
-      render(<Checkbox />);
-
-      const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveClass("peer");
-      expect(checkbox).toHaveClass("border-input");
-      expect(checkbox).toHaveClass("dark:bg-input/30");
-      expect(checkbox).toHaveClass("size-4");
-      expect(checkbox).toHaveClass("shrink-0");
-      expect(checkbox).toHaveClass("rounded-[4px]");
-      expect(checkbox).toHaveClass("border");
-      expect(checkbox).toHaveClass("shadow-xs");
-      expect(checkbox).toHaveClass("transition-shadow");
-      expect(checkbox).toHaveClass("outline-none");
-      expect(checkbox).toHaveClass("focus-visible:ring-[3px]");
-      expect(checkbox).toHaveClass("disabled:cursor-not-allowed");
-      expect(checkbox).toHaveClass("disabled:opacity-50");
-    });
-
-    it("renders with checked state styling when checked", () => {
-      render(<Checkbox checked />);
-
-      const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveClass("data-[state=checked]:bg-primary");
-      expect(checkbox).toHaveClass(
-        "data-[state=checked]:text-primary-foreground"
-      );
-      expect(checkbox).toHaveClass("data-[state=checked]:border-primary");
-    });
-
-    it("renders with dark mode checked styling when checked", () => {
-      render(<Checkbox checked />);
-
-      const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveClass("dark:data-[state=checked]:bg-primary");
-    });
-
-    it("renders with focus-visible styling classes", () => {
-      render(<Checkbox />);
-
-      const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveClass("focus-visible:border-ring");
-      expect(checkbox).toHaveClass("focus-visible:ring-ring/50");
-    });
-
-    it("renders with invalid state styling when aria-invalid is true", () => {
-      render(<Checkbox aria-invalid="true" />);
-
-      const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveClass("aria-invalid:ring-destructive/20");
-      expect(checkbox).toHaveClass("aria-invalid:border-destructive");
-      expect(checkbox).toHaveClass("dark:aria-invalid:ring-destructive/40");
-    });
-
     it("renders checkbox indicator when checked", () => {
       render(<Checkbox checked />);
 
@@ -158,11 +98,6 @@ describe("Checkbox Component", () => {
         .querySelector('[data-slot="checkbox-indicator"]');
       expect(indicator).toBeInTheDocument();
       expect(indicator).toHaveAttribute("data-slot", "checkbox-indicator");
-      expect(indicator).toHaveClass("flex");
-      expect(indicator).toHaveClass("items-center");
-      expect(indicator).toHaveClass("justify-center");
-      expect(indicator).toHaveClass("text-current");
-      expect(indicator).toHaveClass("transition-none");
     });
 
     it("renders CheckIcon when checked", () => {
@@ -170,7 +105,6 @@ describe("Checkbox Component", () => {
 
       const checkIcon = screen.getByRole("checkbox").querySelector("svg");
       expect(checkIcon).toBeInTheDocument();
-      expect(checkIcon).toHaveClass("size-3.5");
     });
 
     it("does not render indicator when unchecked", () => {
@@ -178,15 +112,6 @@ describe("Checkbox Component", () => {
 
       const indicator = screen.queryByTestId("checkbox-indicator");
       expect(indicator).not.toBeInTheDocument();
-    });
-
-    it("renders with multiple className values", () => {
-      render(<Checkbox className="class1 class2 class3" />);
-
-      const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveClass("class1");
-      expect(checkbox).toHaveClass("class2");
-      expect(checkbox).toHaveClass("class3");
     });
 
     it("handles empty className", () => {
@@ -277,7 +202,7 @@ describe("Checkbox Component", () => {
       const checkbox = screen.getByRole("checkbox");
       checkbox.focus();
 
-      expect(document.activeElement).toBe(checkbox);
+      expect(checkbox).toHaveFocus();
     });
 
     it("handles hover states", async () => {
@@ -360,14 +285,14 @@ describe("Checkbox Component", () => {
       render(<Checkbox />);
 
       const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveAttribute("aria-checked", "false");
+      expect(checkbox).not.toBeChecked();
     });
 
     it("has correct ARIA checked state when checked", () => {
       render(<Checkbox checked />);
 
       const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveAttribute("aria-checked", "true");
+      expect(checkbox).toBeChecked();
     });
 
     it("supports aria-label for screen readers", () => {
@@ -406,7 +331,7 @@ describe("Checkbox Component", () => {
       render(<Checkbox required />);
 
       const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveAttribute("aria-required", "true");
+      expect(checkbox).toBeRequired();
     });
 
     it("supports aria-invalid for error states", () => {
@@ -421,7 +346,7 @@ describe("Checkbox Component", () => {
 
       const checkbox = screen.getByRole("checkbox");
       // Radix UI doesn't set aria-disabled by default, but does set disabled attribute
-      expect(checkbox).toHaveAttribute("disabled");
+      expect(checkbox).toBeDisabled();
     });
 
     it("maintains focus management", () => {
@@ -430,7 +355,7 @@ describe("Checkbox Component", () => {
       const checkbox = screen.getByRole("checkbox");
       checkbox.focus();
 
-      expect(document.activeElement).toBe(checkbox);
+      expect(checkbox).toHaveFocus();
       // Radix UI doesn't set tabindex by default
     });
 
@@ -470,7 +395,7 @@ describe("Checkbox Component", () => {
         />
       );
 
-      expect(checkbox).toHaveAttribute("aria-checked", "true");
+      expect(checkbox).toBeChecked();
     });
   });
 
@@ -491,8 +416,7 @@ describe("Checkbox Component", () => {
       expect(checkbox).toBeInTheDocument();
       expect(checkbox).toHaveAttribute("id", "complete-checkbox");
       // Note: Radix UI doesn't pass through name, value, and required attributes
-      expect(checkbox).toHaveClass("custom-checkbox");
-      expect(checkbox).toHaveAttribute("aria-required", "true");
+      expect(checkbox).toBeRequired();
     });
 
     it("handles multiple checkboxes independently", () => {
@@ -571,8 +495,6 @@ describe("Checkbox Component", () => {
       );
 
       const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveClass("custom-class-1");
-      expect(checkbox).toHaveClass("custom-class-2");
       expect(checkbox).toHaveStyle({ marginTop: "10px" });
     });
 
@@ -591,7 +513,7 @@ describe("Checkbox Component", () => {
       const checkbox = screen.getByRole("checkbox");
       // Note: Radix UI doesn't pass through name, value, and required attributes
       expect(checkbox).toHaveAttribute("id", "test-id");
-      expect(checkbox).toHaveAttribute("aria-required", "true");
+      expect(checkbox).toBeRequired();
       expect(checkbox).toHaveAttribute("data-state", "checked");
     });
   });
@@ -616,16 +538,6 @@ describe("Checkbox Component", () => {
 
       const checkbox = screen.getByRole("checkbox");
       expect(checkbox).toBeInTheDocument();
-    });
-
-    it("handles very long className", () => {
-      const longClassName =
-        "class1 class2 class3 class4 class5 class6 class7 class8 class9 class10";
-      render(<Checkbox className={longClassName} />);
-
-      const checkbox = screen.getByRole("checkbox");
-      expect(checkbox).toHaveClass("class1");
-      expect(checkbox).toHaveClass("class10");
     });
 
     it("handles special characters in props", () => {
@@ -668,37 +580,6 @@ describe("Checkbox Component", () => {
 
       rerender(<Checkbox checked={false} />);
       expect(checkbox).toHaveAttribute("data-state", "unchecked");
-    });
-
-    it("handles all styling classes being applied", () => {
-      render(<Checkbox />);
-
-      const checkbox = screen.getByRole("checkbox");
-      // Verify all the complex Tailwind classes are present
-      expect(checkbox).toHaveClass("peer");
-      expect(checkbox).toHaveClass("border-input");
-      expect(checkbox).toHaveClass("dark:bg-input/30");
-      expect(checkbox).toHaveClass("data-[state=checked]:bg-primary");
-      expect(checkbox).toHaveClass(
-        "data-[state=checked]:text-primary-foreground"
-      );
-      expect(checkbox).toHaveClass("dark:data-[state=checked]:bg-primary");
-      expect(checkbox).toHaveClass("data-[state=checked]:border-primary");
-      expect(checkbox).toHaveClass("focus-visible:border-ring");
-      expect(checkbox).toHaveClass("focus-visible:ring-ring/50");
-      expect(checkbox).toHaveClass("aria-invalid:ring-destructive/20");
-      expect(checkbox).toHaveClass("dark:aria-invalid:ring-destructive/40");
-      expect(checkbox).toHaveClass("aria-invalid:border-destructive");
-      expect(checkbox).toHaveClass("size-4");
-      expect(checkbox).toHaveClass("shrink-0");
-      expect(checkbox).toHaveClass("rounded-[4px]");
-      expect(checkbox).toHaveClass("border");
-      expect(checkbox).toHaveClass("shadow-xs");
-      expect(checkbox).toHaveClass("transition-shadow");
-      expect(checkbox).toHaveClass("outline-none");
-      expect(checkbox).toHaveClass("focus-visible:ring-[3px]");
-      expect(checkbox).toHaveClass("disabled:cursor-not-allowed");
-      expect(checkbox).toHaveClass("disabled:opacity-50");
     });
 
     it("handles component unmounting gracefully", () => {

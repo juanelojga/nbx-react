@@ -1,8 +1,9 @@
-import Image from "next/image";
-import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+
+import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site-config";
 
 export function HeroSection() {

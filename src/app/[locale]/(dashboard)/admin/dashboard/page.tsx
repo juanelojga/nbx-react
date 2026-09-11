@@ -6,7 +6,9 @@ import { RouteLoading } from "@/components/common/RouteLoading";
 
 import { AdminDashboardPage } from "./AdminDashboardPage";
 
-type Props = { params: Promise<{ locale: string }> };
+interface Props {
+  params: Promise<{ locale: string }>;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;

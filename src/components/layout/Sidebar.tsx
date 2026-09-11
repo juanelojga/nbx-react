@@ -1,15 +1,16 @@
 "use client";
 
-import { Link, usePathname } from "@/i18n/navigation";
+import { Package, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
+
 import {
   adminNavItems,
   clientNavItems,
   type NavItem,
 } from "@/components/layout/nav-items";
-import { X, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link, usePathname } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 import { UserRole } from "@/types/user";
 
 interface SidebarProps {

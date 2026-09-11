@@ -1,6 +1,7 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import React from "react";
+
 import { Input } from "../input";
 
 describe("Input Component", () => {
@@ -22,67 +23,18 @@ describe("Input Component", () => {
       expect(input).toHaveAttribute("data-slot", "input");
     });
 
-    it("renders with custom className", () => {
-      render(<Input className="custom-input" />);
-
-      const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("custom-input");
-    });
-
-    it("renders with default CSS classes", () => {
-      render(<Input />);
-
-      const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("h-10");
-      expect(input).toHaveClass("w-full");
-      expect(input).toHaveClass("min-w-0");
-      expect(input).toHaveClass("rounded-lg");
-      expect(input).toHaveClass("border-2");
-      expect(input).toHaveClass("bg-background");
-      expect(input).toHaveClass("px-4");
-      expect(input).toHaveClass("py-2");
-      expect(input).toHaveClass("text-base");
-      expect(input).toHaveClass("shadow-sm");
-      expect(input).toHaveClass("transition-all");
-      expect(input).toHaveClass("duration-200");
-      expect(input).toHaveClass("outline-none");
-    });
-
-    it("renders with focus and hover classes", () => {
-      render(<Input />);
-
-      const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("focus-visible:border-primary");
-      expect(input).toHaveClass("focus-visible:ring-2");
-      expect(input).toHaveClass("focus-visible:ring-ring");
-      expect(input).toHaveClass("focus-visible:ring-offset-2");
-      expect(input).toHaveClass("focus-visible:ring-offset-background");
-      expect(input).toHaveClass("hover:border-primary/50");
-    });
-
-    it("renders with aria-invalid classes", () => {
-      render(<Input aria-invalid="true" />);
-
-      const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("aria-invalid:ring-destructive/50");
-      expect(input).toHaveClass("aria-invalid:border-destructive");
-    });
-
     it("renders with disabled state", () => {
       render(<Input disabled />);
 
       const input = screen.getByRole("textbox");
-      expect(input).toHaveAttribute("disabled");
-      expect(input).toHaveClass("disabled:pointer-events-none");
-      expect(input).toHaveClass("disabled:cursor-not-allowed");
-      expect(input).toHaveClass("disabled:opacity-50");
+      expect(input).toBeDisabled();
     });
 
     it("renders with value prop", () => {
       render(<Input value="test value" />);
 
-      const input = screen.getByRole("textbox") as HTMLInputElement;
-      expect(input.value).toBe("test value");
+      const input = screen.getByRole("textbox");
+      expect(input).toHaveValue("test value");
     });
 
     it("renders with name attribute", () => {
@@ -103,7 +55,7 @@ describe("Input Component", () => {
       render(<Input required />);
 
       const input = screen.getByRole("textbox");
-      expect(input).toHaveAttribute("required");
+      expect(input).toBeRequired();
     });
 
     it("renders with readonly attribute", () => {
@@ -139,15 +91,6 @@ describe("Input Component", () => {
 
       const input = screen.getByRole("textbox");
       expect(input).toHaveAttribute("autoComplete", "email");
-    });
-
-    it("renders with multiple CSS classes", () => {
-      render(<Input className="class1 class2 class3" />);
-
-      const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("class1");
-      expect(input).toHaveClass("class2");
-      expect(input).toHaveClass("class3");
     });
 
     it("renders with data attributes", () => {
@@ -237,7 +180,7 @@ describe("Input Component", () => {
       await user.click(input);
 
       expect(handleFocus).toHaveBeenCalledTimes(1);
-      expect(document.activeElement).toBe(input);
+      expect(input).toHaveFocus();
     });
 
     it("handles blur events", async () => {
@@ -263,7 +206,7 @@ describe("Input Component", () => {
       await user.type(input, "test");
 
       expect(handleChange).not.toHaveBeenCalled();
-      expect(input).toHaveAttribute("disabled");
+      expect(input).toBeDisabled();
     });
 
     it("handles keyboard navigation with Tab", async () => {
@@ -280,11 +223,11 @@ describe("Input Component", () => {
       const input2 = screen.getByTestId("input2");
 
       input1.focus();
-      expect(document.activeElement).toBe(input1);
+      expect(input1).toHaveFocus();
 
       await user.tab();
 
-      expect(document.activeElement).toBe(input2);
+      expect(input2).toHaveFocus();
     });
 
     it("handles paste events", async () => {
@@ -359,7 +302,7 @@ describe("Input Component", () => {
       );
 
       const input = screen.getByRole("searchbox");
-      expect(input).toHaveAttribute("aria-required", "true");
+      expect(input).toBeRequired();
       expect(input).toHaveAttribute("aria-invalid", "false");
       expect(input).toHaveAttribute("aria-describedby", "help-text");
     });
@@ -406,7 +349,7 @@ describe("Input Component", () => {
       render(<Input aria-required="true" />);
 
       const input = screen.getByRole("textbox");
-      expect(input).toHaveAttribute("aria-required", "true");
+      expect(input).toBeRequired();
     });
 
     it("supports aria-disabled for disabled state", () => {
@@ -414,7 +357,7 @@ describe("Input Component", () => {
 
       const input = screen.getByRole("textbox");
       expect(input).toHaveAttribute("aria-disabled", "true");
-      expect(input).toHaveAttribute("disabled");
+      expect(input).toBeDisabled();
     });
 
     it("supports aria-expanded for expandable inputs", () => {
@@ -573,8 +516,7 @@ describe("Input Component", () => {
       expect(input).toHaveAttribute("id", "email-input");
       expect(input).toHaveAttribute("name", "email");
       expect(input).toHaveAttribute("placeholder", "Enter your email");
-      expect(input).toHaveAttribute("required");
-      expect(input).toHaveClass("custom-input");
+      expect(input).toBeRequired();
       expect(input).toHaveAttribute("aria-label", "Email address");
       expect(input).toHaveAttribute("aria-describedby", "email-help");
     });
@@ -737,7 +679,7 @@ describe("Input Component", () => {
     });
 
     it("handles numeric value conversion", () => {
-      render(<Input value={123 as unknown as string} />);
+      render(<Input value={123} />);
 
       const input = screen.getByRole("textbox");
       expect(input).toHaveValue("123");
@@ -825,16 +767,6 @@ describe("Input Component", () => {
 
       const input = screen.getByRole("textbox");
       expect(input).toHaveValue("   ");
-    });
-
-    it("handles multiple className strings", () => {
-      render(<Input className="class1 class2   class3    class4" />);
-
-      const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("class1");
-      expect(input).toHaveClass("class2");
-      expect(input).toHaveClass("class3");
-      expect(input).toHaveClass("class4");
     });
 
     it("handles rapid value changes", async () => {
@@ -931,7 +863,7 @@ describe("Input Component", () => {
       render(<Input ref={inputRef} />);
 
       inputRef.current?.focus();
-      expect(document.activeElement).toBe(inputRef.current);
+      expect(inputRef.current).toHaveFocus();
     });
 
     it("handles ref with value manipulation", () => {

@@ -1,8 +1,9 @@
-import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { MessageCircle, MapPin } from "lucide-react";
-import { InstagramIcon } from "@/components/icons/InstagramIcon";
+import { MapPin, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+
+import { InstagramIcon } from "@/components/icons/InstagramIcon";
+import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site-config";
 
 export function ContactSection() {

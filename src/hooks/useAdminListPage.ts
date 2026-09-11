@@ -78,7 +78,7 @@ export function useAdminListPage<
   TVariables extends OperationVariables,
   TItem,
   TSort extends string,
-  TExtra extends object = Record<never, never>,
+  TExtra extends object = object,
 >({
   query,
   buildVariables,
@@ -111,7 +111,7 @@ export function useAdminListPage<
     [buildVariables, state, search.debouncedSearch, orderBy]
   );
 
-  const { data, loading, error, refetch } = useQuery<TData, TVariables>(query, {
+  const { data, loading, error, refetch } = useQuery(query, {
     variables,
     notifyOnNetworkStatusChange: true,
   });

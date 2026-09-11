@@ -1,14 +1,15 @@
-import { LandingHeader } from "@/components/landing/LandingHeader";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+
+import { ContactSection } from "@/components/landing/ContactSection";
+import { FAQSection } from "@/components/landing/FAQSection";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { LandingHeader } from "@/components/landing/LandingHeader";
 import { ServicesSection } from "@/components/landing/ServicesSection";
-import { FAQSection } from "@/components/landing/FAQSection";
-import { ContactSection } from "@/components/landing/ContactSection";
-import { LocalBusinessJsonLd } from "@/components/seo/LocalBusinessJsonLd";
-import { FAQPageJsonLd } from "@/components/seo/FAQPageJsonLd";
-import { ServiceJsonLd } from "@/components/seo/ServiceJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { FAQPageJsonLd } from "@/components/seo/FAQPageJsonLd";
+import { LocalBusinessJsonLd } from "@/components/seo/LocalBusinessJsonLd";
+import { ServiceJsonLd } from "@/components/seo/ServiceJsonLd";
 import { siteConfig } from "@/lib/site-config";
 
 export default async function LandingPage({
@@ -69,12 +70,8 @@ export default async function LandingPage({
           </div>
 
           <div className="flex items-center gap-6 text-sm">
-            <a href="#" className="hover:text-white transition-colors">
-              {tFooter("privacyPolicy")}
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              {tFooter("termsOfService")}
-            </a>
+            <span>{tFooter("privacyPolicy")}</span>
+            <span>{tFooter("termsOfService")}</span>
           </div>
         </div>
       </footer>

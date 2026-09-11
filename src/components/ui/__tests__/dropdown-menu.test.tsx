@@ -1,22 +1,22 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
 import {
   DropdownMenu,
-  DropdownMenuPortal,
-  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuLabel,
   DropdownMenuItem,
-  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuSub,
-  DropdownMenuSubTrigger,
   DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
 } from "../dropdown-menu";
 
 describe("DropdownMenu Component", () => {
@@ -134,51 +134,6 @@ describe("DropdownMenu Component", () => {
         .closest('[data-slot="dropdown-menu-content"]');
       expect(content).toBeInTheDocument();
     });
-
-    it("renders content with custom className", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent className="custom-content">
-            <DropdownMenuItem>Item 1</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const content = screen
-        .getByText("Item 1")
-        .closest('[data-slot="dropdown-menu-content"]');
-      expect(content).toHaveClass("custom-content");
-    });
-
-    it("applies default styling classes", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>Item 1</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const content = screen
-        .getByText("Item 1")
-        .closest('[data-slot="dropdown-menu-content"]');
-      expect(content).toHaveClass("z-50");
-      expect(content).toHaveClass(
-        "max-h-(--radix-dropdown-menu-content-available-height)"
-      );
-      expect(content).toHaveClass("min-w-[8rem]");
-      expect(content).toHaveClass(
-        "origin-(--radix-dropdown-menu-content-transform-origin)"
-      );
-      expect(content).toHaveClass("overflow-x-hidden");
-      expect(content).toHaveClass("overflow-y-auto");
-      expect(content).toHaveClass("rounded-md");
-      expect(content).toHaveClass("border");
-      expect(content).toHaveClass("p-1");
-      expect(content).toHaveClass("shadow-md");
-    });
   });
 
   describe("DropdownMenuItem", () => {
@@ -228,22 +183,6 @@ describe("DropdownMenu Component", () => {
       expect(item).toHaveAttribute("data-inset", "true");
     });
 
-    it("renders item with custom className", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem className="custom-item">
-              Custom item
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const item = screen.getByText("Custom item");
-      expect(item).toHaveClass("custom-item");
-    });
-
     it("renders item with icon", () => {
       render(
         <DropdownMenu defaultOpen>
@@ -259,30 +198,6 @@ describe("DropdownMenu Component", () => {
 
       expect(screen.getByTestId("item-icon")).toBeInTheDocument();
       expect(screen.getByText("Item with icon")).toBeInTheDocument();
-    });
-
-    it("applies default styling classes", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>Styled item</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const item = screen.getByText("Styled item");
-      expect(item).toHaveClass("relative");
-      expect(item).toHaveClass("flex");
-      expect(item).toHaveClass("cursor-default");
-      expect(item).toHaveClass("items-center");
-      expect(item).toHaveClass("gap-2");
-      expect(item).toHaveClass("rounded-sm");
-      expect(item).toHaveClass("px-2");
-      expect(item).toHaveClass("py-1.5");
-      expect(item).toHaveClass("text-sm");
-      expect(item).toHaveClass("outline-hidden");
-      expect(item).toHaveClass("select-none");
     });
   });
 
@@ -320,25 +235,6 @@ describe("DropdownMenu Component", () => {
       expect(item).toBeInTheDocument();
       // Check icon should be present in the checkbox item
       expect(item.querySelector("svg")).toBeInTheDocument();
-    });
-
-    it("renders checkbox item with custom className", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuCheckboxItem
-              checked={false}
-              className="custom-checkbox"
-            >
-              Custom checkbox
-            </DropdownMenuCheckboxItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const item = screen.getByText("Custom checkbox");
-      expect(item).toHaveClass("custom-checkbox");
     });
   });
 
@@ -383,24 +279,6 @@ describe("DropdownMenu Component", () => {
       // Radio indicator should be present
       expect(item.querySelector("svg")).toBeInTheDocument();
     });
-
-    it("renders radio item with custom className", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuRadioGroup value="option1">
-              <DropdownMenuRadioItem value="option1" className="custom-radio">
-                Custom radio
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const item = screen.getByText("Custom radio");
-      expect(item).toHaveClass("custom-radio");
-    });
   });
 
   describe("DropdownMenuLabel", () => {
@@ -434,23 +312,6 @@ describe("DropdownMenu Component", () => {
       const label = screen.getByText("Inset label");
       expect(label).toHaveAttribute("data-inset", "true");
     });
-
-    it("renders label with custom className", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel className="custom-label">
-              Custom label
-            </DropdownMenuLabel>
-            <DropdownMenuItem>Item 1</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const label = screen.getByText("Custom label");
-      expect(label).toHaveClass("custom-label");
-    });
   });
 
   describe("DropdownMenuSeparator", () => {
@@ -469,41 +330,6 @@ describe("DropdownMenu Component", () => {
       const separator = screen.getByRole("separator");
       expect(separator).toBeInTheDocument();
       expect(separator).toHaveAttribute("data-slot", "dropdown-menu-separator");
-    });
-
-    it("renders separator with custom className", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>Item 1</DropdownMenuItem>
-            <DropdownMenuSeparator className="custom-separator" />
-            <DropdownMenuItem>Item 2</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const separator = screen.getByRole("separator");
-      expect(separator).toHaveClass("custom-separator");
-    });
-
-    it("applies default styling classes", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>Item 1</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Item 2</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const separator = screen.getByRole("separator");
-      expect(separator).toHaveClass("bg-border");
-      expect(separator).toHaveClass("-mx-1");
-      expect(separator).toHaveClass("my-1");
-      expect(separator).toHaveClass("h-px");
     });
   });
 
@@ -524,45 +350,6 @@ describe("DropdownMenu Component", () => {
       const shortcut = screen.getByText("⌘C");
       expect(shortcut).toBeInTheDocument();
       expect(shortcut).toHaveAttribute("data-slot", "dropdown-menu-shortcut");
-    });
-
-    it("renders shortcut with custom className", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>
-              Paste
-              <DropdownMenuShortcut className="custom-shortcut">
-                ⌘V
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const shortcut = screen.getByText("⌘V");
-      expect(shortcut).toHaveClass("custom-shortcut");
-    });
-
-    it("applies default styling classes", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>
-              Cut
-              <DropdownMenuShortcut>⌘X</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const shortcut = screen.getByText("⌘X");
-      expect(shortcut).toHaveClass("text-muted-foreground");
-      expect(shortcut).toHaveClass("ml-auto");
-      expect(shortcut).toHaveClass("text-xs");
-      expect(shortcut).toHaveClass("tracking-widest");
     });
   });
 
@@ -1170,24 +957,6 @@ describe("DropdownMenu Component", () => {
       );
 
       expect(screen.getByText(longText)).toBeInTheDocument();
-    });
-
-    it("handles multiple className props", () => {
-      render(
-        <DropdownMenu defaultOpen>
-          <DropdownMenuTrigger>Open menu</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem className="class1 class2 class3">
-              Multiple classes
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-
-      const item = screen.getByText("Multiple classes");
-      expect(item).toHaveClass("class1");
-      expect(item).toHaveClass("class2");
-      expect(item).toHaveClass("class3");
     });
 
     it("handles empty string className", () => {

@@ -1,31 +1,32 @@
 "use client";
 
+import { ArrowDown, ArrowUp, ArrowUpDown, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
-
 import * as React from "react";
 import { useMemo } from "react";
-import { TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { TooltipProvider } from "@/components/ui/tooltip";
+
 import { EnhancedTable } from "@/components/data-display/enhanced-table/EnhancedTable";
-import { EnhancedTableHeader } from "@/components/data-display/enhanced-table/EnhancedTableHeader";
-import { EnhancedTableHead } from "@/components/data-display/enhanced-table/EnhancedTableHead";
-import { EnhancedTableRow } from "@/components/data-display/enhanced-table/EnhancedTableRow";
 import { EnhancedTableEmptyState } from "@/components/data-display/enhanced-table/EnhancedTableEmptyState";
+import { EnhancedTableHead } from "@/components/data-display/enhanced-table/EnhancedTableHead";
+import { EnhancedTableHeader } from "@/components/data-display/enhanced-table/EnhancedTableHeader";
+import { EnhancedTableRow } from "@/components/data-display/enhanced-table/EnhancedTableRow";
 import { EnhancedTableSelectionBar } from "@/components/data-display/enhanced-table/EnhancedTableSelectionBar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ArrowDown, ArrowUp, ArrowUpDown, Sparkles } from "lucide-react";
-import { TableSkeleton } from "./table-skeleton";
+
 import { TablePagination } from "./table-pagination";
+import { TableSkeleton } from "./table-skeleton";
 
 export type {
+  BaseTableProps,
   ColumnDef,
-  SortState,
-  PaginationState,
-  SelectionConfig,
   EmptyStateConfig,
   PaginationLabels,
-  BaseTableProps,
+  PaginationState,
+  SelectionConfig,
+  SortState,
 } from "./base-table.types";
 
 import type { BaseTableProps } from "./base-table.types";
@@ -86,7 +87,7 @@ export function BaseTable<T>({
   };
 
   const getSortIcon = (field: string) => {
-    if (!sort || sort.field !== field) {
+    if (sort?.field !== field) {
       return <ArrowUpDown className="h-4 w-4" />;
     }
     return sort.order === "asc" ? (
@@ -97,7 +98,7 @@ export function BaseTable<T>({
   };
 
   const getAriaSort = (field: string): "ascending" | "descending" | "none" => {
-    if (!sort || sort.field !== field) return "none";
+    if (sort?.field !== field) return "none";
     return sort.order === "asc" ? "ascending" : "descending";
   };
 
@@ -145,6 +146,7 @@ export function BaseTable<T>({
                   {columns.map((col) => {
                     const isSortable =
                       col.sortable && col.sortField && onSortChange;
+                    const sortField = col.sortField;
                     return (
                       <EnhancedTableHead
                         key={col.id}
@@ -155,18 +157,20 @@ export function BaseTable<T>({
                           col.headerClassName
                         )}
                         onClick={
-                          isSortable
-                            ? () => onSortChange(col.sortField!)
+                          isSortable && sortField
+                            ? () => onSortChange(sortField)
                             : undefined
                         }
                         aria-sort={
-                          isSortable ? getAriaSort(col.sortField!) : undefined
+                          isSortable && sortField
+                            ? getAriaSort(sortField)
+                            : undefined
                         }
                       >
                         {isSortable ? (
                           <div className="flex items-center gap-2">
                             {col.header}
-                            {getSortIcon(col.sortField!)}
+                            {sortField ? getSortIcon(sortField) : null}
                           </div>
                         ) : (
                           col.header

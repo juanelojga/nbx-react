@@ -422,7 +422,8 @@
     },
     "viewAriaLabel": "Ver {description}",
     "editAriaLabel": "Editar {description}",
-    "deleteAriaLabel": "Eliminar {description}"
+    "deleteAriaLabel": "Eliminar {description}",
+    "descriptionColumn": "Descripción"
   },
   "consolidation": {
     "pageTitle": "Consolidación de Paquetes",

@@ -1,15 +1,16 @@
 "use client";
 
-import { memo } from "react";
 import { useTranslations } from "next-intl";
-import { TableCell } from "@/components/ui/table";
+import { memo } from "react";
+
 import { DataRowPrimaryCell } from "@/components/common/DataRowPrimaryCell";
 import { DataRowShell } from "@/components/common/DataRowShell";
-
 import { TableActionButtons } from "@/components/common/TableActionButtons";
 import { StatusBadge } from "@/components/data-display/status-badge";
+import { TableCell } from "@/components/ui/table";
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
 import { getStatusLabel } from "@/lib/consolidations/getStatusLabel";
+import { parseISODate } from "@/lib/date/parseISODate";
 
 interface ConsolidationRowProps {
   consolidation: ConsolidateType;
@@ -43,6 +44,14 @@ export const ConsolidationRow = memo(function ConsolidationRow({
         </div>
       </TableCell>
       <TableCell>
+        <div
+          className="max-w-[240px] truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300"
+          title={consolidation.description}
+        >
+          {consolidation.description}
+        </div>
+      </TableCell>
+      <TableCell>
         <StatusBadge
           status={consolidation.status}
           label={getStatusLabel(t, consolidation.status)}
@@ -65,18 +74,13 @@ export const ConsolidationRow = memo(function ConsolidationRow({
               className="text-xs font-medium text-foreground/80 whitespace-nowrap"
               dateTime={consolidation.deliveryDate || undefined}
             >
-              {consolidation.deliveryDate
-                ? (() => {
-                    const [y, m, d] = consolidation.deliveryDate
-                      .split("-")
-                      .map(Number);
-                    return new Date(y, m - 1, d).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    });
-                  })()
-                : "\u2014"}
+              {parseISODate(
+                consolidation.deliveryDate ?? ""
+              )?.toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              }) ?? "\u2014"}
             </time>
           </div>
         </div>

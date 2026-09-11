@@ -15,17 +15,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  UPDATE_PACKAGE,
-  type UpdatePackageResponse,
-  type UpdatePackageVariables,
-} from "@/graphql/mutations/packages";
+import { UPDATE_PACKAGE } from "@/graphql/mutations/packages";
 import type { ClientType } from "@/graphql/queries/clients";
-import {
-  GET_PACKAGE,
-  type GetPackageResponse,
-  type GetPackageVariables,
-} from "@/graphql/queries/packages";
+import { GET_PACKAGE } from "@/graphql/queries/packages";
 import { toPackageFormValues } from "@/lib/packages/toPackageFormValues";
 import { toUpdatePackageVariables } from "@/lib/packages/toUpdatePackageVariables";
 import {
@@ -66,7 +58,7 @@ export function UpdatePackageDialog({
     data,
     loading: queryLoading,
     error: queryError,
-  } = useQuery<GetPackageResponse, GetPackageVariables>(GET_PACKAGE, {
+  } = useQuery(GET_PACKAGE, {
     variables: { id: parseInt(packageId || "0") },
     skip: !packageId || !open,
   });
@@ -94,23 +86,23 @@ export function UpdatePackageDialog({
     onOpenChange(false);
   }, [reset, onOpenChange]);
 
-  const [updatePackage, { loading: mutationLoading }] = useMutation<
-    UpdatePackageResponse,
-    UpdatePackageVariables
-  >(UPDATE_PACKAGE, {
-    onCompleted: async (result) => {
-      toast.success(t("successTitle"), {
-        description: t("successDescription", {
-          barcode: result.updatePackage?.package?.barcode ?? "",
-        }),
-      });
-      handleClose();
-      await onPackageUpdated?.();
-    },
-    onError: (error) => {
-      toast.error(t("errorTitle"), { description: error.message });
-    },
-  });
+  const [updatePackage, { loading: mutationLoading }] = useMutation(
+    UPDATE_PACKAGE,
+    {
+      onCompleted: (result) => {
+        toast.success(t("successTitle"), {
+          description: t("successDescription", {
+            barcode: result.updatePackage?.package?.barcode ?? "",
+          }),
+        });
+        handleClose();
+        void onPackageUpdated?.();
+      },
+      onError: (error) => {
+        toast.error(t("errorTitle"), { description: error.message });
+      },
+    }
+  );
 
   const onSubmit = form.handleSubmit(async (values) => {
     if (!packageId) return;

@@ -1,10 +1,11 @@
-import type { ClientType } from "@/graphql/queries/clients";
+import { Users } from "lucide-react";
+
 import type {
   ColumnDef,
   EmptyStateConfig,
   PaginationLabels,
 } from "@/components/data-display/base-table";
-import { Users } from "lucide-react";
+import type { ClientType } from "@/graphql/queries/clients";
 
 export function getClientColumns(
   t: (key: string) => string

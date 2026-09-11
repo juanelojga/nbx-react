@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  async headers() {
-    return [
+  headers() {
+    return Promise.resolve([
       {
         source: "/:path*",
         headers: [
@@ -38,7 +38,7 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-    ];
+    ]);
   },
 };
 

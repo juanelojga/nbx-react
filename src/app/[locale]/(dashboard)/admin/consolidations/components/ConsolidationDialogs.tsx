@@ -1,8 +1,8 @@
 "use client";
 
-import type { UseConsolidationDialogsReturn } from "../hooks/useConsolidationDialogs";
-
 import dynamic from "next/dynamic";
+
+import type { UseConsolidationDialogsReturn } from "../hooks/useConsolidationDialogs";
 
 const ViewConsolidationDialog = dynamic(
   () =>

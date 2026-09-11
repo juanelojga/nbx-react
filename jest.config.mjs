@@ -13,8 +13,8 @@ const customJestConfig = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   testMatch: [
-    "**/__tests__/**/*.(ts|tsx|js|jsx)",
-    "**/*.(test|spec).(ts|tsx|js|jsx)",
+    "<rootDir>/src/**/__tests__/**/*.test.{ts,tsx}",
+    "<rootDir>/src/**/*.test.{ts,tsx}",
   ],
   testPathIgnorePatterns: ["<rootDir>/e2e/", "<rootDir>/node_modules/"],
   collectCoverageFrom: [
@@ -25,15 +25,46 @@ const customJestConfig = {
     "!src/graphql/generated/**",
     "!src/test/**",
     "!src/types/**",
+    "!src/**/*.types.ts",
+    // Module-level Apollo wiring; exercised by the Playwright suite.
+    "!src/lib/apollo/client.ts",
   ],
   coverageReporters: ["lcov", "text", "html"],
   coverageDirectory: "coverage",
+  coverageProvider: "v8",
+  // Floors are ratcheted upward as coverage grows; never lower them.
   coverageThreshold: {
-    global: {
-      branches: 0,
-      functions: 0,
-      lines: 0,
-      statements: 0,
+    global: { statements: 50, branches: 65, functions: 55, lines: 50 },
+    "./src/lib/auth/": {
+      statements: 85,
+      branches: 75,
+      functions: 85,
+      lines: 85,
+    },
+    "./src/lib/validation/": {
+      statements: 90,
+      branches: 80,
+      functions: 90,
+      lines: 90,
+    },
+    "./src/lib/table/": {
+      statements: 90,
+      branches: 80,
+      functions: 90,
+      lines: 90,
+    },
+    "./src/hooks/": { statements: 80, branches: 65, functions: 80, lines: 80 },
+    "./src/lib/apollo/": {
+      statements: 70,
+      branches: 60,
+      functions: 70,
+      lines: 70,
+    },
+    "./src/contexts/": {
+      statements: 80,
+      branches: 65,
+      functions: 80,
+      lines: 80,
     },
   },
 };

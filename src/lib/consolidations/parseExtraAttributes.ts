@@ -6,13 +6,15 @@ export function parseExtraAttributes(
 ): ExtraAttributeEntry[] {
   if (!json) return [];
   try {
-    const obj = JSON.parse(json);
+    const obj: unknown = JSON.parse(json);
     if (typeof obj !== "object" || obj === null || Array.isArray(obj))
       return [];
-    return Object.entries(obj).map(([key, value]) => ({
-      key,
-      value: String(value),
-    }));
+    return Object.entries(obj as Record<string, unknown>).map(
+      ([key, value]) => ({
+        key,
+        value: String(value),
+      })
+    );
   } catch {
     return [];
   }

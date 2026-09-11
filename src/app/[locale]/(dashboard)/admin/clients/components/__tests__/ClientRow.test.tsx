@@ -1,8 +1,10 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ClientRow } from "../ClientRow";
+import React from "react";
+
 import type { ClientType } from "@/graphql/queries/clients";
+
+import { ClientRow } from "../ClientRow";
 
 jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 
@@ -123,6 +125,6 @@ describe("ClientRow", () => {
     renderInTable(<ClientRow {...defaultProps} animationDelay={150} />);
 
     const row = screen.getByRole("row");
-    expect(row.style.animationDelay).toBe("150ms");
+    expect(row).toHaveStyle({ animationDelay: "150ms" });
   });
 });

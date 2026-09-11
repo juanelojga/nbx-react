@@ -63,7 +63,7 @@ async function performRefresh(): Promise<string | null> {
           refreshExpiresIn?: number;
         } | null;
       };
-      errors?: Array<{ message?: string }>;
+      errors?: { message?: string }[];
     };
 
     const payload = json.data?.refreshWithToken;

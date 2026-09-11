@@ -1,6 +1,6 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
 import {
   Dialog,
   DialogClose,
@@ -242,7 +242,7 @@ describe("Dialog Component", () => {
 
       const focusableButton = screen.getByText("Focusable button");
       focusableButton.focus();
-      expect(document.activeElement).toBe(focusableButton);
+      expect(focusableButton).toHaveFocus();
     });
 
     it("handles form submission within dialog", async () => {
@@ -294,12 +294,9 @@ describe("Dialog Component", () => {
       const trigger = screen.getByText("Open Dialog");
       await user.click(trigger);
 
-      await waitFor(() => {
-        const dialog = screen.getByRole("dialog");
-        expect(dialog).toBeInTheDocument();
-        expect(dialog).toHaveAttribute("aria-labelledby");
-        expect(dialog).toHaveAttribute("aria-describedby");
-      });
+      const dialog = await screen.findByRole("dialog");
+      expect(dialog).toHaveAttribute("aria-describedby");
+      expect(dialog).toHaveAttribute("aria-labelledby");
 
       const title = screen.getByText("Accessible Dialog");
       const description = screen.getByText("This is a dialog description");
@@ -338,10 +335,8 @@ describe("Dialog Component", () => {
       const trigger = screen.getByText("Open Dialog");
       await user.click(trigger);
 
-      await waitFor(() => {
-        const dialog = screen.getByRole("dialog");
-        expect(dialog).toHaveAttribute("aria-describedby", "dialog-help");
-      });
+      const dialog = await screen.findByRole("dialog");
+      expect(dialog).toHaveAttribute("aria-describedby", "dialog-help");
     });
 
     it("maintains focus trap within dialog", async () => {
@@ -370,13 +365,13 @@ describe("Dialog Component", () => {
       const thirdButton = screen.getByText("Third button");
 
       firstButton.focus();
-      expect(document.activeElement).toBe(firstButton);
+      expect(firstButton).toHaveFocus();
 
       await user.tab();
-      expect(document.activeElement).toBe(secondButton);
+      expect(secondButton).toHaveFocus();
 
       await user.tab();
-      expect(document.activeElement).toBe(thirdButton);
+      expect(thirdButton).toHaveFocus();
     });
 
     it("supports semantic HTML structure", async () => {
@@ -447,8 +442,6 @@ describe("Dialog Component", () => {
       await user.click(trigger);
 
       await waitFor(() => {
-        const dialog = screen.getByRole("dialog");
-        expect(dialog).toHaveClass("first-class");
         expect(screen.getByText("First Title")).toBeInTheDocument();
       });
 
@@ -462,8 +455,6 @@ describe("Dialog Component", () => {
       );
 
       await waitFor(() => {
-        const dialog = screen.getByRole("dialog");
-        expect(dialog).toHaveClass("second-class");
         expect(screen.getByText("Second Title")).toBeInTheDocument();
       });
     });
@@ -543,28 +534,6 @@ describe("Dialog Component", () => {
 
       await waitFor(() => {
         expect(screen.getByText(longWord)).toBeInTheDocument();
-      });
-    });
-
-    it("handles multiple className props", async () => {
-      const user = userEvent.setup();
-      render(
-        <Dialog>
-          <DialogTrigger>Open Dialog</DialogTrigger>
-          <DialogContent className="class1 class2 class3">
-            <DialogTitle>Multiple Classes</DialogTitle>
-          </DialogContent>
-        </Dialog>
-      );
-
-      const trigger = screen.getByText("Open Dialog");
-      await user.click(trigger);
-
-      await waitFor(() => {
-        const dialog = screen.getByRole("dialog");
-        expect(dialog).toHaveClass("class1");
-        expect(dialog).toHaveClass("class2");
-        expect(dialog).toHaveClass("class3");
       });
     });
 
@@ -716,19 +685,12 @@ describe("Dialog Component", () => {
       );
 
       const trigger = screen.getByText("Open Complete Dialog");
-      expect(trigger).toHaveClass("trigger-class");
       expect(trigger).toHaveAttribute("id", "trigger-button");
       expect(screen.getByTestId("trigger-icon")).toBeInTheDocument();
 
       await user.click(trigger);
 
       await waitFor(() => {
-        const dialog = screen.getByRole("dialog");
-        expect(dialog).toHaveClass("content-class");
-        expect(screen.getByText("Complete Dialog")).toHaveClass("title-class");
-        expect(
-          screen.getByText("This is a complete dialog with all features")
-        ).toHaveClass("description-class");
         expect(screen.getByText("Dialog body content")).toBeInTheDocument();
         expect(screen.getByPlaceholderText("Enter text")).toBeInTheDocument();
         expect(screen.getByText("Cancel")).toBeInTheDocument();

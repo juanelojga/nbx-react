@@ -1,18 +1,21 @@
+import "../globals.css";
+
 import type { Metadata, Viewport } from "next";
 import { Inter, Work_Sans } from "next/font/google";
+import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import {
   getMessages,
   getTranslations,
   setRequestLocale,
 } from "next-intl/server";
-import { notFound } from "next/navigation";
-import { routing, type Locale } from "@/i18n/routing";
-import { Providers } from "../providers";
+
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { WebSiteJsonLd } from "@/components/seo/WebSiteJsonLd";
+import { type Locale, routing } from "@/i18n/routing";
 import { siteConfig } from "@/lib/site-config";
-import "../globals.css";
+
+import { Providers } from "../providers";
 
 // Two-font system (see docs/TYPOGRAPHY_GUIDELINES.md): Work Sans for
 // headings, Inter for body/data. Loaded once here for the whole app.

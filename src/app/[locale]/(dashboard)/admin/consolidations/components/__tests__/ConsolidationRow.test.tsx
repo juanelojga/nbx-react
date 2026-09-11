@@ -1,8 +1,10 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ConsolidationRow } from "../ConsolidationRow";
+import React from "react";
+
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
+
+import { ConsolidationRow } from "../ConsolidationRow";
 
 jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 
@@ -169,6 +171,6 @@ describe("ConsolidationRow", () => {
     renderInTable(<ConsolidationRow {...defaultProps} animationDelay={150} />);
 
     const row = screen.getByRole("row");
-    expect(row.style.animationDelay).toBe("150ms");
+    expect(row).toHaveStyle({ animationDelay: "150ms" });
   });
 });

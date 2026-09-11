@@ -1,14 +1,15 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import React from "react";
 
 jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 import { Package } from "lucide-react";
+
 import {
   BaseTable,
-  ColumnDef,
-  PaginationState,
-  SelectionConfig,
+  type ColumnDef,
+  type PaginationState,
+  type SelectionConfig,
 } from "../base-table";
 
 /* ============================================================================
@@ -708,7 +709,7 @@ describe("BaseTable", () => {
     });
 
     it("single item renders correctly", () => {
-      renderTable({ data: [mockData[0]] });
+      renderTable({ data: [mockData[0]!] });
 
       expect(screen.getByText("Alice")).toBeInTheDocument();
       expect(screen.queryByText("Bob")).not.toBeInTheDocument();

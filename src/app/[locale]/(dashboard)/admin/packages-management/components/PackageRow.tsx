@@ -1,12 +1,12 @@
 "use client";
 
-import { memo } from "react";
 import { useTranslations } from "next-intl";
-import { TableCell } from "@/components/ui/table";
+import { memo } from "react";
+
 import { DataRowPrimaryCell } from "@/components/common/DataRowPrimaryCell";
 import { DataRowShell } from "@/components/common/DataRowShell";
-
 import { TableActionButtons } from "@/components/common/TableActionButtons";
+import { TableCell } from "@/components/ui/table";
 import type { PackageType } from "@/graphql/queries/packages";
 
 interface PackageRowProps {

@@ -1,13 +1,17 @@
 "use client";
 
+import { EnhancedTableActionButton } from "@/components/data-display/enhanced-table/EnhancedTableActionButton";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { EnhancedTableActionButton } from "@/components/data-display/enhanced-table/EnhancedTableActionButton";
-import { ActionVariant, TableAction } from "./table-action-buttons.types";
+
 import { icons, tooltipStyles } from "./table-action-buttons.constants";
+import {
+  type ActionVariant,
+  type TableAction,
+} from "./table-action-buttons.types";
 
 export function ActionButton({
   variant,

@@ -1,10 +1,11 @@
-import type { PackageType } from "@/graphql/queries/packages";
+import { Package as PackageIcon } from "lucide-react";
+
 import type {
   ColumnDef,
   EmptyStateConfig,
   PaginationLabels,
 } from "@/components/data-display/base-table";
-import { Package as PackageIcon } from "lucide-react";
+import type { PackageType } from "@/graphql/queries/packages";
 
 export function getPackageColumns(
   t: (key: string) => string

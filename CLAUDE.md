@@ -33,7 +33,7 @@ pnpm exec playwright test e2e/file.spec.ts    # Single E2E test
 pnpm dlx shadcn add <component-name>         # Add shadcn component to src/components/ui/
 
 # Docker
-pnpm run docker:up          # Start container
+pnpm run docker:up          # Start container (docker compose down -v after dependency changes)
 pnpm run docker:down        # Stop container
 ```
 
@@ -52,7 +52,7 @@ pnpm run docker:down        # Stop container
 - `src/graphql/queries/` and `src/graphql/mutations/` - GraphQL operations grouped by domain (auth, clients, packages), each exporting gql documents + TypeScript interfaces
 - `src/lib/apollo/` - Apollo Client config with JWT auth link, error link (auto token refresh on 401), SSR singleton
 - `src/lib/auth/` - Token handling (localStorage keys: `narbox_access_token`, `narbox_refresh_token`)
-- `src/contexts/AuthContext.tsx` - Provides `user`, `loading`, `isAuthenticated`, `login()`, `logout()`; maps superusers to ADMIN role, regular users to CLIENT
+- `src/contexts/AuthContext.tsx` - Provides `user`, `loading`, `isAuthenticated`, `login()`, `logout()`; maps superusers to ADMIN role, regular users to CLIENT. Token refresh lives in `src/lib/auth/refreshAccessToken.ts` (single in-flight lock); role gating in the `admin/` and `client/` layouts. Backend follow-ups: `docs/AUTH_BACKEND_FOLLOWUP.md`
 - `src/components/ui/` - shadcn/ui components only (add with `pnpm dlx shadcn add`). `button.tsx` and `input.tsx` are deliberate forks; see the header comment in each before re-adding them
 - `src/components/data-display/` - bespoke table system (`BaseTable`, `EnhancedTable*`, pagination, skeleton, `StatusBadge`, `StatCard`, `PageHeader`)
 - `src/components/admin/` - Admin-specific components
@@ -60,7 +60,7 @@ pnpm run docker:down        # Stop container
 - `src/components/layout/` - Header, Sidebar, MainLayout
 - `messages/en.json`, `messages/es.json` - i18n translation files (Spanish is default)
 
-**Internationalization:** next-intl with the Next 16 `proxy.ts` convention at the repo root. Locale routing config in `src/i18n/`. Use `useTranslations()` in client components, `getTranslations()` in server components. Locale stored in `NEXT_LOCALE` cookie. Timezone: `America/Guayaquil`.
+**Internationalization:** next-intl with the Next 16 proxy convention at `src/proxy.ts` (must live next to `src/app`). Locale routing config in `src/i18n/`. Use `useTranslations()` in client components, `getTranslations()` in server components. Locale stored in `NEXT_LOCALE` cookie. Timezone: `America/Guayaquil`.
 
 **Path alias:** `@/*` maps to `./src/*`
 
@@ -130,8 +130,8 @@ The Playwright MCP server is configured in `.mcp.json` and available during Clau
 - **Verify typography** against `docs/TYPOGRAPHY_GUIDELINES.md` — confirm Work Sans is used for headings and Inter for body text, and that heading sizes respect the compact scale (no `text-3xl` or larger).
 - **Debug visual issues** by navigating pages, inspecting element states (hover, focus, active), and taking snapshots to compare before/after.
 
-Workflow: `pnpm run dev` to start the server, then use Playwright MCP browser tools (`browser_navigate`, `browser_screenshot`, `browser_click`, etc.) to interact with and capture the running app.
+Workflow: `pnpm run dev` to start the server, then use Playwright MCP browser tools (`browser_navigate`, `browser_take_screenshot`, `browser_click`, etc.) to interact with and capture the running app.
 
 ## Deployment
 
-Netlify via `@netlify/plugin-nextjs`. CI/CD: GitHub Actions runs lint, type-check, tests with coverage (uploaded to Codecov), and Playwright E2E tests (report uploaded as artifact).
+Netlify via `@netlify/plugin-nextjs` (`netlify.toml`; public build vars in `[context.production.environment]`). CI (`.github/workflows/ci.yml`): codegen drift check, lint, format check, type-check, unit tests with coverage (Codecov), production build, and Playwright E2E against the mocked backend (report uploaded as artifact). Dependabot keeps dependencies grouped and weekly; TypeScript and graphql majors are pinned (see `.github/dependabot.yml`).

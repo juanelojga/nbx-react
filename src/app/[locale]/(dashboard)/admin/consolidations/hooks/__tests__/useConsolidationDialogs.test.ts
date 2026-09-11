@@ -1,6 +1,8 @@
-import { renderHook, act } from "@testing-library/react";
-import { useConsolidationDialogs } from "../useConsolidationDialogs";
+import { act, renderHook } from "@testing-library/react";
+
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
+
+import { useConsolidationDialogs } from "../useConsolidationDialogs";
 
 const mockConsolidation: ConsolidateType = {
   id: "cons-1",

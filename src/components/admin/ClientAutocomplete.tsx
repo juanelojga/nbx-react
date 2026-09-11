@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
-
-import { compact } from "@/lib/graphql/compact";
-import { useTranslations } from "next-intl";
 import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -21,14 +20,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { type ClientType, GET_ALL_CLIENTS } from "@/graphql/queries/clients";
 import { useDebounce } from "@/hooks/useDebounce";
-import {
-  ClientType,
-  GET_ALL_CLIENTS,
-  GetAllClientsResponse,
-  GetAllClientsVariables,
-} from "@/graphql/queries/clients";
+import { compact } from "@/lib/graphql/compact";
+import { cn } from "@/lib/utils";
 
 const DEFAULT_MIN_SEARCH_LENGTH = 3;
 
@@ -51,10 +46,7 @@ export function ClientAutocomplete({
 
   const hasMinChars = debouncedSearch.length >= minSearchLength;
 
-  const { data, loading, error } = useQuery<
-    GetAllClientsResponse,
-    GetAllClientsVariables
-  >(GET_ALL_CLIENTS, {
+  const { data, loading, error } = useQuery(GET_ALL_CLIENTS, {
     variables: {
       page: 1,
       pageSize: 50,

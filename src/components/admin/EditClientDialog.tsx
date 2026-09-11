@@ -12,11 +12,7 @@ import { ClientFormFields } from "@/components/admin/ClientFormFields";
 import { BaseDialog } from "@/components/common/BaseDialog";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import {
-  UPDATE_CLIENT,
-  type UpdateClientResponse,
-  type UpdateClientVariables,
-} from "@/graphql/mutations/clients";
+import { UPDATE_CLIENT } from "@/graphql/mutations/clients";
 import { toClientFormValues } from "@/lib/clients/toClientFormValues";
 import { toUpdateClientVariables } from "@/lib/clients/toUpdateClientVariables";
 import {
@@ -75,18 +71,15 @@ export function EditClientDialog({
     onOpenChange(false);
   }, [onOpenChange]);
 
-  const [updateClient, { loading }] = useMutation<
-    UpdateClientResponse,
-    UpdateClientVariables
-  >(UPDATE_CLIENT, {
-    onCompleted: async (data) => {
+  const [updateClient, { loading }] = useMutation(UPDATE_CLIENT, {
+    onCompleted: (data) => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
           fullName: data.updateClient?.client?.fullName ?? "",
         }),
       });
       handleClose();
-      await onClientUpdated?.();
+      void onClientUpdated?.();
     },
     onError: (error) => {
       toast.error(t("errorTitle"), {

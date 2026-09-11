@@ -14,11 +14,8 @@ import React, {
   useState,
 } from "react";
 
-import { LOGIN_MUTATION, type LoginResponse } from "@/graphql/mutations/auth";
-import {
-  GET_CURRENT_USER,
-  type GetCurrentUserResponse,
-} from "@/graphql/queries/auth";
+import { LOGIN_MUTATION } from "@/graphql/mutations/auth";
+import { GET_CURRENT_USER } from "@/graphql/queries/auth";
 import { useRouter } from "@/i18n/navigation";
 import { authEvents, SESSION_EXPIRED_EVENT } from "@/lib/auth/authEvents";
 import { getDefaultRoute } from "@/lib/auth/getDefaultRoute";
@@ -57,11 +54,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [loginMutation] = useMutation<LoginResponse>(LOGIN_MUTATION);
-  const [getCurrentUser, { loading: userLoading }] =
-    useLazyQuery<GetCurrentUserResponse>(GET_CURRENT_USER, {
+  const [loginMutation] = useMutation(LOGIN_MUTATION);
+  const [getCurrentUser, { loading: userLoading }] = useLazyQuery(
+    GET_CURRENT_USER,
+    {
       fetchPolicy: "network-only",
-    });
+    }
+  );
 
   /**
    * Restore the session from stored tokens on mount.
@@ -84,7 +83,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       const { data, error: queryError } = await getCurrentUser();
-      if (queryError) throw queryError;
+      if (queryError) throw new Error(queryError.message);
 
       setUser(data?.me ? mapBackendUser(data.me) : null);
       setError(null);

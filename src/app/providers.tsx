@@ -1,11 +1,12 @@
 "use client";
 
 import { ApolloProvider } from "@apollo/client/react";
-import { getApolloClient } from "@/lib/apollo/client";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { Toaster } from "@/components/ui/sonner";
-import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { useMemo } from "react";
+
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { getApolloClient } from "@/lib/apollo/client";
 
 interface ProvidersProps {
   children: React.ReactNode;

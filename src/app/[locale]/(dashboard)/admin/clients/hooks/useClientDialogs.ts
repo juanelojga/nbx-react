@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
+
 import type { ClientType } from "@/graphql/queries/clients";
+
 import type {
   ClientToDelete,
   ClientToEdit,

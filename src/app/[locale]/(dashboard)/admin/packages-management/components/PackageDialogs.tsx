@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+
 import type { UsePackageDialogsReturn } from "../hooks/usePackageDialogs";
 
 const AddPackageDialog = dynamic(

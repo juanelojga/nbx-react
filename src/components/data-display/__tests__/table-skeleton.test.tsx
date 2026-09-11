@@ -1,7 +1,8 @@
-import React from "react";
 import { render } from "@testing-library/react";
-import { TableSkeleton, skeletonVariantClasses } from "../table-skeleton";
-import { ColumnDef } from "../base-table.types";
+import React from "react";
+
+import { type ColumnDef } from "../base-table.types";
+import { skeletonVariantClasses, TableSkeleton } from "../table-skeleton";
 
 /* ============================================================================
  * Mock Data & Helpers
@@ -63,8 +64,8 @@ describe("TableSkeleton", () => {
     it("renders column header text", () => {
       const { container } = renderSkeleton();
 
-      expect(container.textContent).toContain("Name");
-      expect(container.textContent).toContain("Status");
+      expect(container).toHaveTextContent(/Name/);
+      expect(container).toHaveTextContent(/Status/);
     });
 
     it("renders correct number of cells per row", () => {
