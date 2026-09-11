@@ -16,7 +16,7 @@ pnpm start                  # Start production server
 
 # Code Quality
 pnpm run lint               # ESLint check
-ppnpm run lint:fix           # ESLint auto-fix
+pnpm run lint:fix           # ESLint auto-fix
 pnpm run format             # Prettier format all files
 pnpm run type-check         # TypeScript type checking (tsc --noEmit)
 
@@ -72,7 +72,7 @@ pnpm run docker:down        # Stop container
 
 ### Typography
 
-Two-font system: **Work Sans** for headings/titles (bold/extrabold), **Inter** for body/data. Compact scale: h1=`text-2xl font-extrabold`, h2=`text-lg font-bold`, h3=`text-base font-bold`, h4=`text-sm font-bold`. Do not use `text-3xl` or larger for headings. Full spec: `documents/TYPOGRAPHY_GUIDELINES.md`.
+Two-font system: **Work Sans** for headings/titles (bold/extrabold), **Inter** for body/data. Compact scale: h1=`text-2xl font-extrabold`, h2=`text-lg font-bold`, h3=`text-base font-bold`, h4=`text-sm font-bold`. Do not use `text-3xl` or larger for headings. Full spec: `docs/TYPOGRAPHY_GUIDELINES.md`.
 
 Font loading pattern for new pages/layouts:
 
@@ -125,7 +125,7 @@ The Playwright MCP server is configured in `.mcp.json` and available during Clau
 - **Check both locales** (`/es` and `/en`) when changes affect translated content or layout that may shift with different text lengths.
 - **Check responsive behavior** by capturing screenshots at desktop (1280px) and mobile (375px) widths when layout changes are involved.
 - **Verify table rendering** against `docs/TABLE_DESIGN_SPEC.md` when modifying or creating data tables — confirm gradient headers, rounded containers, hover effects, and action button colors render correctly.
-- **Verify typography** against `documents/TYPOGRAPHY_GUIDELINES.md` — confirm Work Sans is used for headings and Inter for body text, and that heading sizes respect the compact scale (no `text-3xl` or larger).
+- **Verify typography** against `docs/TYPOGRAPHY_GUIDELINES.md` — confirm Work Sans is used for headings and Inter for body text, and that heading sizes respect the compact scale (no `text-3xl` or larger).
 - **Debug visual issues** by navigating pages, inspecting element states (hover, focus, active), and taking snapshots to compare before/after.
 
 Workflow: `pnpm run dev` to start the server, then use Playwright MCP browser tools (`browser_navigate`, `browser_screenshot`, `browser_click`, etc.) to interact with and capture the running app.
