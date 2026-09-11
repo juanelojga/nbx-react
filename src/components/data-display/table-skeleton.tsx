@@ -1,11 +1,9 @@
 "use client";
 
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
-import {
-  EnhancedTable,
-  EnhancedTableHeader,
-  EnhancedTableHead,
-} from "@/components/ui/enhanced-table";
+import { EnhancedTable } from "@/components/data-display/enhanced-table/EnhancedTable";
+import { EnhancedTableHeader } from "@/components/data-display/enhanced-table/EnhancedTableHeader";
+import { EnhancedTableHead } from "@/components/data-display/enhanced-table/EnhancedTableHead";
 import { cn } from "@/lib/utils";
 import { ColumnDef } from "./base-table.types";
 

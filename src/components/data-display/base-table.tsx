@@ -7,14 +7,12 @@ import { useMemo } from "react";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import {
-  EnhancedTable,
-  EnhancedTableHeader,
-  EnhancedTableHead,
-  EnhancedTableRow,
-  EnhancedTableEmptyState,
-  EnhancedTableSelectionBar,
-} from "@/components/ui/enhanced-table";
+import { EnhancedTable } from "@/components/data-display/enhanced-table/EnhancedTable";
+import { EnhancedTableHeader } from "@/components/data-display/enhanced-table/EnhancedTableHeader";
+import { EnhancedTableHead } from "@/components/data-display/enhanced-table/EnhancedTableHead";
+import { EnhancedTableRow } from "@/components/data-display/enhanced-table/EnhancedTableRow";
+import { EnhancedTableEmptyState } from "@/components/data-display/enhanced-table/EnhancedTableEmptyState";
+import { EnhancedTableSelectionBar } from "@/components/data-display/enhanced-table/EnhancedTableSelectionBar";
 import { cn } from "@/lib/utils";
 import { ArrowDown, ArrowUp, ArrowUpDown, Sparkles } from "lucide-react";
 import { TableSkeleton } from "./table-skeleton";

@@ -52,7 +52,8 @@ pnpm run docker:down        # Stop container
 - `src/lib/apollo/` - Apollo Client config with JWT auth link, error link (auto token refresh on 401), SSR singleton
 - `src/lib/auth/` - Token handling (localStorage keys: `narbox_access_token`, `narbox_refresh_token`)
 - `src/contexts/AuthContext.tsx` - Provides `user`, `loading`, `isAuthenticated`, `login()`, `logout()`; maps superusers to ADMIN role, regular users to CLIENT
-- `src/components/ui/` - shadcn/ui components (do not edit manually, use `pnpm dlx shadcn add`)
+- `src/components/ui/` - shadcn/ui components only (add with `pnpm dlx shadcn add`). `button.tsx` and `input.tsx` are deliberate forks; see the header comment in each before re-adding them
+- `src/components/data-display/` - bespoke table system (`BaseTable`, `EnhancedTable*`, pagination, skeleton, `StatusBadge`, `StatCard`, `PageHeader`)
 - `src/components/admin/` - Admin-specific components
 - `src/components/common/` - Shared components
 - `src/components/layout/` - Header, Sidebar, MainLayout
@@ -78,7 +79,7 @@ Fonts are loaded **once** in `src/app/[locale]/layout.tsx` (`--font-work-sans`, 
 
 ### Table Design
 
-All data tables **must** use `src/components/ui/base-table.tsx` (`BaseTable` component) as the foundation. Do not build tables from scratch or directly use low-level table primitives — always compose on top of `BaseTable`, which provides selection, sorting, pagination, skeleton loading, and empty states out of the box. Define column configurations via the `ColumnDef<T>` type and pass data, handlers, and options as props. Visual style must follow `docs/TABLE_DESIGN_SPEC.md`: `rounded-2xl` containers with `backdrop-blur-sm`, gradient headers, left-bordered rows with hover effects, color-coded action buttons (blue/amber/red gradients). Reference implementation: `src/app/(dashboard)/admin/packages/components/PackagesTable.tsx`.
+All data tables **must** use `src/components/data-display/base-table.tsx` (`BaseTable` component) as the foundation. Do not build tables from scratch or directly use low-level table primitives — always compose on top of `BaseTable`, which provides selection, sorting, pagination, skeleton loading, and empty states out of the box. Define column configurations via the `ColumnDef<T>` type and pass data, handlers, and options as props. Visual style must follow `docs/TABLE_DESIGN_SPEC.md`: `rounded-2xl` containers with `backdrop-blur-sm`, gradient headers, left-bordered rows with hover effects, color-coded action buttons (blue/amber/red gradients). Reference implementation: `src/app/[locale]/(dashboard)/admin/packages/components/PackagesTable.tsx`. Admin list pages compose `useAdminListPage` (`src/hooks/useAdminListPage.ts`) with `ListPageShell`, `SearchToolbar` and `DataRowShell` from `src/components/common/`.
 
 ### GraphQL Pattern
 

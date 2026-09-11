@@ -8,7 +8,7 @@ import { useCallback, useMemo } from "react";
 import type {
   PaginationState,
   SortState,
-} from "@/components/ui/base-table.types";
+} from "@/components/data-display/base-table.types";
 import { useSearchState } from "@/hooks/useSearchState";
 import {
   useTableUrlState,

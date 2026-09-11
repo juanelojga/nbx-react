@@ -10,7 +10,7 @@ import {
   BaseTable,
   type ColumnDef,
   type EmptyStateConfig,
-} from "@/components/ui/base-table";
+} from "@/components/data-display/base-table";
 import {
   Tooltip,
   TooltipContent,

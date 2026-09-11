@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/data-display/page-header";
 import {
   Card,
   CardContent,
@@ -11,10 +11,10 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { StatCard } from "@/components/ui/stat-card";
+import { StatCard } from "@/components/data-display/stat-card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Link } from "@/i18n/navigation";
 import {
   GET_DASHBOARD,

@@ -78,5 +78,3 @@ export function BaseDialog({
     </Dialog>
   );
 }
-
-export { DialogFooter } from "@/components/ui/dialog";

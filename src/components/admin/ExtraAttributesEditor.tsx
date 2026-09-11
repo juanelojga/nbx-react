@@ -5,10 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, X } from "lucide-react";
 
-export interface ExtraAttributeEntry {
-  key: string;
-  value: string;
-}
+import type { ExtraAttributeEntry } from "@/types/consolidation";
 
 interface ExtraAttributesEditorProps {
   value: ExtraAttributeEntry[];
@@ -155,35 +152,4 @@ export function ExtraAttributesEditor({
       </Button>
     </div>
   );
-}
-
-export function serializeExtraAttributes(
-  entries: ExtraAttributeEntry[]
-): string | undefined {
-  const filtered = entries.filter(
-    (e) => e.key.trim() !== "" && e.value.trim() !== ""
-  );
-  if (filtered.length === 0) return undefined;
-  const obj: Record<string, string> = {};
-  for (const entry of filtered) {
-    obj[entry.key.trim()] = entry.value.trim();
-  }
-  return JSON.stringify(obj);
-}
-
-export function parseExtraAttributes(
-  json: string | null
-): ExtraAttributeEntry[] {
-  if (!json) return [];
-  try {
-    const obj = JSON.parse(json);
-    if (typeof obj !== "object" || obj === null || Array.isArray(obj))
-      return [];
-    return Object.entries(obj).map(([key, value]) => ({
-      key,
-      value: String(value),
-    }));
-  } catch {
-    return [];
-  }
 }

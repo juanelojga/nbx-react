@@ -1,3 +1,5 @@
+// FORKED from shadcn (new-york): h-10, rounded-lg, px-4, border-2, custom hover/focus rings.
+// Re-apply these deltas after any `shadcn add` that overwrites this file.
 import * as React from "react";
 
 import { cn } from "@/lib/utils";

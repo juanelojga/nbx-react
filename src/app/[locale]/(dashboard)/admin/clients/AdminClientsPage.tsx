@@ -7,7 +7,7 @@ import { useCallback, useMemo } from "react";
 import { ListPageShell } from "@/components/common/ListPageShell";
 import { RefreshButton } from "@/components/common/RefreshButton";
 import { SearchToolbar } from "@/components/common/SearchToolbar";
-import { BaseTable } from "@/components/ui/base-table";
+import { BaseTable } from "@/components/data-display/base-table";
 import { Button } from "@/components/ui/button";
 import {
   type ClientType,

@@ -22,11 +22,9 @@ import {
 } from "@/graphql/mutations/consolidations";
 import { ClientType } from "@/graphql/queries/clients";
 import { Package } from "../types";
-import {
-  ExtraAttributesEditor,
-  ExtraAttributeEntry,
-  serializeExtraAttributes,
-} from "@/components/admin/ExtraAttributesEditor";
+import { ExtraAttributesEditor } from "@/components/admin/ExtraAttributesEditor";
+import { serializeExtraAttributes } from "@/lib/consolidations/serializeExtraAttributes";
+import type { ExtraAttributeEntry } from "@/types/consolidation";
 import { ConfirmCreateConsolidationDialog } from "./ConfirmCreateConsolidationDialog";
 
 interface ConsolidationFormProps {

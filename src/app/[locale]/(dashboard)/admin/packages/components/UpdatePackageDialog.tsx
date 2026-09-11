@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { BaseDialog, DialogFooter } from "@/components/ui/base-dialog";
+import { BaseDialog } from "@/components/common/BaseDialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

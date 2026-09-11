@@ -9,7 +9,7 @@ jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));
-jest.mock("@/components/ui/status-badge", () => ({
+jest.mock("@/components/data-display/status-badge", () => ({
   StatusBadge: ({ status, label }: { status: string; label: string }) => (
     <span data-testid="status-badge" data-status={status}>
       {label}

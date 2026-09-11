@@ -2,7 +2,7 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { BaseDialog } from "@/components/ui/base-dialog";
+import { BaseDialog } from "@/components/common/BaseDialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import {

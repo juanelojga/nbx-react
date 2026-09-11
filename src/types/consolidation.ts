@@ -10,3 +10,9 @@ export type ConsolidationStatus =
   | "in_transit"
   | "delivered"
   | "cancelled";
+
+/** One extra charge line on a consolidation (name → amount as entered). */
+export interface ExtraAttributeEntry {
+  key: string;
+  value: string;
+}

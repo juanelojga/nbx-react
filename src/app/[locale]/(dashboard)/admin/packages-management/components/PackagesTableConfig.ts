@@ -3,7 +3,7 @@ import type {
   ColumnDef,
   EmptyStateConfig,
   PaginationLabels,
-} from "@/components/ui/base-table";
+} from "@/components/data-display/base-table";
 import { Package as PackageIcon } from "lucide-react";
 
 export function getPackageColumns(

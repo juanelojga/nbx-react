@@ -7,7 +7,7 @@ import { DataRowPrimaryCell } from "@/components/common/DataRowPrimaryCell";
 import { DataRowShell } from "@/components/common/DataRowShell";
 
 import { TableActionButtons } from "@/components/common/TableActionButtons";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
 import { getStatusLabel } from "@/lib/consolidations/getStatusLabel";
 

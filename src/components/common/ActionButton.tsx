@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { EnhancedTableActionButton } from "@/components/ui/enhanced-table";
+import { EnhancedTableActionButton } from "@/components/data-display/enhanced-table/EnhancedTableActionButton";
 import { ActionVariant, TableAction } from "./table-action-buttons.types";
 import { icons, tooltipStyles } from "./table-action-buttons.constants";
 

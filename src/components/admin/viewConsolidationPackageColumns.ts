@@ -1,4 +1,4 @@
-import type { ColumnDef } from "@/components/ui/base-table.types";
+import type { ColumnDef } from "@/components/data-display/base-table.types";
 import type { ConsolidatePackageType } from "@/graphql/queries/consolidations";
 
 type TranslationFn = (key: string) => string;

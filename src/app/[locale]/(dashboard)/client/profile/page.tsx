@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ComingSoonCard } from "@/components/common/ComingSoonCard";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/data-display/page-header";
 
 type Props = { params: Promise<{ locale: string }> };
 

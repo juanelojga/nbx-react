@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { BaseDialog } from "@/components/ui/base-dialog";
+import { BaseDialog } from "@/components/common/BaseDialog";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Eye, Loader2, Package } from "lucide-react";
 import {
@@ -11,10 +11,10 @@ import {
   GetConsolidateByIdVariables,
 } from "@/graphql/queries/consolidations";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { parseExtraAttributes } from "@/components/admin/ExtraAttributesEditor";
+import { StatusBadge } from "@/components/data-display/status-badge";
+import { parseExtraAttributes } from "@/lib/consolidations/parseExtraAttributes";
 import { getViewConsolidationPackageColumns } from "@/components/admin/viewConsolidationPackageColumns";
-import { BaseTable } from "@/components/ui/base-table";
+import { BaseTable } from "@/components/data-display/base-table";
 import { getStatusLabel } from "@/lib/consolidations/getStatusLabel";
 import { useMemo } from "react";
 

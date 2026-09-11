@@ -43,7 +43,7 @@ jest.mock("@/components/common/TableActionButtons", () => ({
   ),
 }));
 
-jest.mock("@/components/ui/status-badge", () => ({
+jest.mock("@/components/data-display/status-badge", () => ({
   StatusBadge: ({ label }: { status: string; label: string }) => (
     <span data-testid="status-badge">{label}</span>
   ),

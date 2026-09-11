@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/data-display/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
