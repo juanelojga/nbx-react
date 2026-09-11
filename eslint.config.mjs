@@ -1,23 +1,21 @@
+import { defineConfig, globalIgnores } from "eslint/config";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import nextTypescript from "eslint-config-next/typescript";
-import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
+import prettier from "eslint-config-prettier/flat";
 
-const eslintConfig = [
+export default defineConfig([
+  globalIgnores([
+    "node_modules/",
+    ".next/",
+    "out/",
+    "coverage/",
+    "playwright-report/",
+    "test-results/",
+    "next-env.d.ts",
+    "src/graphql/generated/",
+  ]),
   ...nextCoreWebVitals,
   ...nextTypescript,
-  {
-    ignores: [
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-      "*.config.js",
-      "*.config.mjs",
-      "*.config.ts",
-    ],
-  },
-  eslintPluginPrettier,
-];
-
-export default eslintConfig;
+  // Must stay last so it can disable formatting rules from the presets above.
+  prettier,
+]);
