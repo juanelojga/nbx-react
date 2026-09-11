@@ -78,17 +78,23 @@ export const ClientRow = memo(function ClientRow({
       <TableActionButtons
         onView={{
           onClick: () => onView(client.id),
-          ariaLabel: `View ${client.fullName || client.email}`,
+          ariaLabel: t("viewAriaLabel", {
+            name: client.fullName || client.email,
+          }),
           tooltip: t("viewClient"),
         }}
         onEdit={{
           onClick: () => onEdit(client),
-          ariaLabel: `Edit ${client.fullName || client.email}`,
+          ariaLabel: t("editAriaLabel", {
+            name: client.fullName || client.email,
+          }),
           tooltip: t("editClient"),
         }}
         onDelete={{
           onClick: () => onDelete(client),
-          ariaLabel: `Delete ${client.fullName || client.email}`,
+          ariaLabel: t("deleteAriaLabel", {
+            name: client.fullName || client.email,
+          }),
           tooltip: t("deleteClient"),
         }}
       />

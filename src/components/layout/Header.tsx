@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types/user";
 
@@ -25,6 +27,8 @@ export function Header({
   onDesktopSidebarToggle,
   isDesktopSidebarCollapsed,
 }: HeaderProps) {
+  const t = useTranslations("header");
+  const tNav = useTranslations("navigation");
   const { user, logout } = useAuth();
 
   const isValidName = (value: string | null | undefined) =>
@@ -66,7 +70,7 @@ export function Header({
           size="icon"
           className="mr-2 lg:hidden rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200 active:scale-95"
           onClick={onMenuClick}
-          aria-label="Toggle menu"
+          aria-label={t("toggleMenu")}
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -78,7 +82,9 @@ export function Header({
           className="mr-2 hidden lg:flex rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200 active:scale-95"
           onClick={onDesktopSidebarToggle}
           aria-label={
-            isDesktopSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+            isDesktopSidebarCollapsed
+              ? t("expandSidebar")
+              : t("collapseSidebar")
           }
           aria-expanded={!isDesktopSidebarCollapsed}
           aria-controls="desktop-sidebar"
@@ -120,7 +126,7 @@ export function Header({
                     isAdmin ? "text-[#1976D2]" : "text-muted-foreground"
                   }`}
                 >
-                  {isAdmin ? "Admin" : "Client"}
+                  {isAdmin ? tNav("role.admin") : tNav("role.client")}
                 </span>
               </div>
             </button>
@@ -148,14 +154,14 @@ export function Header({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer rounded-lg">
-              Account Settings
+              {t("accountSettings")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => logout()}
               className="text-destructive cursor-pointer font-semibold rounded-lg"
             >
-              Logout
+              {t("logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

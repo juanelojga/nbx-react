@@ -134,17 +134,23 @@ export const ConsolidationRow = memo(function ConsolidationRow({
       <TableActionButtons
         onView={{
           onClick: () => onView(consolidation.id),
-          ariaLabel: `View ${consolidation.description}`,
+          ariaLabel: t("viewAriaLabel", {
+            description: consolidation.description,
+          }),
           tooltip: t("viewConsolidation"),
         }}
         onEdit={{
           onClick: () => onEdit(consolidation),
-          ariaLabel: `Edit ${consolidation.description}`,
+          ariaLabel: t("editAriaLabel", {
+            description: consolidation.description,
+          }),
           tooltip: t("editConsolidation"),
         }}
         onDelete={{
           onClick: () => onDelete(consolidation),
-          ariaLabel: `Delete ${consolidation.description}`,
+          ariaLabel: t("deleteAriaLabel", {
+            description: consolidation.description,
+          }),
           tooltip: t("deleteConsolidation"),
         }}
       />

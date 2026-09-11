@@ -1,6 +1,8 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 import { Package } from "lucide-react";
 import {
   BaseTable,
@@ -306,17 +308,15 @@ describe("BaseTable", () => {
     it("renders checkboxes with correct aria-labels", () => {
       renderTable({ selection: createSelection() });
 
-      expect(screen.getByLabelText("Select all")).toBeInTheDocument();
-      expect(screen.getByLabelText("Select row 1")).toBeInTheDocument();
-      expect(screen.getByLabelText("Select row 2")).toBeInTheDocument();
-      expect(screen.getByLabelText("Select row 3")).toBeInTheDocument();
+      expect(screen.getByLabelText("selectAll")).toBeInTheDocument();
+      expect(screen.getAllByLabelText("selectRow")).toHaveLength(3);
     });
 
     it("does not render checkboxes without selection config", () => {
       renderTable();
 
-      expect(screen.queryByLabelText("Select all")).not.toBeInTheDocument();
-      expect(screen.queryByLabelText("Select row 1")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("selectAll")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("selectRow")).not.toBeInTheDocument();
     });
 
     it("calls onSelectionChange with correct Set when selecting an item", async () => {
@@ -324,7 +324,7 @@ describe("BaseTable", () => {
       const onSelectionChange = jest.fn();
       renderTable({ selection: createSelection(new Set(), onSelectionChange) });
 
-      await user.click(screen.getByLabelText("Select row 1"));
+      await user.click(screen.getAllByLabelText("selectRow")[0]!);
 
       expect(onSelectionChange).toHaveBeenCalledTimes(1);
       const calledWith = onSelectionChange.mock.calls[0][0];
@@ -340,7 +340,7 @@ describe("BaseTable", () => {
         selection: createSelection(new Set(["1"]), onSelectionChange),
       });
 
-      await user.click(screen.getByLabelText("Select row 1"));
+      await user.click(screen.getAllByLabelText("selectRow")[0]!);
 
       const calledWith = onSelectionChange.mock.calls[0][0];
       expect(calledWith.has("1")).toBe(false);
@@ -352,7 +352,7 @@ describe("BaseTable", () => {
       const onSelectionChange = jest.fn();
       renderTable({ selection: createSelection(new Set(), onSelectionChange) });
 
-      await user.click(screen.getByLabelText("Select all"));
+      await user.click(screen.getByLabelText("selectAll"));
 
       const calledWith = onSelectionChange.mock.calls[0][0];
       expect(calledWith.size).toBe(3);
@@ -368,7 +368,7 @@ describe("BaseTable", () => {
         selection: createSelection(new Set(["1", "2", "3"]), onSelectionChange),
       });
 
-      await user.click(screen.getByLabelText("Select all"));
+      await user.click(screen.getByLabelText("selectAll"));
 
       const calledWith = onSelectionChange.mock.calls[0][0];
       expect(calledWith.size).toBe(0);
@@ -759,7 +759,7 @@ describe("BaseTable", () => {
       expect(screen.getByText("Alice")).toBeInTheDocument();
 
       // Selection
-      expect(screen.getByLabelText("Select all")).toBeInTheDocument();
+      expect(screen.getByLabelText("selectAll")).toBeInTheDocument();
       expect(screen.getByText("1 item selected")).toBeInTheDocument();
 
       // Sorting

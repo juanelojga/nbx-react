@@ -1,30 +1,35 @@
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export default function ClientPackages() {
+import { ComingSoonCard } from "@/components/common/ComingSoonCard";
+import { PageHeader } from "@/components/ui/page-header";
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "clientPackages" });
+  return { title: t("title") };
+}
+
+export default async function ClientPackagesPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "clientPackages" });
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="My Packages"
-        description="View and manage your packages"
+      <PageHeader title={t("title")} description={t("description")} />
+      <ComingSoonCard
+        intro={t("intro")}
+        features={[
+          t("feature1"),
+          t("feature2"),
+          t("feature3"),
+          t("feature4"),
+          t("feature5"),
+        ]}
       />
-      <Card>
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600">
-            This page will display all your packages with features including:
-          </p>
-          <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-            <li>Complete list of your packages</li>
-            <li>Filter by status (pending, in-transit, delivered)</li>
-            <li>Search packages by tracking number</li>
-            <li>View detailed package information</li>
-            <li>Download shipping labels and receipts</li>
-          </ul>
-        </CardContent>
-      </Card>
     </div>
   );
 }

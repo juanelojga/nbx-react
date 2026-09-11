@@ -97,7 +97,11 @@ export function ViewConsolidationDialog({
     >
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-12">
+        <div
+          className="flex items-center justify-center py-12"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin">
               <Loader2 className="h-12 w-12 text-primary" />

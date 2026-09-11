@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import * as React from "react";
 import { useMemo } from "react";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
@@ -50,6 +52,7 @@ export function BaseTable<T>({
   toolbar,
   className,
 }: BaseTableProps<T>) {
+  const t = useTranslations("common.table");
   const allSelected = useMemo(() => {
     if (!selection || data.length === 0) return false;
     return data.every((item) =>
@@ -129,7 +132,7 @@ export function BaseTable<T>({
                         <Checkbox
                           checked={allSelected}
                           onCheckedChange={handleSelectAll}
-                          aria-label="Select all"
+                          aria-label={t("selectAll")}
                           className={cn(
                             "transition-all duration-300 hover:scale-110",
                             someSelected && "data-[state=checked]:bg-primary/50"
@@ -204,7 +207,7 @@ export function BaseTable<T>({
                               onCheckedChange={() =>
                                 handleSelectItem(selection.getItemId(item))
                               }
-                              aria-label={`Select row ${index + 1}`}
+                              aria-label={t("selectRow", { index: index + 1 })}
                               className="transition-all duration-300 hover:scale-110"
                             />
                             {isSelected && (

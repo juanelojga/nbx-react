@@ -22,6 +22,7 @@ interface ExtraAttributesEditorProps {
     chargeName: string;
     chargeAmount: string;
     maxChargesReached: string;
+    removeCharge: string;
   };
   errors?: Record<string, string | undefined>;
 }
@@ -73,7 +74,11 @@ export function ExtraAttributesEditor({
           {value.map((entry, index) => (
             <div key={index} className="flex items-start gap-2">
               <div className="flex-1 space-y-1">
+                <Label htmlFor={`extra-key-${index}`} className="sr-only">
+                  {labels.chargeName}
+                </Label>
                 <Input
+                  id={`extra-key-${index}`}
                   placeholder={labels.chargeName}
                   value={entry.key}
                   onChange={(e) => handleChange(index, "key", e.target.value)}
@@ -91,7 +96,11 @@ export function ExtraAttributesEditor({
                 )}
               </div>
               <div className="w-32 space-y-1">
+                <Label htmlFor={`extra-value-${index}`} className="sr-only">
+                  {labels.chargeAmount}
+                </Label>
                 <Input
+                  id={`extra-value-${index}`}
                   type="number"
                   step="0.01"
                   min="0"
@@ -117,6 +126,7 @@ export function ExtraAttributesEditor({
                 size="icon"
                 onClick={() => handleRemove(index)}
                 disabled={disabled}
+                aria-label={labels.removeCharge}
                 className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive"
               >
                 <X className="h-4 w-4" />

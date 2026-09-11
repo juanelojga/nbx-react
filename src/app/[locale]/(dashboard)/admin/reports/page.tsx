@@ -1,30 +1,35 @@
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export default function AdminReports() {
+import { ComingSoonCard } from "@/components/common/ComingSoonCard";
+import { PageHeader } from "@/components/ui/page-header";
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "adminReports" });
+  return { title: t("title") };
+}
+
+export default async function AdminReportsPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "adminReports" });
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Reports"
-        description="View analytics and generate reports"
+      <PageHeader title={t("title")} description={t("description")} />
+      <ComingSoonCard
+        intro={t("intro")}
+        features={[
+          t("feature1"),
+          t("feature2"),
+          t("feature3"),
+          t("feature4"),
+          t("feature5"),
+        ]}
       />
-      <Card>
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600">
-            This page will provide detailed analytics and reporting features:
-          </p>
-          <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-            <li>Revenue and financial reports</li>
-            <li>Package delivery statistics and trends</li>
-            <li>User activity and engagement metrics</li>
-            <li>Performance analytics and KPIs</li>
-            <li>Custom report generation and exports</li>
-          </ul>
-        </CardContent>
-      </Card>
     </div>
   );
 }

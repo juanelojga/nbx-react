@@ -1,27 +1,35 @@
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export default function ClientProfile() {
+import { ComingSoonCard } from "@/components/common/ComingSoonCard";
+import { PageHeader } from "@/components/ui/page-header";
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "clientProfile" });
+  return { title: t("title") };
+}
+
+export default async function ClientProfilePage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "clientProfile" });
+
   return (
     <div className="space-y-6">
-      <PageHeader title="Profile" description="Manage your account settings" />
-      <Card>
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600">
-            This page will allow you to manage your profile and settings:
-          </p>
-          <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-            <li>Update personal information</li>
-            <li>Change password and security settings</li>
-            <li>Manage saved addresses</li>
-            <li>Set notification preferences</li>
-            <li>View account activity history</li>
-          </ul>
-        </CardContent>
-      </Card>
+      <PageHeader title={t("title")} description={t("description")} />
+      <ComingSoonCard
+        intro={t("intro")}
+        features={[
+          t("feature1"),
+          t("feature2"),
+          t("feature3"),
+          t("feature4"),
+          t("feature5"),
+        ]}
+      />
     </div>
   );
 }

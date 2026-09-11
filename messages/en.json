@@ -20,6 +20,19 @@
       "title": "Page not found",
       "description": "The page you are looking for does not exist or was moved.",
       "goHome": "Go to home"
+    },
+    "loading": "Loading...",
+    "comingSoon": "Coming Soon",
+    "dismiss": "Dismiss",
+    "error": {
+      "title": "Something went wrong",
+      "description": "An error occurred while loading this page",
+      "retry": "Try again",
+      "goToDashboard": "Go to Dashboard"
+    },
+    "table": {
+      "selectAll": "Select all",
+      "selectRow": "Select row {index}"
     }
   },
   "navigation": {
@@ -95,6 +108,9 @@
       "whatsapp": "+507 6612-6130",
       "instagram": "@narboxcourier",
       "address": "Panama City, Panama – Nation-wide home deliveries."
+    },
+    "header": {
+      "signIn": "Sign In"
     }
   },
   "login": {
@@ -276,7 +292,10 @@
       "successDescription": "{name} has been removed from the system.",
       "errorTitle": "Failed to delete client",
       "errorDescription": "{error}"
-    }
+    },
+    "viewAriaLabel": "View {name}",
+    "editAriaLabel": "Edit {name}",
+    "deleteAriaLabel": "Delete {name}"
   },
   "adminConsolidations": {
     "title": "Consolidations Management",
@@ -400,7 +419,10 @@
       "successDescription": "The consolidation has been removed from the system.",
       "errorTitle": "Failed to delete consolidation",
       "errorDescription": "{error}"
-    }
+    },
+    "viewAriaLabel": "View {description}",
+    "editAriaLabel": "Edit {description}",
+    "deleteAriaLabel": "Delete {description}"
   },
   "consolidation": {
     "pageTitle": "Package Consolidation",
@@ -499,7 +521,10 @@
     "previousPage": "Previous page",
     "nextPage": "Next page",
     "goToPage": "Go to page {page}",
-    "owner": "Owner"
+    "owner": "Owner",
+    "viewAriaLabel": "View {barcode}",
+    "editAriaLabel": "Edit {barcode}",
+    "deleteAriaLabel": "Delete {barcode}"
   },
   "clientAutocomplete": {
     "placeholder": "Select a client...",
@@ -760,7 +785,8 @@
         "cancel": "Cancel",
         "confirm": "Yes, create consolidation",
         "creating": "Creating..."
-      }
+      },
+      "removeCharge": "Remove charge"
     },
     "success": {
       "title": "Consolidation Created Successfully!",
@@ -851,5 +877,92 @@
     "errorTitle": "Failed to update pricing configuration",
     "loadingError": "Failed to load pricing configuration.",
     "loading": "Loading pricing configuration..."
+  },
+  "header": {
+    "toggleMenu": "Toggle menu",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "accountSettings": "Account Settings",
+    "logout": "Logout"
+  },
+  "clientDashboard": {
+    "title": "Dashboard",
+    "description": "Welcome to your NarBox dashboard",
+    "intro": "Your dashboard will provide an overview of your shipping activity:",
+    "feature1": "Active shipments and tracking information",
+    "feature2": "Recent package history",
+    "feature3": "Pending deliveries",
+    "feature4": "Quick actions for common tasks",
+    "feature5": "Important notifications and updates"
+  },
+  "clientPackages": {
+    "title": "My Packages",
+    "description": "View and manage your packages",
+    "intro": "This page will display all your packages with features including:",
+    "feature1": "Complete list of your packages",
+    "feature2": "Filter by status (pending, in-transit, delivered)",
+    "feature3": "Search packages by tracking number",
+    "feature4": "View detailed package information",
+    "feature5": "Download shipping labels and receipts"
+  },
+  "clientTrack": {
+    "title": "Track Package",
+    "description": "Enter tracking number to find your package",
+    "intro": "This page will provide real-time package tracking features:",
+    "feature1": "Enter tracking number for instant lookup",
+    "feature2": "View current package location",
+    "feature3": "See delivery timeline and history",
+    "feature4": "Estimated delivery date and time",
+    "feature5": "Receive notifications for status changes"
+  },
+  "clientNewShipment": {
+    "title": "New Shipment",
+    "description": "Create a new package shipment",
+    "intro": "This page will provide a form to create new shipments with:",
+    "feature1": "Sender and recipient information",
+    "feature2": "Package details (weight, dimensions, type)",
+    "feature3": "Shipping method selection",
+    "feature4": "Cost calculation and payment options",
+    "feature5": "Generate shipping label and tracking number"
+  },
+  "clientProfile": {
+    "title": "Profile",
+    "description": "Manage your account settings",
+    "intro": "This page will let you manage your account:",
+    "feature1": "Update personal information",
+    "feature2": "Change password and security settings",
+    "feature3": "Manage saved addresses",
+    "feature4": "Set notification preferences",
+    "feature5": "View account activity history"
+  },
+  "adminUsers": {
+    "title": "Users Management",
+    "description": "Manage system users and permissions",
+    "intro": "This page will provide user management features:",
+    "feature1": "View and manage all user accounts",
+    "feature2": "Add, edit, or deactivate user accounts",
+    "feature3": "Manage user roles and permissions",
+    "feature4": "View user activity and package history",
+    "feature5": "Send notifications to users"
+  },
+  "adminSettings": {
+    "title": "Settings",
+    "description": "Configure system settings and preferences",
+    "intro": "This page will provide system configuration options:",
+    "feature1": "General system settings and preferences",
+    "feature2": "Email and notification configurations",
+    "feature3": "Payment gateway settings",
+    "feature4": "Shipping rates and zones",
+    "feature5": "Security and access control settings"
+  },
+  "adminReports": {
+    "title": "Reports",
+    "description": "View analytics and generate reports",
+    "intro": "This page will provide reporting and analytics:",
+    "feature1": "Revenue and financial reports",
+    "feature2": "Package delivery statistics and trends",
+    "feature3": "User activity and engagement metrics",
+    "feature4": "Performance analytics and KPIs",
+    "feature5": "Custom report generation and exports"
   }
 }

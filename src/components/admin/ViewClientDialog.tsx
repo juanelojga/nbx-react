@@ -76,7 +76,11 @@ export function ViewClientDialog({
     >
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-12">
+        <div
+          className="flex items-center justify-center py-12"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex flex-col items-center gap-4">
             {/* Rule 6.1: Animate wrapper instead of icon */}
             <div className="animate-spin">

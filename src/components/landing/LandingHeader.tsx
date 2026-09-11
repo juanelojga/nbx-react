@@ -5,7 +5,7 @@ import LanguageSelector from "@/components/LanguageSelector";
 import Image from "next/image";
 
 export function LandingHeader() {
-  const t = useTranslations("login"); // Using login translations for "signIn" or creating a specific one
+  const t = useTranslations("landing.header");
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,7 +31,7 @@ export function LandingHeader() {
                 variant="default"
                 className="hidden sm:inline-flex bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
               >
-                {t("signIn") || "Log In"}
+                {t("signIn")}
               </Button>
             </Link>
           </div>

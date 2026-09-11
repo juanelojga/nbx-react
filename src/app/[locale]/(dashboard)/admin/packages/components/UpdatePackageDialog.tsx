@@ -373,7 +373,11 @@ export function UpdatePackageDialog({
     >
       {/* Loading State */}
       {queryLoading && (
-        <div className="flex items-center justify-center py-12">
+        <div
+          className="flex items-center justify-center py-12"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
             <p className="text-sm text-muted-foreground">{t("loading")}</p>

@@ -103,17 +103,17 @@ export const PackageRow = memo(function PackageRow({
       <TableActionButtons
         onView={{
           onClick: () => onView(pkg.id),
-          ariaLabel: `View ${pkg.barcode}`,
+          ariaLabel: t("viewAriaLabel", { barcode: pkg.barcode }),
           tooltip: t("viewPackage"),
         }}
         onEdit={{
           onClick: () => onEdit(pkg),
-          ariaLabel: `Edit ${pkg.barcode}`,
+          ariaLabel: t("editAriaLabel", { barcode: pkg.barcode }),
           tooltip: t("editPackage"),
         }}
         onDelete={{
           onClick: () => onDelete(pkg),
-          ariaLabel: `Delete ${pkg.barcode}`,
+          ariaLabel: t("deleteAriaLabel", { barcode: pkg.barcode }),
           tooltip: t("deletePackage"),
         }}
       />

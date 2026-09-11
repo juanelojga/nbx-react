@@ -402,6 +402,7 @@ export function ConsolidationForm({
                       chargeName: t("chargeName"),
                       chargeAmount: t("chargeAmount"),
                       maxChargesReached: t("maxChargesReached"),
+                      removeCharge: t("removeCharge"),
                     }}
                   />
                 </div>

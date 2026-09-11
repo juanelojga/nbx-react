@@ -1,30 +1,35 @@
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export default function AdminUsers() {
+import { ComingSoonCard } from "@/components/common/ComingSoonCard";
+import { PageHeader } from "@/components/ui/page-header";
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "adminUsers" });
+  return { title: t("title") };
+}
+
+export default async function AdminUsersPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "adminUsers" });
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Users Management"
-        description="Manage system users and permissions"
+      <PageHeader title={t("title")} description={t("description")} />
+      <ComingSoonCard
+        intro={t("intro")}
+        features={[
+          t("feature1"),
+          t("feature2"),
+          t("feature3"),
+          t("feature4"),
+          t("feature5"),
+        ]}
       />
-      <Card>
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600">
-            This page will provide comprehensive user management capabilities:
-          </p>
-          <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-            <li>View and manage all user accounts</li>
-            <li>Add, edit, or deactivate user accounts</li>
-            <li>Manage user roles and permissions</li>
-            <li>View user activity and package history</li>
-            <li>Send notifications to users</li>
-          </ul>
-        </CardContent>
-      </Card>
     </div>
   );
 }
