@@ -41,28 +41,16 @@ This document defines the typography system for the NBX React application. Our t
 
 ### Font Loading
 
-```typescript
-import { Work_Sans, Inter } from "next/font/google";
+Both fonts are loaded **once** in `src/app/[locale]/layout.tsx` via `next/font/google` and exposed as CSS variables on `<body>`:
 
-const workSansFont = Work_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-work-sans",
-  display: "swap",
-});
+- `--font-work-sans` → mapped to `--font-heading` in `globals.css`
+- `--font-inter` → mapped to `--font-sans` in `globals.css`
 
-const interFont = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-inter",
-  display: "swap",
-});
+Base styles in `globals.css` already give `h1`–`h6` the Work Sans family and the compact scale below, so components do not need to load fonts or set `font-[family-name:...]` for standard headings. Never load fonts per page.
 
-// Apply to root element
-<div className={`${workSansFont.variable} ${interFont.variable}`}>
-  {/* Your app */}
-</div>
-```
+### Marketing Exemption
+
+Marketing surfaces (`src/components/landing/*`, `src/app/[locale]/page.tsx`) may use display sizes (up to `text-6xl`) for hero and section titles. All authenticated app surfaces (login, admin, client) must follow the compact scale.
 
 ---
 

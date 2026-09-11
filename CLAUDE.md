@@ -74,24 +74,7 @@ pnpm run docker:down        # Stop container
 
 Two-font system: **Work Sans** for headings/titles (bold/extrabold), **Inter** for body/data. Compact scale: h1=`text-2xl font-extrabold`, h2=`text-lg font-bold`, h3=`text-base font-bold`, h4=`text-sm font-bold`. Do not use `text-3xl` or larger for headings. Full spec: `docs/TYPOGRAPHY_GUIDELINES.md`.
 
-Font loading pattern for new pages/layouts:
-
-```typescript
-import { Work_Sans, Inter } from "next/font/google";
-const workSansFont = Work_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-work-sans",
-  display: "swap",
-});
-const interFont = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-inter",
-  display: "swap",
-});
-// Apply: <div className={`${workSansFont.variable} ${interFont.variable}`}>
-```
+Fonts are loaded **once** in `src/app/[locale]/layout.tsx` (`--font-work-sans`, `--font-inter`) and mapped in `globals.css` (`--font-heading`, `--font-sans`); base `h1`–`h6` styles already apply Work Sans and the compact scale. Do not load fonts per page. Marketing surfaces (`src/components/landing/*`, `src/app/[locale]/page.tsx`) are exempt from the size cap and may use display sizes for hero/section titles.
 
 ### Table Design
 

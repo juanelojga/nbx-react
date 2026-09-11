@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Work_Sans, Inter } from "next/font/google";
 import { useTranslations } from "next-intl";
 import { StepHeader } from "./components/StepHeader";
 import { ClientSelectionStep } from "./components/ClientSelectionStep";
@@ -10,20 +9,6 @@ import { ConsolidationForm } from "./components/ConsolidationForm";
 import { ConsolidationSuccess } from "./components/ConsolidationSuccess";
 import { useConsolidationWizard } from "./hooks/useConsolidationWizard";
 import { useAddPackageDialog } from "./hooks/useAddPackageDialog";
-
-const workSansFont = Work_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-work-sans",
-  display: "swap",
-});
-
-const interFont = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-inter",
-  display: "swap",
-});
 
 // Dynamically import dialog component for better bundle splitting
 const AddPackageDialog = dynamic(
@@ -40,9 +25,7 @@ export default function AdminPackages() {
   const dialog = useAddPackageDialog();
 
   return (
-    <div
-      className={`${workSansFont.variable} ${interFont.variable} min-h-screen`}
-    >
+    <div className="min-h-screen">
       {/* Background Pattern */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.02] z-0">
         <div

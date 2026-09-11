@@ -188,7 +188,7 @@ export function ConsolidationSuccess({
 
             {/* Success Text */}
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground mb-2">
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground mb-2">
                 {t("title")}
               </h1>
               <p className="text-lg text-muted-foreground">

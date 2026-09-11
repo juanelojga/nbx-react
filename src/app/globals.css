@@ -6,8 +6,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading:
+    var(--font-work-sans), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -171,38 +173,34 @@
   }
 
   /* Headings */
+  /* Compact scale from docs/TYPOGRAPHY_GUIDELINES.md; Work Sans for headings */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    @apply font-semibold tracking-tight;
+    @apply tracking-tight;
+    font-family: var(--font-heading);
     color: rgb(var(--brand-text-primary));
   }
 
   h1 {
-    @apply text-4xl;
+    @apply text-2xl font-extrabold;
   }
 
   h2 {
-    @apply text-3xl;
+    @apply text-lg font-bold;
   }
 
   h3 {
-    @apply text-2xl;
+    @apply text-base font-bold;
   }
 
-  h4 {
-    @apply text-xl;
-  }
-
-  h5 {
-    @apply text-lg;
-  }
-
+  h4,
+  h5,
   h6 {
-    @apply text-base;
+    @apply text-sm font-bold;
   }
 
   /* Links */

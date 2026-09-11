@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Work_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import {
   getMessages,
@@ -14,14 +14,20 @@ import { WebSiteJsonLd } from "@/components/seo/WebSiteJsonLd";
 import { siteConfig } from "@/lib/site-config";
 import "../globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Two-font system (see docs/TYPOGRAPHY_GUIDELINES.md): Work Sans for
+// headings, Inter for body/data. Loaded once here for the whole app.
+const workSans = Work_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-work-sans",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -122,9 +128,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${workSans.variable} ${inter.variable} antialiased`}>
         <OrganizationJsonLd />
         <WebSiteJsonLd />
         <NextIntlClientProvider locale={locale} messages={messages}>

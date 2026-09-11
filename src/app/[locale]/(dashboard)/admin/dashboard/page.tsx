@@ -3,7 +3,6 @@
 import { useCallback } from "react";
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { Work_Sans, Inter } from "next/font/google";
 import { PageHeader } from "@/components/ui/page-header";
 import {
   Card,
@@ -32,20 +31,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-const workSansFont = Work_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-work-sans",
-  display: "swap",
-});
-
-const interFont = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
 const RECENT_LIMIT = 5;
 
 export default function AdminDashboard() {
@@ -71,9 +56,7 @@ export default function AdminDashboard() {
   const recentConsolidations = data?.dashboard?.recentConsolidations ?? [];
 
   return (
-    <div
-      className={`${workSansFont.variable} ${interFont.variable} space-y-8 animate-fade-in`}
-    >
+    <div className="space-y-8 animate-fade-in">
       <PageHeader
         title={t("title")}
         description={t("description")}

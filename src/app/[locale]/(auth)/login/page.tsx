@@ -113,7 +113,7 @@ export default function LoginPage() {
         <div className="flex justify-end mb-2">
           <LanguageSelector />
         </div>
-        <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <CardTitle className="text-2xl font-extrabold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           {t("title")}
         </CardTitle>
         <CardDescription className="text-center text-base">
