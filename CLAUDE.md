@@ -58,7 +58,7 @@ pnpm run docker:down        # Stop container
 - `src/components/layout/` - Header, Sidebar, MainLayout
 - `messages/en.json`, `messages/es.json` - i18n translation files (Spanish is default)
 
-**Internationalization:** next-intl with middleware in `middleware.ts`. Locale routing config in `src/lib/i18n/`. Use `useTranslations()` in client components, `getTranslations()` in server components. Locale stored in `NEXT_LOCALE` cookie. Timezone: `America/Guayaquil`.
+**Internationalization:** next-intl with the Next 16 `proxy.ts` convention at the repo root. Locale routing config in `src/i18n/`. Use `useTranslations()` in client components, `getTranslations()` in server components. Locale stored in `NEXT_LOCALE` cookie. Timezone: `America/Guayaquil`.
 
 **Path alias:** `@/*` maps to `./src/*`
 
