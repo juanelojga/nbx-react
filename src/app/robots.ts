@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
 
-export default function robots(): MetadataRoute.Robots {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
+import { routing } from "@/i18n/routing";
+import { siteConfig } from "@/lib/site-config";
 
+const PRIVATE_SECTIONS = ["login", "admin/", "client/"];
+
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
@@ -11,15 +13,12 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/api/",
-          "/es/login",
-          "/en/login",
-          "/es/admin/",
-          "/en/admin/",
-          "/es/client/",
-          "/en/client/",
+          ...routing.locales.flatMap((locale) =>
+            PRIVATE_SECTIONS.map((section) => `/${locale}/${section}`)
+          ),
         ],
       },
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: `${siteConfig.url}/sitemap.xml`,
   };
 }

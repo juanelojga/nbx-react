@@ -1,20 +1,21 @@
+import { siteConfig } from "@/lib/site-config";
+
 export function OrganizationJsonLd() {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
+  const siteUrl = siteConfig.url;
 
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "NarBox Courier",
+    name: siteConfig.name,
     url: siteUrl,
-    logo: `${siteUrl}/images/narbox-logo.png`,
+    logo: `${siteUrl}${siteConfig.logoPath}`,
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: "+507-6612-6130",
+      telephone: siteConfig.phone,
       contactType: "customer service",
       availableLanguage: ["Spanish", "English"],
     },
-    sameAs: ["https://instagram.com/narboxcourier"],
+    sameAs: [siteConfig.instagramUrl],
   };
 
   return (

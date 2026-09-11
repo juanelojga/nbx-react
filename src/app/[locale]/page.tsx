@@ -9,6 +9,7 @@ import { FAQPageJsonLd } from "@/components/seo/FAQPageJsonLd";
 import { ServiceJsonLd } from "@/components/seo/ServiceJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { siteConfig } from "@/lib/site-config";
 
 export default async function LandingPage({
   params,
@@ -17,9 +18,6 @@ export default async function LandingPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
 
   const tFaq = await getTranslations({ locale, namespace: "landing.faq" });
   const tServices = await getTranslations({
@@ -41,7 +39,9 @@ export default async function LandingPage({
     { name: tServices("card4Title"), description: tServices("card4Text") },
   ];
 
-  const breadcrumbs = [{ name: "NarBox", url: `${siteUrl}/${locale}` }];
+  const breadcrumbs = [
+    { name: siteConfig.shortName, url: `${siteConfig.url}/${locale}` },
+  ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-[#1976D2]/20 selection:text-[#1976D2]">

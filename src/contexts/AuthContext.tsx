@@ -8,7 +8,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useRouter } from "@/lib/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 import { User, UserRole } from "@/types/user";
 import {

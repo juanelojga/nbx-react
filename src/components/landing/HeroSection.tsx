@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { siteConfig } from "@/lib/site-config";
 
 export function HeroSection() {
   const _t = useTranslations("landing.hero");
@@ -58,7 +59,7 @@ export function HeroSection() {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full">
               <Link
-                href="https://wa.me/50766126130"
+                href={siteConfig.whatsappUrl}
                 target="_blank"
                 className="w-full sm:w-auto"
               >

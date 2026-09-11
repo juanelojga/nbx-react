@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import {
@@ -7,10 +7,11 @@ import {
   setRequestLocale,
 } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { routing, type Locale } from "../../../i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
 import { Providers } from "../providers";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { WebSiteJsonLd } from "@/components/seo/WebSiteJsonLd";
+import { siteConfig } from "@/lib/site-config";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -22,6 +23,10 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  themeColor: siteConfig.themeColor,
+};
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -35,14 +40,13 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "seo" });
 
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
+  const siteUrl = siteConfig.url;
   const url = `${siteUrl}/${locale}`;
 
   return {
     title: {
       default: t("title"),
-      template: "%s | NarBox Courier",
+      template: `%s | ${siteConfig.name}`,
     },
     description: t("description"),
     keywords: t("keywords"),
@@ -57,15 +61,15 @@ export async function generateMetadata({
       title: t("title"),
       description: t("ogDescription"),
       url,
-      siteName: "NarBox Courier",
+      siteName: siteConfig.name,
       locale: locale === "es" ? "es_PA" : "en_US",
       alternateLocale: locale === "es" ? ["en_US"] : ["es_PA"],
       type: "website",
       images: [
         {
-          url: `${siteUrl}/images/narbox-logo.png`,
-          width: 455,
-          height: 514,
+          url: `${siteUrl}${siteConfig.logoPath}`,
+          width: siteConfig.logoWidth,
+          height: siteConfig.logoHeight,
           alt: "NarBox Courier Logo",
         },
       ],
@@ -74,7 +78,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: t("title"),
       description: t("ogDescription"),
-      images: [`${siteUrl}/images/narbox-logo.png`],
+      images: [`${siteUrl}${siteConfig.logoPath}`],
     },
     icons: {
       icon: "/favicon.ico",

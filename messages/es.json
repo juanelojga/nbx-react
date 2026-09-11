@@ -12,7 +12,12 @@
   "common": {
     "language": "Idioma",
     "spanish": "Español",
-    "english": "Inglés"
+    "english": "Inglés",
+    "notFound": {
+      "title": "Página no encontrada",
+      "description": "La página que buscas no existe o fue movida.",
+      "goHome": "Ir al inicio"
+    }
   },
   "navigation": {
     "admin": {
@@ -316,12 +321,11 @@
     "totalCost": "Costo",
     "viewDialog": {
       "title": "Ver Detalles de Consolidación",
-      "description": "Información detallada sobre la consolidación seleccionada.",
+      "description": "Descripción",
       "generalInfo": "Información General",
       "packagesInfo": "Paquetes",
       "id": "ID de Consolidación",
       "client": "Cliente",
-      "description": "Descripción",
       "status": "Estado",
       "deliveryDate": "Fecha de Entrega",
       "comment": "Comentario",
@@ -466,7 +470,7 @@
   },
   "adminPackagesManagement": {
     "title": "Gestión de Paquetes",
-    "description": "Administra los paquetes de un cliente seleccionado",
+    "description": "Descripción",
     "refresh": "Actualizar",
     "addPackage": "Agregar Paquete",
     "clientLabel": "Cliente",
@@ -476,7 +480,6 @@
     "clearSearch": "Limpiar búsqueda",
     "loadingError": "Error al cargar los paquetes: {error}",
     "barcode": "Código de Barras",
-    "description": "Descripción",
     "weight": "Peso",
     "createdAt": "Creado",
     "actions": "Acciones",

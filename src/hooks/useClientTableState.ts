@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useRouter, usePathname } from "@/lib/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 
 type SortField = "full_name" | "email" | "created_at";

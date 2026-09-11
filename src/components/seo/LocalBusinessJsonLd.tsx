@@ -1,19 +1,20 @@
+import { siteConfig } from "@/lib/site-config";
+
 export function LocalBusinessJsonLd() {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
+  const siteUrl = siteConfig.url;
 
   const schema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "@id": `${siteUrl}/#business`,
-    name: "NarBox Courier",
-    image: `${siteUrl}/images/narbox-logo.png`,
+    name: siteConfig.name,
+    image: `${siteUrl}${siteConfig.logoPath}`,
     url: siteUrl,
-    telephone: "+507-6612-6130",
+    telephone: siteConfig.phone,
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Panama City",
-      addressCountry: "PA",
+      addressLocality: siteConfig.locality,
+      addressCountry: siteConfig.countryCode,
     },
     areaServed: [
       { "@type": "Country", name: "Panama" },

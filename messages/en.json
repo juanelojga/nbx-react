@@ -12,7 +12,12 @@
   "common": {
     "language": "Language",
     "spanish": "Spanish",
-    "english": "English"
+    "english": "English",
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for does not exist or was moved.",
+      "goHome": "Go to home"
+    }
   },
   "navigation": {
     "admin": {
@@ -316,12 +321,11 @@
     "totalCost": "Cost",
     "viewDialog": {
       "title": "View Consolidation Details",
-      "description": "Detailed information about the selected consolidation.",
+      "description": "Description",
       "generalInfo": "General Information",
       "packagesInfo": "Packages",
       "id": "Consolidation ID",
       "client": "Client",
-      "description": "Description",
       "status": "Status",
       "deliveryDate": "Delivery Date",
       "comment": "Comment",
@@ -467,7 +471,7 @@
   },
   "adminPackagesManagement": {
     "title": "Packages Management",
-    "description": "Manage packages for a selected client",
+    "description": "Description",
     "refresh": "Refresh",
     "addPackage": "Add Package",
     "clientLabel": "Client",
@@ -477,7 +481,6 @@
     "clearSearch": "Clear search",
     "loadingError": "Failed to load packages: {error}",
     "barcode": "Barcode",
-    "description": "Description",
     "weight": "Weight",
     "createdAt": "Created At",
     "actions": "Actions",

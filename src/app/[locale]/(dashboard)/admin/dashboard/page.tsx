@@ -16,7 +16,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Link } from "@/lib/navigation";
+import { Link } from "@/i18n/navigation";
 import {
   GET_DASHBOARD,
   GetDashboardResponse,

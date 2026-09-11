@@ -1,9 +1,13 @@
 "use client";
 
-import { Link, usePathname } from "@/lib/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { adminNavItems, clientNavItems, type NavItem } from "@/lib/navigation";
+import {
+  adminNavItems,
+  clientNavItems,
+  type NavItem,
+} from "@/components/layout/nav-items";
 import { X, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

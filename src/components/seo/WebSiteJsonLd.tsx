@@ -1,11 +1,12 @@
+import { siteConfig } from "@/lib/site-config";
+
 export function WebSiteJsonLd() {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
+  const siteUrl = siteConfig.url;
 
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "NarBox Courier",
+    name: siteConfig.name,
     url: siteUrl,
     inLanguage: ["es", "en"],
   };

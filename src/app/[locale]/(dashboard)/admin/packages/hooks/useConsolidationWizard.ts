@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "@/lib/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { ClientType } from "@/graphql/queries/clients";
