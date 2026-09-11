@@ -1,6 +1,8 @@
 export type { ClientType } from "@/graphql/queries/clients";
 
-export type SortField = "full_name" | "email" | "created_at";
+export const SORT_FIELDS = ["full_name", "email", "created_at"] as const;
+
+export type SortField = (typeof SORT_FIELDS)[number];
 
 export interface ClientToDelete {
   id: string;

@@ -304,6 +304,11 @@
     animation: shake 0.5s;
   }
 
+  /* Staggered row entrance used by DataRowShell (delay set inline). */
+  .animate-row-in {
+    animation: fade-in 0.4s ease-out forwards;
+  }
+
   .animate-fade-in {
     animation: fade-in 0.6s ease-out;
   }

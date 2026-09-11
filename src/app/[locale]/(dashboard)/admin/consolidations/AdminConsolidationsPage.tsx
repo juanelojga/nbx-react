@@ -1,76 +1,99 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { useConsolidationTableState } from "@/hooks/useConsolidationTableState";
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { ListPageShell } from "@/components/common/ListPageShell";
+import { RefreshButton } from "@/components/common/RefreshButton";
+import { BaseTable } from "@/components/ui/base-table";
 import { Button } from "@/components/ui/button";
 import {
-  BaseTable,
-  type SortState,
-  type PaginationState,
-} from "@/components/ui/base-table";
-import {
+  type ConsolidateType,
   GET_ALL_CONSOLIDATES,
   type GetAllConsolidatesResponse,
   type GetAllConsolidatesVariables,
-  type ConsolidateType,
 } from "@/graphql/queries/consolidations";
-import { RefreshCw, X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { SortField } from "./components/consolidations-table.types";
-import { useConsolidationSearch } from "./hooks/useConsolidationSearch";
-import { useConsolidationDialogs } from "./hooks/useConsolidationDialogs";
+import { useAdminListPage } from "@/hooks/useAdminListPage";
+import {
+  type DateRangeError,
+  validateDateRange,
+} from "@/lib/validation/consolidationFilters";
+
+import { ConsolidationDialogs } from "./components/ConsolidationDialogs";
 import { ConsolidationRow } from "./components/ConsolidationRow";
-import { ConsolidationToolbar } from "./components/ConsolidationToolbar";
+import {
+  SORT_FIELDS,
+  type SortField,
+} from "./components/consolidations-table.types";
 import {
   getConsolidationColumns,
   getEmptyStateConfig,
   getPaginationLabels,
 } from "./components/ConsolidationsTableConfig";
-import { ConsolidationDialogs } from "./components/ConsolidationDialogs";
+import { ConsolidationToolbar } from "./components/ConsolidationToolbar";
 import {
-  validateDateRange,
-  type DateRangeError,
-} from "@/lib/validation/consolidationFilters";
+  type ConsolidationExtraParams,
+  consolidationExtraParams,
+} from "./hooks/consolidationExtraParams";
+import { useConsolidationDialogs } from "./hooks/useConsolidationDialogs";
+
+const DEFAULT_SORT = { field: "created_at", order: "desc" } as const;
+
+const buildVariables = (
+  state: ConsolidationExtraParams & {
+    page: number;
+    pageSize: number;
+    orderBy: string;
+    search: string;
+  }
+): GetAllConsolidatesVariables => ({
+  page: state.page,
+  pageSize: state.pageSize,
+  orderBy: state.orderBy,
+  ...(state.search ? { search: state.search } : {}),
+  ...(state.status !== "all" ? { status: state.status } : {}),
+  ...(state.createdAfter ? { createdAfter: state.createdAfter } : {}),
+  ...(state.createdBefore ? { createdBefore: state.createdBefore } : {}),
+});
+
+const selectConnection = (data: GetAllConsolidatesResponse | undefined) =>
+  data?.allConsolidates;
 
 export function AdminConsolidationsPage() {
   const t = useTranslations("adminConsolidations");
+  const dialogs = useConsolidationDialogs();
 
-  const {
-    state: urlState,
-    updateURL,
-    getOrderBy,
-  } = useConsolidationTableState({
-    defaultPageSize: 10,
-    defaultSortField: "created_at",
-    defaultSortOrder: "desc",
+  const list = useAdminListPage<
+    GetAllConsolidatesResponse,
+    GetAllConsolidatesVariables,
+    ConsolidateType,
+    SortField,
+    ConsolidationExtraParams
+  >({
+    query: GET_ALL_CONSOLIDATES,
+    sortFields: SORT_FIELDS,
+    defaultSort: DEFAULT_SORT,
+    extra: consolidationExtraParams,
+    buildVariables,
+    selectConnection,
   });
+  const { updateURL } = list;
+  const { input: searchInput, clear: clearSearch } = list.search;
+  const { status: statusFilter, createdAfter, createdBefore } = list.urlState;
 
-  const {
-    page,
-    pageSize,
-    sortField,
-    sortOrder,
-    status: statusFilter,
-    createdAfter,
-    createdBefore,
-  } = urlState;
-
-  // Local draft state so the inputs reflect typing immediately while we
-  // validate before pushing to the URL/query.
+  // Draft state so the date inputs reflect typing immediately; only valid
+  // ranges are pushed to the URL/query.
   const [createdAfterInput, setCreatedAfterInput] = useState(createdAfter);
   const [createdBeforeInput, setCreatedBeforeInput] = useState(createdBefore);
   const [dateRangeError, setDateRangeError] = useState<DateRangeError>(null);
 
   const commitDateRange = useCallback(
     (nextAfter: string, nextBefore: string) => {
-      const err = validateDateRange(nextAfter, nextBefore);
-      setDateRangeError(err);
-      if (err) return;
+      const error = validateDateRange(nextAfter, nextBefore);
+      setDateRangeError(error);
+      if (error) return;
       updateURL({
         createdAfter: nextAfter,
         createdBefore: nextBefore,
@@ -96,9 +119,8 @@ export function AdminConsolidationsPage() {
     [commitDateRange, createdAfterInput]
   );
 
-  // On first mount, if the URL has no date params at all, persist the
-  // defaulted "today / today" range into the URL so the active filter is
-  // visible and shareable.
+  // On first mount, persist the defaulted today/today range into the URL so
+  // the active filter is visible and shareable.
   const rawSearchParams = useSearchParams();
   const didSyncDefaults = useRef(false);
   useEffect(() => {
@@ -112,8 +134,7 @@ export function AdminConsolidationsPage() {
     ) {
       updateURL({ createdAfter, createdBefore });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [rawSearchParams, createdAfter, createdBefore, updateURL]);
 
   const handleClearDates = useCallback(() => {
     setCreatedAfterInput("");
@@ -122,104 +143,13 @@ export function AdminConsolidationsPage() {
     updateURL({ createdAfter: "", createdBefore: "", page: 1 });
   }, [updateURL]);
 
-  const handleSearchChange = useCallback(
-    (search: string, resetPage: number) => {
-      updateURL({ search, page: resetPage });
-    },
-    [updateURL]
-  );
-
-  const {
-    searchInput,
-    setSearchInput,
-    debouncedSearch,
-    isDebouncing,
-    handleClearSearch,
-  } = useConsolidationSearch({
-    initialSearch: urlState.search,
-    onSearchChange: handleSearchChange,
-  });
-
-  const dialogs = useConsolidationDialogs();
-
   const handleStatusFilterChange = useCallback(
-    (newStatus: string) => {
-      updateURL({ status: newStatus, page: 1 });
-    },
+    (status: string) => updateURL({ status, page: 1 }),
     [updateURL]
   );
-
-  // Build GraphQL variables
-  const queryVariables: GetAllConsolidatesVariables = {
-    page,
-    pageSize,
-    orderBy: getOrderBy(),
-  };
-  if (debouncedSearch) {
-    queryVariables.search = debouncedSearch;
-  }
-  if (statusFilter !== "all") {
-    queryVariables.status = statusFilter;
-  }
-  if (createdAfter) {
-    queryVariables.createdAfter = createdAfter;
-  }
-  if (createdBefore) {
-    queryVariables.createdBefore = createdBefore;
-  }
-
-  const { data, loading, error, refetch } = useQuery<
-    GetAllConsolidatesResponse,
-    GetAllConsolidatesVariables
-  >(GET_ALL_CONSOLIDATES, {
-    variables: queryVariables,
-    notifyOnNetworkStatusChange: true,
-  });
-
-  const handleRefresh = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
-
-  const handleSort = useCallback(
-    (field: string) => {
-      if (sortField === field) {
-        updateURL({ sortOrder: sortOrder === "asc" ? "desc" : "asc" });
-      } else {
-        updateURL({ sortField: field as SortField, sortOrder: "asc" });
-      }
-    },
-    [sortField, sortOrder, updateURL]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (newSize: number) => {
-      updateURL({ pageSize: newSize, page: 1 });
-    },
-    [updateURL]
-  );
-
-  const consolidations = data?.allConsolidates.results || [];
-  const totalCount = data?.allConsolidates.totalCount || 0;
-  const hasNext = data?.allConsolidates.hasNext || false;
-  const hasPrevious = data?.allConsolidates.hasPrevious || false;
 
   const columns = useMemo(() => getConsolidationColumns(t), [t]);
-
-  const sortState: SortState = useMemo(
-    () => ({ field: sortField, order: sortOrder }),
-    [sortField, sortOrder]
-  );
-
-  const paginationState: PaginationState | undefined = useMemo(
-    () =>
-      totalCount > 0
-        ? { page, pageSize, totalCount, hasNext, hasPrevious }
-        : undefined,
-    [page, pageSize, totalCount, hasNext, hasPrevious]
-  );
-
   const paginationLabels = useMemo(() => getPaginationLabels(t), [t]);
-
   const emptyState = useMemo(
     () =>
       getEmptyStateConfig(
@@ -230,16 +160,16 @@ export function AdminConsolidationsPage() {
           variant="outline"
           size="sm"
           onClick={() => {
-            handleClearSearch();
+            clearSearch();
             updateURL({ status: "all", page: 1 });
           }}
           className="mt-8 gap-2"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" aria-hidden="true" />
           {t("clearSearch")}
         </Button>
       ),
-    [t, searchInput, statusFilter, handleClearSearch, updateURL]
+    [t, searchInput, statusFilter, clearSearch, updateURL]
   );
 
   const renderRow = useCallback(
@@ -260,78 +190,59 @@ export function AdminConsolidationsPage() {
     ]
   );
 
-  const toolbar = (
-    <ConsolidationToolbar
-      searchInput={searchInput}
-      onSearchInputChange={setSearchInput}
-      onClearSearch={handleClearSearch}
-      statusFilter={statusFilter}
-      onStatusFilterChange={handleStatusFilterChange}
-      createdAfter={createdAfterInput}
-      createdBefore={createdBeforeInput}
-      onCreatedAfterChange={handleCreatedAfterChange}
-      onCreatedBeforeChange={handleCreatedBeforeChange}
-      onClearDates={handleClearDates}
-      dateRangeError={dateRangeError}
-      isLoading={loading}
-      isDebouncing={isDebouncing}
-    />
-  );
+  const getRowKey = useCallback((c: ConsolidateType) => c.id, []);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <PageHeader title={t("title")} description={t("description")} />
-        <Button variant="outline" onClick={handleRefresh} disabled={loading}>
-          <div className={loading ? "animate-spin mr-2" : "mr-2"}>
-            <RefreshCw className="h-4 w-4" />
-          </div>
-          {t("refresh")}
-        </Button>
-      </div>
+    <ListPageShell
+      title={t("title")}
+      description={t("description")}
+      errorMessage={
+        list.errorMessage
+          ? t("loadingError", { error: list.errorMessage })
+          : null
+      }
+      actions={
+        <RefreshButton
+          onClick={list.refresh}
+          loading={list.loading}
+          label={t("refresh")}
+        />
+      }
+    >
+      <ConsolidationDialogs dialogs={dialogs} onRefresh={list.refresh} />
 
-      <ConsolidationDialogs
-        isViewDialogOpen={dialogs.isViewDialogOpen}
-        onViewDialogOpenChange={dialogs.setIsViewDialogOpen}
-        isEditDialogOpen={dialogs.isEditDialogOpen}
-        onEditDialogOpenChange={dialogs.setIsEditDialogOpen}
-        isDeleteDialogOpen={dialogs.isDeleteDialogOpen}
-        onDeleteDialogOpenChange={dialogs.setIsDeleteDialogOpen}
-        consolidationIdToView={dialogs.consolidationIdToView}
-        consolidationToEdit={dialogs.consolidationToEdit}
-        consolidationToDelete={dialogs.consolidationToDelete}
-        onRefresh={handleRefresh}
-      />
-
-      <Card>
-        <CardContent className="p-6">
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription>
-                {t("loadingError", { error: error.message })}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <BaseTable<ConsolidateType>
-            columns={columns}
-            data={consolidations}
-            getRowKey={(c) => c.id}
-            isLoading={loading}
-            renderRow={renderRow}
-            sort={sortState}
-            onSortChange={handleSort}
-            pagination={paginationState}
-            onPageChange={(p) => updateURL({ page: p })}
-            onPageSizeChange={handlePageSizeChange}
-            paginationLabels={paginationLabels}
-            emptyState={emptyState}
-            toolbar={toolbar}
-            withTooltipProvider={true}
-            className=""
+      <BaseTable<ConsolidateType>
+        columns={columns}
+        data={list.items}
+        getRowKey={getRowKey}
+        isLoading={list.loading}
+        skeletonRowCount={list.table.skeletonRowCount}
+        renderRow={renderRow}
+        sort={list.table.sort}
+        onSortChange={list.table.onSortChange}
+        pagination={list.table.pagination}
+        onPageChange={list.table.onPageChange}
+        onPageSizeChange={list.table.onPageSizeChange}
+        paginationLabels={paginationLabels}
+        emptyState={emptyState}
+        toolbar={
+          <ConsolidationToolbar
+            searchInput={list.search.input}
+            onSearchInputChange={list.search.setInput}
+            onClearSearch={list.search.clear}
+            statusFilter={statusFilter}
+            onStatusFilterChange={handleStatusFilterChange}
+            createdAfter={createdAfterInput}
+            createdBefore={createdBeforeInput}
+            onCreatedAfterChange={handleCreatedAfterChange}
+            onCreatedBeforeChange={handleCreatedBeforeChange}
+            onClearDates={handleClearDates}
+            dateRangeError={dateRangeError}
+            isLoading={list.loading}
+            isDebouncing={list.search.isDebouncing}
           />
-        </CardContent>
-      </Card>
-    </div>
+        }
+      />
+    </ListPageShell>
   );
 }

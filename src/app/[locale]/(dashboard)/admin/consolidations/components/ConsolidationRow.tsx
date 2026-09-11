@@ -1,8 +1,11 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo } from "react";
 import { useTranslations } from "next-intl";
-import { TableCell, TableRow } from "@/components/ui/table";
+import { TableCell } from "@/components/ui/table";
+import { DataRowPrimaryCell } from "@/components/common/DataRowPrimaryCell";
+import { DataRowShell } from "@/components/common/DataRowShell";
+
 import { TableActionButtons } from "@/components/common/TableActionButtons";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
@@ -24,37 +27,14 @@ export const ConsolidationRow = memo(function ConsolidationRow({
   animationDelay = 0,
 }: ConsolidationRowProps) {
   const t = useTranslations("adminConsolidations");
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <TableRow
-      className="group relative transition-all duration-300 hover:bg-gradient-to-r hover:from-muted/80 hover:to-transparent border-l-4 border-l-transparent hover:border-l-primary"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        animationName: "fade-in",
-        animationDuration: "0.4s",
-        animationTimingFunction: "ease-out",
-        animationFillMode: "forwards",
-        animationDelay: `${animationDelay}ms`,
-      }}
-    >
-      <TableCell>
-        <div className="relative">
-          <div
-            className="font-mono text-xs font-semibold tracking-wide text-foreground transition-colors duration-300"
-            style={{ fontVariantNumeric: "tabular-nums" }}
-            title={consolidation.id}
-          >
-            <div className="max-w-[120px] truncate">{consolidation.id}</div>
-          </div>
-          <div
-            className={`absolute -bottom-0.5 left-0 h-[2px] bg-gradient-to-r from-primary to-secondary transition-all duration-500 ${
-              isHovered ? "w-full opacity-100" : "w-0 opacity-0"
-            }`}
-          />
-        </div>
-      </TableCell>
+    <DataRowShell animationDelay={animationDelay}>
+      <DataRowPrimaryCell
+        text={consolidation.id}
+        mono
+        className="max-w-[120px]"
+      />
       <TableCell>
         <div className="relative max-w-[200px]">
           <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300 truncate">
@@ -154,6 +134,6 @@ export const ConsolidationRow = memo(function ConsolidationRow({
           tooltip: t("deleteConsolidation"),
         }}
       />
-    </TableRow>
+    </DataRowShell>
   );
 });

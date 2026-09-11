@@ -6,26 +6,6 @@ import type { ConsolidateType } from "@/graphql/queries/consolidations";
 
 jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 
-jest.mock("@/components/ui/table", () => ({
-  TableRow: ({
-    children,
-    ...props
-  }: {
-    children: React.ReactNode;
-    style?: React.CSSProperties;
-  }) => (
-    <tr data-testid="table-row" style={props.style}>
-      {children}
-    </tr>
-  ),
-  TableCell: ({
-    children,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => <td>{children}</td>,
-}));
-
 jest.mock("@/components/ui/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   TooltipTrigger: ({
@@ -188,7 +168,7 @@ describe("ConsolidationRow", () => {
   it("animation delay applied via style", () => {
     renderInTable(<ConsolidationRow {...defaultProps} animationDelay={150} />);
 
-    const row = screen.getByTestId("table-row");
+    const row = screen.getByRole("row");
     expect(row.style.animationDelay).toBe("150ms");
   });
 });

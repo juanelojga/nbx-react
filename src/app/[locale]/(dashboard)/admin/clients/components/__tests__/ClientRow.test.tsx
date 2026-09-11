@@ -6,23 +6,6 @@ import type { ClientType } from "@/graphql/queries/clients";
 
 jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 
-jest.mock("@/components/ui/table", () => ({
-  TableRow: ({
-    children,
-    ...props
-  }: {
-    children: React.ReactNode;
-    style?: React.CSSProperties;
-  }) => (
-    <tr data-testid="table-row" style={props.style}>
-      {children}
-    </tr>
-  ),
-  TableCell: ({ children }: { children: React.ReactNode }) => (
-    <td>{children}</td>
-  ),
-}));
-
 jest.mock("@/components/common/TableActionButtons", () => ({
   TableActionButtons: ({
     onView,
@@ -139,7 +122,7 @@ describe("ClientRow", () => {
   it("animation delay applied via style", () => {
     renderInTable(<ClientRow {...defaultProps} animationDelay={150} />);
 
-    const row = screen.getByTestId("table-row");
+    const row = screen.getByRole("row");
     expect(row.style.animationDelay).toBe("150ms");
   });
 });

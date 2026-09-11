@@ -1,20 +1,25 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { useDebounce } from "@/hooks/useDebounce";
 
 const DEBOUNCE_DELAY = 400;
-const DANGEROUS_CHARS_REGEX = /[<>{};\\\[\]]/g;
+const DANGEROUS_CHARS_REGEX = /[<>{};\\[\]]/g;
 
-function sanitizeInput(input: string): string {
+function sanitizeSearch(input: string): string {
   return input.replace(DANGEROUS_CHARS_REGEX, "").trim();
 }
 
-interface UsePackageSearchOptions {
+export interface UseSearchStateOptions {
+  /** Search term currently in the URL. */
   initialSearch: string;
+  /** Called with the debounced term and the page to reset to. */
   onSearchChange: (search: string, page: number) => void;
   debounceDelay?: number;
 }
 
-interface UsePackageSearchReturn {
+export interface UseSearchStateReturn {
   searchInput: string;
   setSearchInput: (value: string) => void;
   debouncedSearch: string;
@@ -22,14 +27,20 @@ interface UsePackageSearchReturn {
   handleClearSearch: () => void;
 }
 
-export function usePackageSearch({
+/**
+ * Debounced search box state that stays in sync with a URL-backed value:
+ * typing updates the input immediately, the parent is notified once the
+ * debounced value settles, and external URL changes (back/forward) re-seed
+ * the input without echoing back.
+ */
+export function useSearchState({
   initialSearch,
   onSearchChange,
   debounceDelay = DEBOUNCE_DELAY,
-}: UsePackageSearchOptions): UsePackageSearchReturn {
+}: UseSearchStateOptions): UseSearchStateReturn {
   const [searchInput, setSearchInput] = useState(initialSearch);
   const debouncedRaw = useDebounce(searchInput, debounceDelay);
-  const debouncedSearch = sanitizeInput(debouncedRaw);
+  const debouncedSearch = sanitizeSearch(debouncedRaw);
   const isDebouncing = searchInput !== debouncedRaw;
 
   const [lastSentSearch, setLastSentSearch] = useState(initialSearch);

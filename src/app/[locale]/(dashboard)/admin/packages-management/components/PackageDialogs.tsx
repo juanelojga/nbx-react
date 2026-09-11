@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { PackageToDelete } from "./packages-table.types";
+import type { UsePackageDialogsReturn } from "../hooks/usePackageDialogs";
 
 const AddPackageDialog = dynamic(
   () =>
@@ -33,59 +33,36 @@ const PackageDetailsModal = dynamic(
 );
 
 interface PackageDialogsProps {
-  isAddDialogOpen: boolean;
-  onAddDialogOpenChange: (open: boolean) => void;
-  isEditDialogOpen: boolean;
-  onEditDialogOpenChange: (open: boolean) => void;
-  isDeleteDialogOpen: boolean;
-  onDeleteDialogOpenChange: (open: boolean) => void;
-  isViewDialogOpen: boolean;
-  onViewDialogOpenChange: (open: boolean) => void;
-  packageIdToEdit: string | null;
-  packageToDelete: PackageToDelete | null;
-  packageIdToView: string | null;
+  dialogs: UsePackageDialogsReturn;
   onRefresh: () => void | Promise<void>;
 }
 
-export function PackageDialogs({
-  isAddDialogOpen,
-  onAddDialogOpenChange,
-  isEditDialogOpen,
-  onEditDialogOpenChange,
-  isDeleteDialogOpen,
-  onDeleteDialogOpenChange,
-  isViewDialogOpen,
-  onViewDialogOpenChange,
-  packageIdToEdit,
-  packageToDelete,
-  packageIdToView,
-  onRefresh,
-}: PackageDialogsProps) {
+export function PackageDialogs({ dialogs, onRefresh }: PackageDialogsProps) {
   return (
     <>
       <AddPackageDialog
-        open={isAddDialogOpen}
-        onOpenChange={onAddDialogOpenChange}
+        open={dialogs.isAddDialogOpen}
+        onOpenChange={dialogs.setIsAddDialogOpen}
         showClientSelector
         onPackageCreated={onRefresh}
       />
       <UpdatePackageDialog
-        open={isEditDialogOpen}
-        onOpenChange={onEditDialogOpenChange}
-        packageId={packageIdToEdit}
+        open={dialogs.isEditDialogOpen}
+        onOpenChange={dialogs.setIsEditDialogOpen}
+        packageId={dialogs.packageIdToEdit}
         showClientSelector
         onPackageUpdated={onRefresh}
       />
       <DeletePackageDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={onDeleteDialogOpenChange}
-        package_={packageToDelete}
+        open={dialogs.isDeleteDialogOpen}
+        onOpenChange={dialogs.setIsDeleteDialogOpen}
+        package_={dialogs.packageToDelete}
         onPackageDeleted={onRefresh}
       />
       <PackageDetailsModal
-        open={isViewDialogOpen}
-        onOpenChange={onViewDialogOpenChange}
-        packageId={packageIdToView}
+        open={dialogs.isViewDialogOpen}
+        onOpenChange={dialogs.setIsViewDialogOpen}
+        packageId={dialogs.packageIdToView}
       />
     </>
   );

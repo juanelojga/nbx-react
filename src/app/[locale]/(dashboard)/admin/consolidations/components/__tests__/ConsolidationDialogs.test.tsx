@@ -1,6 +1,7 @@
 import React from "react";
 import { render, act } from "@testing-library/react";
 import { ConsolidationDialogs } from "../ConsolidationDialogs";
+import type { UseConsolidationDialogsReturn } from "../../hooks/useConsolidationDialogs";
 
 jest.mock("next/dynamic", () => {
   return (loader: () => Promise<{ default: React.ComponentType }>) => {
@@ -36,18 +37,21 @@ jest.mock("@/components/admin/DeleteConsolidationDialog", () => ({
 }));
 
 describe("ConsolidationDialogs", () => {
-  const defaultProps = {
+  const dialogs: UseConsolidationDialogsReturn = {
     isViewDialogOpen: false,
-    onViewDialogOpenChange: jest.fn(),
+    setIsViewDialogOpen: jest.fn(),
     isEditDialogOpen: false,
-    onEditDialogOpenChange: jest.fn(),
+    setIsEditDialogOpen: jest.fn(),
     isDeleteDialogOpen: false,
-    onDeleteDialogOpenChange: jest.fn(),
+    setIsDeleteDialogOpen: jest.fn(),
     consolidationIdToView: null,
     consolidationToEdit: null,
     consolidationToDelete: null,
-    onRefresh: jest.fn(),
+    handleViewConsolidation: jest.fn(),
+    handleEditConsolidation: jest.fn(),
+    handleDeleteConsolidation: jest.fn(),
   };
+  const defaultProps = { dialogs, onRefresh: jest.fn() };
 
   it("renders all 3 dialogs", async () => {
     let result: ReturnType<typeof render>;
@@ -68,9 +72,12 @@ describe("ConsolidationDialogs", () => {
       result = render(
         <ConsolidationDialogs
           {...defaultProps}
-          isViewDialogOpen={true}
-          isEditDialogOpen={true}
-          isDeleteDialogOpen={true}
+          dialogs={{
+            ...dialogs,
+            isViewDialogOpen: true,
+            isEditDialogOpen: true,
+            isDeleteDialogOpen: true,
+          }}
         />
       );
     });

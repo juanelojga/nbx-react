@@ -1,148 +1,85 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-import { useQuery } from "@apollo/client/react";
+import { Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
+import { useCallback, useMemo } from "react";
+
+import { ListPageShell } from "@/components/common/ListPageShell";
+import { RefreshButton } from "@/components/common/RefreshButton";
+import { SearchToolbar } from "@/components/common/SearchToolbar";
+import { BaseTable } from "@/components/ui/base-table";
 import { Button } from "@/components/ui/button";
 import {
-  BaseTable,
-  type SortState,
-  type PaginationState,
-} from "@/components/ui/base-table";
-import {
+  type PackageType,
   RESOLVE_ALL_PACKAGES,
   type ResolveAllPackagesResponse,
   type ResolveAllPackagesVariables,
-  type PackageType,
 } from "@/graphql/queries/packages";
-import { Plus, RefreshCw, X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { SortField } from "./components/packages-table.types";
-import { usePackageSearch } from "./hooks/usePackageSearch";
-import { usePackageDialogs } from "./hooks/usePackageDialogs";
-import { usePackageTableState } from "./hooks/usePackageTableState";
+import { useAdminListPage } from "@/hooks/useAdminListPage";
+
+import { PackageDialogs } from "./components/PackageDialogs";
 import { PackageRow } from "./components/PackageRow";
-import { PackageSearchToolbar } from "./components/PackageSearchToolbar";
+import { SORT_FIELDS, type SortField } from "./components/packages-table.types";
 import {
-  getPackageColumns,
   getEmptyStateConfig,
+  getPackageColumns,
   getPaginationLabels,
 } from "./components/PackagesTableConfig";
-import { PackageDialogs } from "./components/PackageDialogs";
+import { usePackageDialogs } from "./hooks/usePackageDialogs";
+
+const DEFAULT_SORT = { field: "created_at", order: "desc" } as const;
+
+const buildVariables = (state: {
+  page: number;
+  pageSize: number;
+  orderBy: string;
+  search: string;
+}): ResolveAllPackagesVariables => ({
+  page: state.page,
+  page_size: state.pageSize,
+  order_by: state.orderBy,
+  notInConsolidate: true,
+  ...(state.search ? { search: state.search } : {}),
+});
+
+const selectConnection = (data: ResolveAllPackagesResponse | undefined) =>
+  data?.allPackages;
 
 export function AdminPackagesManagementPage() {
   const t = useTranslations("adminPackagesManagement");
-
-  const {
-    state: urlState,
-    updateURL,
-    getOrderBy,
-  } = usePackageTableState({
-    defaultPageSize: 10,
-    defaultSortField: "created_at",
-    defaultSortOrder: "desc",
-  });
-
-  const { page, pageSize, sortField, sortOrder } = urlState;
-
-  const handleSearchChange = useCallback(
-    (search: string, resetPage: number) => {
-      updateURL({ search, page: resetPage });
-    },
-    [updateURL]
-  );
-
-  const {
-    searchInput,
-    setSearchInput,
-    debouncedSearch,
-    isDebouncing,
-    handleClearSearch,
-  } = usePackageSearch({
-    initialSearch: urlState.search,
-    onSearchChange: handleSearchChange,
-  });
-
   const dialogs = usePackageDialogs();
 
-  const queryVariables: ResolveAllPackagesVariables = {
-    page,
-    page_size: pageSize,
-    order_by: getOrderBy(),
-    notInConsolidate: true,
-    ...(debouncedSearch ? { search: debouncedSearch } : {}),
-  };
-
-  const { data, loading, error, refetch } = useQuery<
+  const list = useAdminListPage<
     ResolveAllPackagesResponse,
-    ResolveAllPackagesVariables
-  >(RESOLVE_ALL_PACKAGES, {
-    variables: queryVariables,
-    notifyOnNetworkStatusChange: true,
+    ResolveAllPackagesVariables,
+    PackageType,
+    SortField
+  >({
+    query: RESOLVE_ALL_PACKAGES,
+    sortFields: SORT_FIELDS,
+    defaultSort: DEFAULT_SORT,
+    buildVariables,
+    selectConnection,
   });
 
-  const handleRefresh = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
-
-  const handleSort = useCallback(
-    (field: string) => {
-      if (sortField === field) {
-        updateURL({ sortOrder: sortOrder === "asc" ? "desc" : "asc" });
-      } else {
-        updateURL({ sortField: field as SortField, sortOrder: "asc" });
-      }
-    },
-    [sortField, sortOrder, updateURL]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (newSize: number) => {
-      updateURL({ pageSize: newSize, page: 1 });
-    },
-    [updateURL]
-  );
-
-  const packages = data?.allPackages.results || [];
-  const totalCount = data?.allPackages.totalCount || 0;
-  const hasNext = data?.allPackages.hasNext || false;
-  const hasPrevious = data?.allPackages.hasPrevious || false;
-
   const columns = useMemo(() => getPackageColumns(t), [t]);
-
-  const sortState: SortState = useMemo(
-    () => ({ field: sortField, order: sortOrder }),
-    [sortField, sortOrder]
-  );
-
-  const paginationState: PaginationState | undefined = useMemo(
-    () =>
-      totalCount > 0
-        ? { page, pageSize, totalCount, hasNext, hasPrevious }
-        : undefined,
-    [page, pageSize, totalCount, hasNext, hasPrevious]
-  );
-
   const paginationLabels = useMemo(() => getPaginationLabels(t), [t]);
-
   const emptyState = useMemo(
     () =>
       getEmptyStateConfig(
         t,
-        debouncedSearch,
+        list.search.debounced,
         <Button
           variant="outline"
           size="sm"
-          onClick={handleClearSearch}
+          onClick={list.search.clear}
           className="mt-8 gap-2"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" aria-hidden="true" />
           {t("clearSearch")}
         </Button>
       ),
-    [t, debouncedSearch, handleClearSearch]
+    [t, list.search.debounced, list.search.clear]
   );
 
   const renderRow = useCallback(
@@ -163,86 +100,63 @@ export function AdminPackagesManagementPage() {
     ]
   );
 
-  const searchToolbar = (
-    <PackageSearchToolbar
-      searchInput={searchInput}
-      onSearchInputChange={setSearchInput}
-      onClearSearch={handleClearSearch}
-      isLoading={loading}
-      isDebouncing={isDebouncing}
-    />
-  );
+  const getRowKey = useCallback((pkg: PackageType) => pkg.id, []);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <PageHeader title={t("title")} description={t("description")} />
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={loading}
-            className="sm:w-auto"
-          >
-            <div className={loading ? "animate-spin mr-2" : "mr-2"}>
-              <RefreshCw className="h-4 w-4" />
-            </div>
-            {t("refresh")}
-          </Button>
+    <ListPageShell
+      title={t("title")}
+      description={t("description")}
+      errorMessage={
+        list.errorMessage
+          ? t("loadingError", { error: list.errorMessage })
+          : null
+      }
+      actions={
+        <>
+          <RefreshButton
+            onClick={list.refresh}
+            loading={list.loading}
+            label={t("refresh")}
+          />
           <Button
             onClick={() => dialogs.setIsAddDialogOpen(true)}
             className="sm:w-auto"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
             {t("addPackage")}
           </Button>
-        </div>
-      </div>
+        </>
+      }
+    >
+      <PackageDialogs dialogs={dialogs} onRefresh={list.refresh} />
 
-      <PackageDialogs
-        isAddDialogOpen={dialogs.isAddDialogOpen}
-        onAddDialogOpenChange={dialogs.setIsAddDialogOpen}
-        isEditDialogOpen={dialogs.isEditDialogOpen}
-        onEditDialogOpenChange={dialogs.setIsEditDialogOpen}
-        isDeleteDialogOpen={dialogs.isDeleteDialogOpen}
-        onDeleteDialogOpenChange={dialogs.setIsDeleteDialogOpen}
-        isViewDialogOpen={dialogs.isViewDialogOpen}
-        onViewDialogOpenChange={dialogs.setIsViewDialogOpen}
-        packageIdToEdit={dialogs.packageIdToEdit}
-        packageToDelete={dialogs.packageToDelete}
-        packageIdToView={dialogs.packageIdToView}
-        onRefresh={handleRefresh}
-      />
-
-      <Card>
-        <CardContent className="p-6">
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription>
-                {t("loadingError", { error: error.message })}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <BaseTable
-            columns={columns}
-            data={packages}
-            getRowKey={(pkg) => pkg.id}
-            isLoading={loading}
-            skeletonRowCount={pageSize}
-            renderRow={renderRow}
-            sort={sortState}
-            onSortChange={handleSort}
-            pagination={paginationState}
-            onPageChange={(p) => updateURL({ page: p })}
-            onPageSizeChange={handlePageSizeChange}
-            paginationLabels={paginationLabels}
-            emptyState={emptyState}
-            toolbar={searchToolbar}
-            withTooltipProvider={true}
+      <BaseTable
+        columns={columns}
+        data={list.items}
+        getRowKey={getRowKey}
+        isLoading={list.loading}
+        skeletonRowCount={list.table.skeletonRowCount}
+        renderRow={renderRow}
+        sort={list.table.sort}
+        onSortChange={list.table.onSortChange}
+        pagination={list.table.pagination}
+        onPageChange={list.table.onPageChange}
+        onPageSizeChange={list.table.onPageSizeChange}
+        paginationLabels={paginationLabels}
+        emptyState={emptyState}
+        toolbar={
+          <SearchToolbar
+            className="mb-6 max-w-md"
+            value={list.search.input}
+            onChange={list.search.setInput}
+            onClear={list.search.clear}
+            placeholder={t("searchPlaceholder")}
+            clearLabel={t("clearSearch")}
+            isLoading={list.loading}
+            isDebouncing={list.search.isDebouncing}
           />
-        </CardContent>
-      </Card>
-    </div>
+        }
+      />
+    </ListPageShell>
   );
 }

@@ -1,150 +1,84 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-import { useQuery } from "@apollo/client/react";
+import { UserPlus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useClientTableState } from "@/hooks/useClientTableState";
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
+import { useCallback, useMemo } from "react";
+
+import { ListPageShell } from "@/components/common/ListPageShell";
+import { RefreshButton } from "@/components/common/RefreshButton";
+import { SearchToolbar } from "@/components/common/SearchToolbar";
+import { BaseTable } from "@/components/ui/base-table";
 import { Button } from "@/components/ui/button";
 import {
-  BaseTable,
-  type SortState,
-  type PaginationState,
-} from "@/components/ui/base-table";
-import {
+  type ClientType,
   GET_ALL_CLIENTS,
   type GetAllClientsResponse,
   type GetAllClientsVariables,
-  type ClientType,
 } from "@/graphql/queries/clients";
-import { RefreshCw, UserPlus, X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { SortField } from "./components/clients-table.types";
-import { useClientSearch } from "./hooks/useClientSearch";
-import { useClientDialogs } from "./hooks/useClientDialogs";
+import { useAdminListPage } from "@/hooks/useAdminListPage";
+
+import { ClientDialogs } from "./components/ClientDialogs";
 import { ClientRow } from "./components/ClientRow";
-import { ClientSearchToolbar } from "./components/ClientSearchToolbar";
+import { SORT_FIELDS, type SortField } from "./components/clients-table.types";
 import {
   getClientColumns,
   getEmptyStateConfig,
   getPaginationLabels,
 } from "./components/ClientsTableConfig";
-import { ClientDialogs } from "./components/ClientDialogs";
+import { useClientDialogs } from "./hooks/useClientDialogs";
+
+const DEFAULT_SORT = { field: "created_at", order: "desc" } as const;
+
+const buildVariables = (state: {
+  page: number;
+  pageSize: number;
+  orderBy: string;
+  search: string;
+}): GetAllClientsVariables => ({
+  page: state.page,
+  pageSize: state.pageSize,
+  orderBy: state.orderBy,
+  ...(state.search ? { search: state.search } : {}),
+});
+
+const selectConnection = (data: GetAllClientsResponse | undefined) =>
+  data?.allClients;
 
 export function AdminClientsPage() {
   const t = useTranslations("adminClients");
-
-  const {
-    state: urlState,
-    updateURL,
-    getOrderBy,
-  } = useClientTableState({
-    defaultPageSize: 10,
-    defaultSortField: "created_at",
-    defaultSortOrder: "desc",
-  });
-
-  const { page, pageSize, sortField, sortOrder } = urlState;
-
-  const handleSearchChange = useCallback(
-    (search: string, resetPage: number) => {
-      updateURL({ search, page: resetPage });
-    },
-    [updateURL]
-  );
-
-  const {
-    searchInput,
-    setSearchInput,
-    debouncedSearch,
-    isDebouncing,
-    handleClearSearch,
-  } = useClientSearch({
-    initialSearch: urlState.search,
-    onSearchChange: handleSearchChange,
-  });
-
   const dialogs = useClientDialogs();
 
-  // Build GraphQL variables
-  const queryVariables: GetAllClientsVariables = {
-    page,
-    pageSize,
-    orderBy: getOrderBy(),
-  };
-  if (debouncedSearch) {
-    queryVariables.search = debouncedSearch;
-  }
-
-  const { data, loading, error, refetch } = useQuery<
+  const list = useAdminListPage<
     GetAllClientsResponse,
-    GetAllClientsVariables
-  >(GET_ALL_CLIENTS, {
-    variables: queryVariables,
-    notifyOnNetworkStatusChange: true,
+    GetAllClientsVariables,
+    ClientType,
+    SortField
+  >({
+    query: GET_ALL_CLIENTS,
+    sortFields: SORT_FIELDS,
+    defaultSort: DEFAULT_SORT,
+    buildVariables,
+    selectConnection,
   });
 
-  const handleRefresh = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
-
-  const handleSort = useCallback(
-    (field: string) => {
-      if (sortField === field) {
-        updateURL({ sortOrder: sortOrder === "asc" ? "desc" : "asc" });
-      } else {
-        updateURL({ sortField: field as SortField, sortOrder: "asc" });
-      }
-    },
-    [sortField, sortOrder, updateURL]
-  );
-
-  const handlePageSizeChange = useCallback(
-    (newSize: number) => {
-      updateURL({ pageSize: newSize, page: 1 });
-    },
-    [updateURL]
-  );
-
-  const clients = data?.allClients.results || [];
-  const totalCount = data?.allClients.totalCount || 0;
-  const hasNext = data?.allClients.hasNext || false;
-  const hasPrevious = data?.allClients.hasPrevious || false;
-
   const columns = useMemo(() => getClientColumns(t), [t]);
-
-  const sortState: SortState = useMemo(
-    () => ({ field: sortField, order: sortOrder }),
-    [sortField, sortOrder]
-  );
-
-  const paginationState: PaginationState | undefined = useMemo(
-    () =>
-      totalCount > 0
-        ? { page, pageSize, totalCount, hasNext, hasPrevious }
-        : undefined,
-    [page, pageSize, totalCount, hasNext, hasPrevious]
-  );
-
   const paginationLabels = useMemo(() => getPaginationLabels(t), [t]);
-
   const emptyState = useMemo(
     () =>
       getEmptyStateConfig(
         t,
-        debouncedSearch,
+        list.search.debounced,
         <Button
           variant="outline"
           size="sm"
-          onClick={handleClearSearch}
+          onClick={list.search.clear}
           className="mt-8 gap-2"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" aria-hidden="true" />
           {t("clearSearch")}
         </Button>
       ),
-    [t, debouncedSearch, handleClearSearch]
+    [t, list.search.debounced, list.search.clear]
   );
 
   const renderRow = useCallback(
@@ -165,87 +99,63 @@ export function AdminClientsPage() {
     ]
   );
 
-  const searchToolbar = (
-    <ClientSearchToolbar
-      searchInput={searchInput}
-      onSearchInputChange={setSearchInput}
-      onClearSearch={handleClearSearch}
-      isLoading={loading}
-      isDebouncing={isDebouncing}
-    />
-  );
+  const getRowKey = useCallback((client: ClientType) => client.id, []);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <PageHeader title={t("title")} description={t("description")} />
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={loading}
-            className="sm:w-auto"
-          >
-            <div className={loading ? "animate-spin mr-2" : "mr-2"}>
-              <RefreshCw className="h-4 w-4" />
-            </div>
-            {t("refresh")}
-          </Button>
+    <ListPageShell
+      title={t("title")}
+      description={t("description")}
+      errorMessage={
+        list.errorMessage
+          ? t("loadingError", { error: list.errorMessage })
+          : null
+      }
+      actions={
+        <>
+          <RefreshButton
+            onClick={list.refresh}
+            loading={list.loading}
+            label={t("refresh")}
+          />
           <Button
             onClick={() => dialogs.setIsAddDialogOpen(true)}
             className="sm:w-auto"
           >
-            <UserPlus className="mr-2 h-4 w-4" />
+            <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
             {t("addClient")}
           </Button>
-        </div>
-      </div>
+        </>
+      }
+    >
+      <ClientDialogs dialogs={dialogs} onRefresh={list.refresh} />
 
-      <ClientDialogs
-        isAddDialogOpen={dialogs.isAddDialogOpen}
-        onAddDialogOpenChange={dialogs.setIsAddDialogOpen}
-        isDeleteDialogOpen={dialogs.isDeleteDialogOpen}
-        onDeleteDialogOpenChange={dialogs.setIsDeleteDialogOpen}
-        isEditDialogOpen={dialogs.isEditDialogOpen}
-        onEditDialogOpenChange={dialogs.setIsEditDialogOpen}
-        isViewDialogOpen={dialogs.isViewDialogOpen}
-        onViewDialogOpenChange={dialogs.setIsViewDialogOpen}
-        clientToDelete={dialogs.clientToDelete}
-        clientToEdit={dialogs.clientToEdit}
-        clientIdToView={dialogs.clientIdToView}
-        onRefresh={handleRefresh}
-      />
-
-      <Card>
-        <CardContent className="p-6">
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription>
-                {t("loadingError", { error: error.message })}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <BaseTable
-            columns={columns}
-            data={clients}
-            getRowKey={(client) => client.id}
-            isLoading={loading}
-            skeletonRowCount={pageSize}
-            renderRow={renderRow}
-            sort={sortState}
-            onSortChange={handleSort}
-            pagination={paginationState}
-            onPageChange={(p) => updateURL({ page: p })}
-            onPageSizeChange={handlePageSizeChange}
-            paginationLabels={paginationLabels}
-            emptyState={emptyState}
-            toolbar={searchToolbar}
-            withTooltipProvider={true}
-            className=""
+      <BaseTable
+        columns={columns}
+        data={list.items}
+        getRowKey={getRowKey}
+        isLoading={list.loading}
+        skeletonRowCount={list.table.skeletonRowCount}
+        renderRow={renderRow}
+        sort={list.table.sort}
+        onSortChange={list.table.onSortChange}
+        pagination={list.table.pagination}
+        onPageChange={list.table.onPageChange}
+        onPageSizeChange={list.table.onPageSizeChange}
+        paginationLabels={paginationLabels}
+        emptyState={emptyState}
+        toolbar={
+          <SearchToolbar
+            className="mb-6 max-w-md"
+            value={list.search.input}
+            onChange={list.search.setInput}
+            onClear={list.search.clear}
+            placeholder={t("searchPlaceholder")}
+            clearLabel={t("clearSearch")}
+            isLoading={list.loading}
+            isDebouncing={list.search.isDebouncing}
           />
-        </CardContent>
-      </Card>
-    </div>
+        }
+      />
+    </ListPageShell>
   );
 }

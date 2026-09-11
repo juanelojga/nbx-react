@@ -1,6 +1,7 @@
 import React from "react";
 import { render, act } from "@testing-library/react";
 import { ClientDialogs } from "../ClientDialogs";
+import type { UseClientDialogsReturn } from "../../hooks/useClientDialogs";
 
 // Mock next/dynamic to render components synchronously
 jest.mock("next/dynamic", () => {
@@ -42,20 +43,23 @@ jest.mock("@/components/admin/ViewClientDialog", () => ({
 }));
 
 describe("ClientDialogs", () => {
-  const defaultProps = {
+  const dialogs: UseClientDialogsReturn = {
     isAddDialogOpen: false,
-    onAddDialogOpenChange: jest.fn(),
+    setIsAddDialogOpen: jest.fn(),
     isDeleteDialogOpen: false,
-    onDeleteDialogOpenChange: jest.fn(),
+    setIsDeleteDialogOpen: jest.fn(),
     isEditDialogOpen: false,
-    onEditDialogOpenChange: jest.fn(),
+    setIsEditDialogOpen: jest.fn(),
     isViewDialogOpen: false,
-    onViewDialogOpenChange: jest.fn(),
+    setIsViewDialogOpen: jest.fn(),
     clientToDelete: null,
     clientToEdit: null,
     clientIdToView: null,
-    onRefresh: jest.fn(),
+    handleViewClient: jest.fn(),
+    handleEditClient: jest.fn(),
+    handleDeleteClient: jest.fn(),
   };
+  const defaultProps = { dialogs, onRefresh: jest.fn() };
 
   it("renders all 4 dialogs", async () => {
     let result: ReturnType<typeof render>;
@@ -84,5 +88,46 @@ describe("ClientDialogs", () => {
     expect(result!.getByTestId("delete-dialog")).toBeInTheDocument();
     expect(result!.getByTestId("edit-dialog")).toBeInTheDocument();
     expect(result!.getByTestId("view-dialog")).toBeInTheDocument();
+  });
+});
+
+describe("ClientDialogs open state", () => {
+  it("forwards the open flags from the hook result", async () => {
+    let result: ReturnType<typeof render>;
+    const dialogs: UseClientDialogsReturn = {
+      isAddDialogOpen: true,
+      setIsAddDialogOpen: jest.fn(),
+      isDeleteDialogOpen: false,
+      setIsDeleteDialogOpen: jest.fn(),
+      isEditDialogOpen: true,
+      setIsEditDialogOpen: jest.fn(),
+      isViewDialogOpen: false,
+      setIsViewDialogOpen: jest.fn(),
+      clientToDelete: null,
+      clientToEdit: null,
+      clientIdToView: null,
+      handleViewClient: jest.fn(),
+      handleEditClient: jest.fn(),
+      handleDeleteClient: jest.fn(),
+    };
+
+    await act(async () => {
+      result = render(
+        <ClientDialogs dialogs={dialogs} onRefresh={jest.fn()} />
+      );
+    });
+
+    expect(result!.getByTestId("add-dialog")).toHaveAttribute(
+      "data-open",
+      "true"
+    );
+    expect(result!.getByTestId("edit-dialog")).toHaveAttribute(
+      "data-open",
+      "true"
+    );
+    expect(result!.getByTestId("delete-dialog")).toHaveAttribute(
+      "data-open",
+      "false"
+    );
   });
 });
