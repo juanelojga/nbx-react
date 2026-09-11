@@ -15,7 +15,7 @@ import {
   Loader,
   XCircle,
 } from "lucide-react";
-import { ConsolidationStatus } from "@/lib/validation/status";
+import { ConsolidationStatus } from "@/types/consolidation";
 
 /**
  * Status Badge Component

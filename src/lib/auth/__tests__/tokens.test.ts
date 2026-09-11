@@ -2,7 +2,6 @@ import {
   clearTokens,
   getAccessToken,
   getRefreshToken,
-  hasValidAuth,
   isRefreshTokenExpired,
   isTokenExpired,
   saveTokens,
@@ -278,60 +277,6 @@ describe("tokens", () => {
     });
   });
 
-  describe("hasValidAuth", () => {
-    it("should return false if no tokens exist", () => {
-      const valid = hasValidAuth();
-
-      expect(valid).toBe(false);
-    });
-
-    it("should return false if only access token exists", () => {
-      mockLocalStorage["narbox_access_token"] = "valid-token";
-
-      const valid = hasValidAuth();
-
-      expect(valid).toBe(false);
-    });
-
-    it("should return false if only refresh token exists", () => {
-      mockLocalStorage["narbox_refresh_token"] = "refresh-token";
-
-      const valid = hasValidAuth();
-
-      expect(valid).toBe(false);
-    });
-
-    it("should return true for valid tokens", () => {
-      mockLocalStorage["narbox_access_token"] = "valid-token";
-      mockLocalStorage["narbox_refresh_token"] = "refresh-token";
-
-      const valid = hasValidAuth();
-
-      expect(valid).toBe(true);
-    });
-
-    it("should return true if access token expired but refresh token valid", () => {
-      mockLocalStorage["narbox_access_token"] = "expired-token";
-      mockLocalStorage["narbox_refresh_token"] = "refresh-token";
-      const futureTime = Date.now() + 3600 * 1000;
-      mockLocalStorage["narbox_refresh_token_expires_at"] = String(futureTime);
-
-      const valid = hasValidAuth();
-
-      expect(valid).toBe(true);
-    });
-
-    it("should return false if both tokens expired", () => {
-      mockLocalStorage["narbox_access_token"] = "expired-token";
-      mockLocalStorage["narbox_refresh_token"] = "refresh-token";
-      const pastTime = Date.now() - 3600 * 1000;
-      mockLocalStorage["narbox_refresh_token_expires_at"] = String(pastTime);
-
-      const valid = hasValidAuth();
-
-      expect(valid).toBe(false);
-    });
-  });
 
   describe("TOKEN_REFRESH_BUFFER_SECONDS constant", () => {
     it("should be exported and have expected value", () => {

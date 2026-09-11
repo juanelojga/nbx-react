@@ -26,19 +26,6 @@ export const passwordSchema = z
   .min(6, "Password must be at least 6 characters");
 
 /**
- * Login form validation schema
- */
-export const loginSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-});
-
-/**
- * Type inference for login input
- */
-export type LoginInput = z.infer<typeof loginSchema>;
-
-/**
  * Validate email address
  * @param email - Email string to validate
  * @returns Object with success status and optional error message
@@ -86,11 +73,3 @@ export function validatePassword(
   };
 }
 
-/**
- * Validate login form data
- * @param data - Object containing email and password
- * @returns Zod safe parse result with typed data or error details
- */
-export function validateLogin(data: { email: string; password: string }) {
-  return loginSchema.safeParse(data);
-}

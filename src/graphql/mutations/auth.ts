@@ -33,14 +33,6 @@ export const REFRESH_TOKEN_MUTATION = gql`
 /**
  * Logout mutation (if backend supports session invalidation)
  */
-export const LOGOUT_MUTATION = gql`
-  mutation Logout {
-    revokeToken {
-      revoked
-    }
-  }
-`;
-
 /**
  * TypeScript types for mutation responses
  */
@@ -70,8 +62,3 @@ export interface RefreshTokenResponse {
   };
 }
 
-export interface LogoutResponse {
-  revokeToken: {
-    revoked: boolean;
-  };
-}

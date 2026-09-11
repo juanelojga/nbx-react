@@ -4,9 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { ClientRow } from "../ClientRow";
 import type { ClientType } from "@/graphql/queries/clients";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 
 jest.mock("@/components/ui/table", () => ({
   TableRow: ({

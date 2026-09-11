@@ -114,14 +114,3 @@ export const logger: Logger = {
   },
 };
 
-/**
- * Helper to safely stringify objects for logging
- * Prevents circular reference errors
- */
-export function safeStringify(obj: unknown): string {
-  try {
-    return JSON.stringify(obj, null, 2);
-  } catch {
-    return String(obj);
-  }
-}

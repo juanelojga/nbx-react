@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import { ConsolidationStatus } from "@/lib/validation/status";
+import { ConsolidationStatus } from "@/types/consolidation";
 
 /**
  * Get all consolidations query with pagination, filtering, and sorting

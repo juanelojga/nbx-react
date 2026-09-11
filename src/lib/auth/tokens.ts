@@ -267,21 +267,3 @@ export function isRefreshTokenExpired(): boolean {
   }
 }
 
-/**
- * Check if user has valid authentication
- */
-export function hasValidAuth(): boolean {
-  const accessToken = getAccessToken();
-  const refreshToken = getRefreshToken();
-
-  if (!accessToken || !refreshToken) {
-    return false;
-  }
-
-  // If access token is expired but refresh token is valid, we can still recover
-  if (isTokenExpired(accessToken) && isRefreshTokenExpired()) {
-    return false;
-  }
-
-  return true;
-}

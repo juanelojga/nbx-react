@@ -3,9 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ClientSearchToolbar } from "../ClientSearchToolbar";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 
 describe("ClientSearchToolbar", () => {
   const defaultProps = {

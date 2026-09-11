@@ -3,7 +3,7 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserRoleString } from "@/lib/utils/user-role";
+import { getUserRoleString } from "@/lib/auth/user-role";
 
 export default function DashboardLayout({
   children,

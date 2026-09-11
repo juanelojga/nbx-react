@@ -4,9 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { ConsolidationRow } from "../ConsolidationRow";
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 
 jest.mock("@/components/ui/table", () => ({
   TableRow: ({

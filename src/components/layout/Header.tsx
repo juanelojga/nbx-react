@@ -12,7 +12,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserRoleString } from "@/lib/utils/user-role";
+import { getUserRoleString } from "@/lib/auth/user-role";
 
 interface HeaderProps {
   onMenuClick: () => void;

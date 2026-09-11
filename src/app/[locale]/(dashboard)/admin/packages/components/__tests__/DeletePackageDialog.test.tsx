@@ -6,9 +6,7 @@ import { DeletePackageDialog } from "@/app/[locale]/(dashboard)/admin/packages/c
 import { DELETE_PACKAGE } from "@/graphql/mutations/packages";
 import { toast } from "sonner";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));

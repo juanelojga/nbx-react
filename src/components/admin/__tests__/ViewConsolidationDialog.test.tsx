@@ -5,9 +5,7 @@ import { ViewConsolidationDialog } from "../ViewConsolidationDialog";
 import { GET_CONSOLIDATE_BY_ID } from "@/graphql/queries/consolidations";
 import { GraphQLError } from "graphql";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));

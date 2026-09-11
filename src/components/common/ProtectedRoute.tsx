@@ -5,7 +5,7 @@ import { useRouter } from "@/lib/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageLoading } from "./PageLoading";
 import { canAccessRoute, getDefaultRoute } from "@/lib/auth/redirects";
-import { getUserRoleString } from "@/lib/utils/user-role";
+import { getUserRoleString } from "@/lib/auth/user-role";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

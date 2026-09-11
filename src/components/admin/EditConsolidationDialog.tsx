@@ -22,7 +22,7 @@ import {
   UpdateConsolidateResponse,
 } from "@/graphql/mutations/consolidations";
 import { toast } from "sonner";
-import { ConsolidationStatus } from "@/lib/validation/status";
+import { ConsolidationStatus } from "@/types/consolidation";
 
 interface EditConsolidationDialogProps {
   open: boolean;

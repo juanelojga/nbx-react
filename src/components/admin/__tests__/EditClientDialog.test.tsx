@@ -6,9 +6,7 @@ import { EditClientDialog } from "@/components/admin/EditClientDialog";
 import { UPDATE_CLIENT } from "@/graphql/mutations/clients";
 import { toast } from "sonner";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));

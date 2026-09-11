@@ -17,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ErrorAlert } from "@/components/common/ErrorAlert";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useLoginRateLimit } from "@/hooks/useRateLimit";
-import { sanitizeEmail } from "@/lib/utils/sanitize";
+import { sanitizeEmail } from "@/lib/validation/sanitizeEmail";
 import { validateEmail, validatePassword } from "@/lib/validation/auth";
 
 export default function LoginPage() {

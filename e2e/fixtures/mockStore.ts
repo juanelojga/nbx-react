@@ -334,7 +334,6 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
       },
     },
   }),
-  Logout: () => ({ revokeToken: { revoked: true } }),
   GetCurrentUser: () => ({ me: { ...store.adminUser } }),
 
   // Pricing

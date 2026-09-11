@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import { ConsolidationStatus } from "@/lib/validation/status";
+import { ConsolidationStatus } from "@/types/consolidation";
 
 /**
  * Create consolidation mutation

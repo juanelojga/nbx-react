@@ -6,9 +6,7 @@ import { EditConsolidationDialog } from "@/components/admin/EditConsolidationDia
 import { UPDATE_CONSOLIDATE } from "@/graphql/mutations/consolidations";
 import { toast } from "sonner";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));

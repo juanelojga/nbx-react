@@ -22,7 +22,7 @@ import {
   GetDashboardResponse,
   GetDashboardVariables,
 } from "@/graphql/queries/dashboard";
-import { ConsolidationStatus } from "@/lib/validation/status";
+import { ConsolidationStatus } from "@/types/consolidation";
 import {
   Package,
   Users,

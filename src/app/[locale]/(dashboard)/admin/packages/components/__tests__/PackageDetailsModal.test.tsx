@@ -5,9 +5,7 @@ import { PackageDetailsModal } from "../PackageDetailsModal";
 import { GET_PACKAGE } from "@/graphql/queries/packages";
 import { GraphQLError } from "graphql";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));
