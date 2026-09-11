@@ -13,14 +13,10 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { parseExtraAttributes } from "@/components/admin/ExtraAttributesEditor";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { getViewConsolidationPackageColumns } from "@/components/admin/viewConsolidationPackageColumns";
+import { BaseTable } from "@/components/ui/base-table";
+import { getStatusLabel } from "@/lib/consolidations/getStatusLabel";
+import { useMemo } from "react";
 
 interface InfoRowProps {
   label: string;
@@ -61,28 +57,13 @@ export function ViewConsolidationDialog({
   });
 
   const consolidation = data?.consolidateById;
+  const packageColumns = useMemo(
+    () => getViewConsolidationPackageColumns(t),
+    [t]
+  );
 
   const handleClose = () => {
     onOpenChange(false);
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "awaiting_payment":
-        return tStatus("statusAwaitingPayment");
-      case "pending":
-        return tStatus("statusPending");
-      case "processing":
-        return tStatus("statusProcessing");
-      case "in_transit":
-        return tStatus("statusInTransit");
-      case "delivered":
-        return tStatus("statusDelivered");
-      case "cancelled":
-        return tStatus("statusCancelled");
-      default:
-        return status;
-    }
   };
 
   return (
@@ -144,7 +125,7 @@ export function ViewConsolidationDialog({
                 <div>
                   <StatusBadge
                     status={consolidation.status}
-                    label={getStatusLabel(consolidation.status)}
+                    label={getStatusLabel(tStatus, consolidation.status)}
                   />
                 </div>
               </div>
@@ -218,54 +199,12 @@ export function ViewConsolidationDialog({
                 {t("noPackages")}
               </div>
             ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t("packageBarcode")}</TableHead>
-                      <TableHead>{t("packageDescription")}</TableHead>
-                      <TableHead>{t("packageWeight")}</TableHead>
-                      <TableHead>{t("packageDimensions")}</TableHead>
-                      <TableHead>{t("packageRealPrice")}</TableHead>
-                      <TableHead>{t("packageServicePrice")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {consolidation.packages.map((pkg) => (
-                      <TableRow key={pkg.id}>
-                        <TableCell className="font-mono font-medium">
-                          {pkg.barcode}
-                        </TableCell>
-                        <TableCell>
-                          <div className="max-w-[200px] truncate">
-                            {pkg.description || "-"}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {pkg.weight && pkg.weightUnit
-                            ? `${pkg.weight} ${pkg.weightUnit}`
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {pkg.length && pkg.width && pkg.height
-                            ? `${pkg.length}×${pkg.width}×${pkg.height} ${pkg.dimensionUnit || ""}`
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {pkg.realPrice != null
-                            ? `$${pkg.realPrice.toFixed(2)}`
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {pkg.servicePrice != null
-                            ? `$${pkg.servicePrice.toFixed(2)}`
-                            : "-"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <BaseTable
+                columns={packageColumns}
+                data={consolidation.packages}
+                getRowKey={(pkg) => pkg.id}
+                withTooltipProvider={false}
+              />
             )}
           </div>
         </div>

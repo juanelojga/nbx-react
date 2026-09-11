@@ -1,4 +1,4 @@
-import { getStatusLabel } from "../getStatusLabel";
+import { getStatusLabel } from "@/lib/consolidations/getStatusLabel";
 
 const mockT = (key: string) => key;
 

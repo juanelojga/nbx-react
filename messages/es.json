@@ -816,14 +816,6 @@
         "cancelled": "Cancelado"
       }
     },
-    "clientSelect": {
-      "placeholder": "Selecciona un cliente...",
-      "searchPlaceholder": "Busca clientes por nombre o correo...",
-      "loading": "Cargando clientes...",
-      "error": "Error al cargar clientes: {message}",
-      "noClientsFound": "No se encontraron clientes.",
-      "tryDifferentSearch": "Intenta con un término de búsqueda diferente"
-    },
     "detailsModal": {
       "title": "Detalles del Paquete",
       "description": "Ver información completa sobre este paquete",

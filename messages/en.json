@@ -816,14 +816,6 @@
         "cancelled": "Cancelled"
       }
     },
-    "clientSelect": {
-      "placeholder": "Select a client...",
-      "searchPlaceholder": "Search clients by name or email...",
-      "loading": "Loading clients...",
-      "error": "Error loading clients: {message}",
-      "noClientsFound": "No clients found.",
-      "tryDifferentSearch": "Try a different search term"
-    },
     "detailsModal": {
       "title": "Package Details",
       "description": "View complete information about this package",

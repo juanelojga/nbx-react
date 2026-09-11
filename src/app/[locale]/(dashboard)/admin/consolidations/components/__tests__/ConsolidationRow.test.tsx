@@ -49,7 +49,7 @@ jest.mock("@/components/ui/status-badge", () => ({
   ),
 }));
 
-jest.mock("../getStatusLabel", () => ({
+jest.mock("@/lib/consolidations/getStatusLabel", () => ({
   getStatusLabel: (_t: unknown, status: string) => `status-${status}`,
 }));
 

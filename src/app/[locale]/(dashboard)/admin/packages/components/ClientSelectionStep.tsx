@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Package, CheckCircle2 } from "lucide-react";
-import { ClientSelect } from "./ClientSelect";
+import { ClientAutocomplete } from "@/components/admin/ClientAutocomplete";
 import { ClientType } from "@/graphql/queries/clients";
 
 interface ClientSelectionStepProps {
@@ -49,9 +49,10 @@ export function ClientSelectionStep({
             >
               {t("clientLabel")}
             </label>
-            <ClientSelect
+            <ClientAutocomplete
               selectedClient={selectedClient}
               onClientSelect={onClientSelect}
+              minSearchLength={0}
             />
 
             {selectedClient && (

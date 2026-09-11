@@ -1,5 +1,7 @@
 type TranslationFn = (key: string) => string;
 
+/** Translate a consolidation status using the `adminConsolidations` namespace. */
+
 export function getStatusLabel(t: TranslationFn, status: string): string {
   switch (status.toLowerCase()) {
     case "awaiting_payment":
