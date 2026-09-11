@@ -1,9 +1,10 @@
-import { gql } from "@apollo/client";
+import type { ResultOf, VariablesOf } from "@graphql-typed-document-node/core";
 
-/**
- * Get all clients query with pagination and sorting
- */
-export const GET_ALL_CLIENTS = gql`
+import { graphql } from "@/graphql/generated";
+import type { ClientDetailFragment } from "@/graphql/generated/graphql";
+
+/** Paginated client list (admin only). */
+export const GET_ALL_CLIENTS = graphql(/* GraphQL */ `
   query GetAllClients(
     $search: String
     $page: Int
@@ -17,7 +18,7 @@ export const GET_ALL_CLIENTS = gql`
       orderBy: $orderBy
     ) {
       results {
-        id
+        ...ClientDetail
         user {
           id
           isSuperuser
@@ -25,20 +26,6 @@ export const GET_ALL_CLIENTS = gql`
           firstName
           lastName
         }
-        email
-        extraEmail1
-        extraEmail2
-        identificationNumber
-        state
-        city
-        mainStreet
-        secondaryStreet
-        buildingNumber
-        mobilePhoneNumber
-        phoneNumber
-        createdAt
-        updatedAt
-        fullName
       }
       totalCount
       page
@@ -47,109 +34,25 @@ export const GET_ALL_CLIENTS = gql`
       hasPrevious
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for query responses
- */
-export interface MeType {
-  id: string;
-  isSuperuser: boolean;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-}
-
-export interface ClientType {
-  id: string;
-  user: MeType;
-  email: string;
-  extraEmail1: string | null;
-  extraEmail2: string | null;
-  identificationNumber: string | null;
-  state: string | null;
-  city: string | null;
-  mainStreet: string | null;
-  secondaryStreet: string | null;
-  buildingNumber: string | null;
-  mobilePhoneNumber: string | null;
-  phoneNumber: string | null;
-  createdAt: string;
-  updatedAt: string;
-  fullName: string;
-}
-
-export interface ClientConnection {
-  results: ClientType[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
-
-export interface GetAllClientsResponse {
-  allClients: ClientConnection;
-}
-
-export interface GetAllClientsVariables {
-  search?: string;
-  page?: number;
-  pageSize?: number;
-  orderBy?: string;
-}
-
-/**
- * Get single client query
- * This query is restricted to superusers
- */
-export const GET_CLIENT = gql`
+export const GET_CLIENT = graphql(/* GraphQL */ `
   query GetClient($id: ID!) {
     client(id: $id) {
-      id
-      email
-      extraEmail1
-      extraEmail2
-      identificationNumber
-      state
-      city
-      mainStreet
-      secondaryStreet
-      buildingNumber
-      mobilePhoneNumber
-      phoneNumber
-      createdAt
-      updatedAt
-      fullName
+      ...ClientDetail
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for single client query
- */
-export interface ClientDetailType {
-  id: string;
-  email: string;
-  extraEmail1: string | null;
-  extraEmail2: string | null;
-  identificationNumber: string | null;
-  state: string | null;
-  city: string | null;
-  mainStreet: string | null;
-  secondaryStreet: string | null;
-  buildingNumber: string | null;
-  mobilePhoneNumber: string | null;
-  phoneNumber: string | null;
-  createdAt: string;
-  updatedAt: string;
-  fullName: string;
-}
+export type GetAllClientsResponse = ResultOf<typeof GET_ALL_CLIENTS>;
+export type GetAllClientsVariables = VariablesOf<typeof GET_ALL_CLIENTS>;
+export type GetClientResponse = ResultOf<typeof GET_CLIENT>;
+export type GetClientVariables = VariablesOf<typeof GET_CLIENT>;
 
-export interface GetClientResponse {
-  client: ClientDetailType;
-}
-
-export interface GetClientVariables {
-  id: string;
-}
+/** A client row as returned by the list query. */
+export type ClientType = NonNullable<
+  NonNullable<
+    NonNullable<GetAllClientsResponse["allClients"]>["results"]
+  >[number]
+>;
+export type ClientDetailType = ClientDetailFragment;

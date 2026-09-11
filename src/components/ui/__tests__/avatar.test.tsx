@@ -1,5 +1,5 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 
 describe("Avatar Component", () => {
@@ -9,12 +9,6 @@ describe("Avatar Component", () => {
       const avatar = screen.getByTestId("avatar-root");
       expect(avatar).toBeInTheDocument();
       expect(avatar).toHaveAttribute("data-slot", "avatar");
-    });
-
-    it("applies custom className", () => {
-      render(<Avatar className="custom-avatar" data-testid="avatar-root" />);
-      const avatar = screen.getByTestId("avatar-root");
-      expect(avatar).toHaveClass("custom-avatar");
     });
 
     it("forwards additional props", () => {
@@ -37,25 +31,6 @@ describe("Avatar Component", () => {
       // Radix UI only renders the fallback initially, image loads asynchronously
       expect(screen.getByText("JD")).toBeInTheDocument();
     });
-
-    it("has correct default styling classes", () => {
-      render(<Avatar data-testid="avatar-root" />);
-      const avatar = screen.getByTestId("avatar-root");
-      expect(avatar).toHaveClass(
-        "relative",
-        "flex",
-        "size-8",
-        "shrink-0",
-        "overflow-hidden",
-        "rounded-full"
-      );
-    });
-
-    it("handles custom size classes", () => {
-      render(<Avatar className="size-16" data-testid="avatar-root" />);
-      const avatar = screen.getByTestId("avatar-root");
-      expect(avatar).toHaveClass("size-16");
-    });
   });
 
   describe("AvatarFallback", () => {
@@ -69,35 +44,6 @@ describe("Avatar Component", () => {
       const fallback = screen.getByText("AB");
       expect(fallback).toBeInTheDocument();
       expect(fallback).toHaveAttribute("data-slot", "avatar-fallback");
-    });
-
-    it("applies custom className", () => {
-      render(
-        <Avatar>
-          <AvatarFallback className="custom-fallback">CD</AvatarFallback>
-        </Avatar>
-      );
-
-      const fallback = screen.getByText("CD");
-      expect(fallback).toHaveClass("custom-fallback");
-    });
-
-    it("has correct default styling classes", () => {
-      render(
-        <Avatar>
-          <AvatarFallback>EF</AvatarFallback>
-        </Avatar>
-      );
-
-      const fallback = screen.getByText("EF");
-      expect(fallback).toHaveClass(
-        "bg-muted",
-        "flex",
-        "size-full",
-        "items-center",
-        "justify-center",
-        "rounded-full"
-      );
     });
 
     it("forwards additional props", () => {

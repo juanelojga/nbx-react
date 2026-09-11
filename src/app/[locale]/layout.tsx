@@ -1,27 +1,41 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import "../globals.css";
+
+import type { Metadata, Viewport } from "next";
+import { Inter, Work_Sans } from "next/font/google";
+import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import {
   getMessages,
   getTranslations,
   setRequestLocale,
 } from "next-intl/server";
-import { notFound } from "next/navigation";
-import { routing, type Locale } from "../../../i18n/routing";
-import { Providers } from "../providers";
+
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { WebSiteJsonLd } from "@/components/seo/WebSiteJsonLd";
-import "../globals.css";
+import { type Locale, routing } from "@/i18n/routing";
+import { siteConfig } from "@/lib/site-config";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+import { Providers } from "../providers";
+
+// Two-font system (see docs/TYPOGRAPHY_GUIDELINES.md): Work Sans for
+// headings, Inter for body/data. Loaded once here for the whole app.
+const workSans = Work_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-work-sans",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
 });
+
+export const viewport: Viewport = {
+  themeColor: siteConfig.themeColor,
+};
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -35,14 +49,13 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "seo" });
 
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
+  const siteUrl = siteConfig.url;
   const url = `${siteUrl}/${locale}`;
 
   return {
     title: {
       default: t("title"),
-      template: "%s | NarBox Courier",
+      template: `%s | ${siteConfig.name}`,
     },
     description: t("description"),
     keywords: t("keywords"),
@@ -57,15 +70,15 @@ export async function generateMetadata({
       title: t("title"),
       description: t("ogDescription"),
       url,
-      siteName: "NarBox Courier",
+      siteName: siteConfig.name,
       locale: locale === "es" ? "es_PA" : "en_US",
       alternateLocale: locale === "es" ? ["en_US"] : ["es_PA"],
       type: "website",
       images: [
         {
-          url: `${siteUrl}/images/narbox-logo.png`,
-          width: 455,
-          height: 514,
+          url: `${siteUrl}${siteConfig.logoPath}`,
+          width: siteConfig.logoWidth,
+          height: siteConfig.logoHeight,
           alt: "NarBox Courier Logo",
         },
       ],
@@ -74,7 +87,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: t("title"),
       description: t("ogDescription"),
-      images: [`${siteUrl}/images/narbox-logo.png`],
+      images: [`${siteUrl}${siteConfig.logoPath}`],
     },
     icons: {
       icon: "/favicon.ico",
@@ -118,9 +131,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${workSans.variable} ${inter.variable} antialiased`}>
         <OrganizationJsonLd />
         <WebSiteJsonLd />
         <NextIntlClientProvider locale={locale} messages={messages}>

@@ -1,26 +1,20 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
-import { BaseDialog } from "@/components/ui/base-dialog";
-import { Button } from "@/components/ui/button";
 import { AlertCircle, Eye, Loader2, Package } from "lucide-react";
-import {
-  GET_CONSOLIDATE_BY_ID,
-  GetConsolidateByIdResponse,
-  GetConsolidateByIdVariables,
-} from "@/graphql/queries/consolidations";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+
+import { getViewConsolidationPackageColumns } from "@/components/admin/viewConsolidationPackageColumns";
+import { BaseDialog } from "@/components/common/BaseDialog";
+import { BaseTable } from "@/components/data-display/base-table";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { parseExtraAttributes } from "@/components/admin/ExtraAttributesEditor";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { GET_CONSOLIDATE_BY_ID } from "@/graphql/queries/consolidations";
+import { getStatusLabel } from "@/lib/consolidations/getStatusLabel";
+import { parseExtraAttributes } from "@/lib/consolidations/parseExtraAttributes";
+import { parseISODate } from "@/lib/date/parseISODate";
 
 interface InfoRowProps {
   label: string;
@@ -52,37 +46,19 @@ export function ViewConsolidationDialog({
   const t = useTranslations("adminConsolidations.viewDialog");
   const tStatus = useTranslations("adminConsolidations");
 
-  const { data, loading, error } = useQuery<
-    GetConsolidateByIdResponse,
-    GetConsolidateByIdVariables
-  >(GET_CONSOLIDATE_BY_ID, {
+  const { data, loading, error } = useQuery(GET_CONSOLIDATE_BY_ID, {
     variables: { id: consolidationId || "" },
     skip: !consolidationId || !open,
   });
 
   const consolidation = data?.consolidateById;
+  const packageColumns = useMemo(
+    () => getViewConsolidationPackageColumns(t),
+    [t]
+  );
 
   const handleClose = () => {
     onOpenChange(false);
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "awaiting_payment":
-        return tStatus("statusAwaitingPayment");
-      case "pending":
-        return tStatus("statusPending");
-      case "processing":
-        return tStatus("statusProcessing");
-      case "in_transit":
-        return tStatus("statusInTransit");
-      case "delivered":
-        return tStatus("statusDelivered");
-      case "cancelled":
-        return tStatus("statusCancelled");
-      default:
-        return status;
-    }
   };
 
   return (
@@ -97,7 +73,11 @@ export function ViewConsolidationDialog({
     >
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-12">
+        <div
+          className="flex items-center justify-center py-12"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin">
               <Loader2 className="h-12 w-12 text-primary" />
@@ -140,22 +120,15 @@ export function ViewConsolidationDialog({
                 <div>
                   <StatusBadge
                     status={consolidation.status}
-                    label={getStatusLabel(consolidation.status)}
+                    label={getStatusLabel(tStatus, consolidation.status)}
                   />
                 </div>
               </div>
               <InfoRow
                 label={t("deliveryDate")}
-                value={
-                  consolidation.deliveryDate
-                    ? (() => {
-                        const [y, m, d] = consolidation.deliveryDate
-                          .split("-")
-                          .map(Number);
-                        return new Date(y, m - 1, d).toLocaleDateString();
-                      })()
-                    : undefined
-                }
+                value={parseISODate(
+                  consolidation.deliveryDate ?? ""
+                )?.toLocaleDateString()}
               />
               <InfoRow label={t("comment")} value={consolidation.comment} />
               <InfoRow
@@ -214,54 +187,12 @@ export function ViewConsolidationDialog({
                 {t("noPackages")}
               </div>
             ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t("packageBarcode")}</TableHead>
-                      <TableHead>{t("packageDescription")}</TableHead>
-                      <TableHead>{t("packageWeight")}</TableHead>
-                      <TableHead>{t("packageDimensions")}</TableHead>
-                      <TableHead>{t("packageRealPrice")}</TableHead>
-                      <TableHead>{t("packageServicePrice")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {consolidation.packages.map((pkg) => (
-                      <TableRow key={pkg.id}>
-                        <TableCell className="font-mono font-medium">
-                          {pkg.barcode}
-                        </TableCell>
-                        <TableCell>
-                          <div className="max-w-[200px] truncate">
-                            {pkg.description || "-"}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {pkg.weight && pkg.weightUnit
-                            ? `${pkg.weight} ${pkg.weightUnit}`
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {pkg.length && pkg.width && pkg.height
-                            ? `${pkg.length}×${pkg.width}×${pkg.height} ${pkg.dimensionUnit || ""}`
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {pkg.realPrice != null
-                            ? `$${pkg.realPrice.toFixed(2)}`
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {pkg.servicePrice != null
-                            ? `$${pkg.servicePrice.toFixed(2)}`
-                            : "-"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <BaseTable
+                columns={packageColumns}
+                data={consolidation.packages}
+                getRowKey={(pkg) => pkg.id}
+                withTooltipProvider={false}
+              />
             )}
           </div>
         </div>

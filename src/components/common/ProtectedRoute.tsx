@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "@/lib/navigation";
+
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "@/i18n/navigation";
+import { canAccessRoute } from "@/lib/auth/canAccessRoute";
+import { getDefaultRoute } from "@/lib/auth/getDefaultRoute";
+import type { UserRole } from "@/types/user";
+
 import { PageLoading } from "./PageLoading";
-import { canAccessRoute, getDefaultRoute } from "@/lib/auth/redirects";
-import { getUserRoleString } from "@/lib/utils/user-role";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: Array<"admin" | "client">;
+  /** When set, only these roles may render `children`; others are sent to their dashboard. */
+  allowedRoles?: readonly UserRole[];
 }
 
 export default function ProtectedRoute({
@@ -19,43 +23,22 @@ export default function ProtectedRoute({
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
 
+  const isAuthorized =
+    isAuthenticated && user !== null && canAccessRoute(user.role, allowedRoles);
+
   useEffect(() => {
-    if (!loading) {
-      // Not authenticated - redirect to login
-      if (!isAuthenticated || !user) {
-        router.push("/login");
-        return;
-      }
-
-      // Check role-based access
-      if (
-        allowedRoles &&
-        !canAccessRoute(getUserRoleString(user.role), allowedRoles)
-      ) {
-        // Redirect to user's default dashboard
-        router.push(getDefaultRoute(getUserRoleString(user.role)));
-      }
+    if (loading) return;
+    if (!isAuthenticated || !user) {
+      router.push("/login");
+      return;
     }
-  }, [user, loading, isAuthenticated, allowedRoles, router]);
+    if (!isAuthorized) {
+      router.push(getDefaultRoute(user.role));
+    }
+  }, [loading, isAuthenticated, user, isAuthorized, router]);
 
-  // Show loading while checking authentication
-  if (loading) {
-    return <PageLoading />;
-  }
+  if (loading) return <PageLoading />;
+  if (!isAuthorized) return null;
 
-  // Not authenticated
-  if (!isAuthenticated || !user) {
-    return null;
-  }
-
-  // Not authorized for this route
-  if (
-    allowedRoles &&
-    !canAccessRoute(getUserRoleString(user.role), allowedRoles)
-  ) {
-    return null;
-  }
-
-  // Authorized - render children
   return <>{children}</>;
 }

@@ -3,7 +3,10 @@
     "title": "NarBox Courier – Envíos de USA a Panamá",
     "description": "Servicio courier marítimo y aéreo desde USA a Panamá. Casillero en Miami, importación de autos y mercancía. Más de 20 años de experiencia en aduanas.",
     "ogDescription": "Compra en USA, recibe en Panamá. Courier marítimo y aéreo con casillero en Miami. Entrega a domicilio en todo Panamá.",
-    "keywords": "courier panamá, envíos usa panamá, casillero miami, importar desde usa, courier marítimo, courier aéreo, importación autos panamá"
+    "keywords": "courier panamá, envíos usa panamá, casillero miami, importar desde usa, courier marítimo, courier aéreo, importación autos panamá",
+    "adminTitle": "Administración",
+    "clientTitle": "Mi cuenta",
+    "loginTitle": "Iniciar sesión"
   },
   "footer": {
     "privacyPolicy": "Políticas de Privacidad",
@@ -12,7 +15,25 @@
   "common": {
     "language": "Idioma",
     "spanish": "Español",
-    "english": "Inglés"
+    "english": "Inglés",
+    "notFound": {
+      "title": "Página no encontrada",
+      "description": "La página que buscas no existe o fue movida.",
+      "goHome": "Ir al inicio"
+    },
+    "loading": "Cargando...",
+    "comingSoon": "Próximamente",
+    "dismiss": "Cerrar",
+    "error": {
+      "title": "Algo salió mal",
+      "description": "Ocurrió un error al cargar esta página",
+      "retry": "Reintentar",
+      "goToDashboard": "Ir al panel"
+    },
+    "table": {
+      "selectAll": "Seleccionar todo",
+      "selectRow": "Seleccionar fila {index}"
+    }
   },
   "navigation": {
     "admin": {
@@ -87,6 +108,9 @@
       "whatsapp": "+507 6612-6130",
       "instagram": "@narboxcourier",
       "address": "Panamá City, Panamá – Entregas a domicilio en todo el país."
+    },
+    "header": {
+      "signIn": "Iniciar sesión"
     }
   },
   "login": {
@@ -268,7 +292,10 @@
       "successDescription": "{name} ha sido eliminado del sistema.",
       "errorTitle": "Error al eliminar cliente",
       "errorDescription": "{error}"
-    }
+    },
+    "viewAriaLabel": "Ver {name}",
+    "editAriaLabel": "Editar {name}",
+    "deleteAriaLabel": "Eliminar {name}"
   },
   "adminConsolidations": {
     "title": "Gestión de Consolidaciones",
@@ -316,12 +343,11 @@
     "totalCost": "Costo",
     "viewDialog": {
       "title": "Ver Detalles de Consolidación",
-      "description": "Información detallada sobre la consolidación seleccionada.",
+      "description": "Descripción",
       "generalInfo": "Información General",
       "packagesInfo": "Paquetes",
       "id": "ID de Consolidación",
       "client": "Cliente",
-      "description": "Descripción",
       "status": "Estado",
       "deliveryDate": "Fecha de Entrega",
       "comment": "Comentario",
@@ -393,7 +419,11 @@
       "successDescription": "La consolidación ha sido eliminada del sistema.",
       "errorTitle": "Error al eliminar consolidación",
       "errorDescription": "{error}"
-    }
+    },
+    "viewAriaLabel": "Ver {description}",
+    "editAriaLabel": "Editar {description}",
+    "deleteAriaLabel": "Eliminar {description}",
+    "descriptionColumn": "Descripción"
   },
   "consolidation": {
     "pageTitle": "Consolidación de Paquetes",
@@ -462,11 +492,12 @@
     "noRecentPackages": "No hay paquetes recientes",
     "noRecentConsolidations": "No hay consolidaciones recientes",
     "packagesCount": "{count, plural, one {# paquete} other {# paquetes}}",
-    "dateLabel": "Fecha"
+    "dateLabel": "Fecha",
+    "clientLabel": "Cliente"
   },
   "adminPackagesManagement": {
     "title": "Gestión de Paquetes",
-    "description": "Administra los paquetes de un cliente seleccionado",
+    "description": "Descripción",
     "refresh": "Actualizar",
     "addPackage": "Agregar Paquete",
     "clientLabel": "Cliente",
@@ -476,7 +507,6 @@
     "clearSearch": "Limpiar búsqueda",
     "loadingError": "Error al cargar los paquetes: {error}",
     "barcode": "Código de Barras",
-    "description": "Descripción",
     "weight": "Peso",
     "createdAt": "Creado",
     "actions": "Acciones",
@@ -492,7 +522,10 @@
     "previousPage": "Página anterior",
     "nextPage": "Página siguiente",
     "goToPage": "Ir a la página {page}",
-    "owner": "Propietario"
+    "owner": "Propietario",
+    "viewAriaLabel": "Ver {barcode}",
+    "editAriaLabel": "Editar {barcode}",
+    "deleteAriaLabel": "Eliminar {barcode}"
   },
   "clientAutocomplete": {
     "placeholder": "Selecciona un cliente...",
@@ -753,7 +786,8 @@
         "cancel": "Cancelar",
         "confirm": "Sí, crear consolidación",
         "creating": "Creando..."
-      }
+      },
+      "removeCharge": "Quitar cargo"
     },
     "success": {
       "title": "¡Consolidación Creada Exitosamente!",
@@ -782,14 +816,6 @@
         "delivered": "Entregado",
         "cancelled": "Cancelado"
       }
-    },
-    "clientSelect": {
-      "placeholder": "Selecciona un cliente...",
-      "searchPlaceholder": "Busca clientes por nombre o correo...",
-      "loading": "Cargando clientes...",
-      "error": "Error al cargar clientes: {message}",
-      "noClientsFound": "No se encontraron clientes.",
-      "tryDifferentSearch": "Intenta con un término de búsqueda diferente"
     },
     "detailsModal": {
       "title": "Detalles del Paquete",
@@ -843,6 +869,95 @@
     "successDescription": "Los parámetros de precios han sido guardados.",
     "errorTitle": "Error al actualizar la configuración de precios",
     "loadingError": "Error al cargar la configuración de precios.",
-    "loading": "Cargando configuración de precios..."
+    "loading": "Cargando configuración de precios...",
+    "transportationRateInvalid": "Ingresa una tarifa válida (0 o mayor)",
+    "serviceFeePercentageInvalid": "Ingresa un decimal entre 0 y 1 (ej. 0.10 para 10%)"
+  },
+  "header": {
+    "toggleMenu": "Abrir menú",
+    "expandSidebar": "Expandir barra lateral",
+    "collapseSidebar": "Contraer barra lateral",
+    "accountSettings": "Configuración de cuenta",
+    "logout": "Cerrar sesión"
+  },
+  "clientDashboard": {
+    "title": "Panel",
+    "description": "Bienvenido a tu panel de NarBox",
+    "intro": "Tu panel mostrará un resumen de tu actividad de envíos:",
+    "feature1": "Envíos activos e información de rastreo",
+    "feature2": "Historial reciente de paquetes",
+    "feature3": "Entregas pendientes",
+    "feature4": "Acciones rápidas para tareas comunes",
+    "feature5": "Notificaciones y novedades importantes"
+  },
+  "clientPackages": {
+    "title": "Mis paquetes",
+    "description": "Consulta y administra tus paquetes",
+    "intro": "Esta página mostrará todos tus paquetes con funciones como:",
+    "feature1": "Lista completa de tus paquetes",
+    "feature2": "Filtrar por estado (pendiente, en tránsito, entregado)",
+    "feature3": "Buscar paquetes por número de rastreo",
+    "feature4": "Ver información detallada del paquete",
+    "feature5": "Descargar etiquetas de envío y recibos"
+  },
+  "clientTrack": {
+    "title": "Rastrear paquete",
+    "description": "Ingresa el número de rastreo para encontrar tu paquete",
+    "intro": "Esta página ofrecerá rastreo de paquetes en tiempo real:",
+    "feature1": "Ingresa el número de rastreo para una búsqueda inmediata",
+    "feature2": "Ver la ubicación actual del paquete",
+    "feature3": "Ver la línea de tiempo e historial de entrega",
+    "feature4": "Fecha y hora estimadas de entrega",
+    "feature5": "Recibir notificaciones de cambios de estado"
+  },
+  "clientNewShipment": {
+    "title": "Nuevo envío",
+    "description": "Crea un nuevo envío de paquete",
+    "intro": "Esta página ofrecerá un formulario para crear envíos con:",
+    "feature1": "Información del remitente y destinatario",
+    "feature2": "Detalles del paquete (peso, dimensiones, tipo)",
+    "feature3": "Selección del método de envío",
+    "feature4": "Cálculo de costos y opciones de pago",
+    "feature5": "Generar etiqueta de envío y número de rastreo"
+  },
+  "clientProfile": {
+    "title": "Perfil",
+    "description": "Administra la configuración de tu cuenta",
+    "intro": "Esta página te permitirá administrar tu cuenta:",
+    "feature1": "Actualizar información personal",
+    "feature2": "Cambiar contraseña y configuración de seguridad",
+    "feature3": "Administrar direcciones guardadas",
+    "feature4": "Configurar preferencias de notificaciones",
+    "feature5": "Ver el historial de actividad de la cuenta"
+  },
+  "adminUsers": {
+    "title": "Gestión de usuarios",
+    "description": "Administra los usuarios y permisos del sistema",
+    "intro": "Esta página ofrecerá funciones de gestión de usuarios:",
+    "feature1": "Ver y administrar todas las cuentas de usuario",
+    "feature2": "Agregar, editar o desactivar cuentas de usuario",
+    "feature3": "Administrar roles y permisos de usuario",
+    "feature4": "Ver la actividad y el historial de paquetes de los usuarios",
+    "feature5": "Enviar notificaciones a los usuarios"
+  },
+  "adminSettings": {
+    "title": "Configuración",
+    "description": "Configura los ajustes y preferencias del sistema",
+    "intro": "Esta página ofrecerá opciones de configuración del sistema:",
+    "feature1": "Ajustes y preferencias generales del sistema",
+    "feature2": "Configuración de correo y notificaciones",
+    "feature3": "Configuración de la pasarela de pagos",
+    "feature4": "Tarifas y zonas de envío",
+    "feature5": "Configuración de seguridad y control de acceso"
+  },
+  "adminReports": {
+    "title": "Reportes",
+    "description": "Consulta analíticas y genera reportes",
+    "intro": "Esta página ofrecerá reportes y analíticas:",
+    "feature1": "Reportes financieros y de ingresos",
+    "feature2": "Estadísticas y tendencias de entregas",
+    "feature3": "Métricas de actividad y participación de usuarios",
+    "feature4": "Analíticas de rendimiento y KPI",
+    "feature5": "Generación y exportación de reportes personalizados"
   }
 }

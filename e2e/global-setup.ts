@@ -1,10 +1,10 @@
-import { test as base, expect } from "./fixtures/mockBackend";
-const setup = base;
 import path from "path";
+
+import { expect, test } from "./fixtures/mockBackend";
 
 const authFile = path.join(__dirname, ".auth/storage-state.json");
 
-setup("authenticate as admin", async ({ page }) => {
+test("authenticate as admin", async ({ page }) => {
   await page.goto("/en/login");
 
   await page.locator("#email").fill("admin@example.com");

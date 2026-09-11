@@ -1,32 +1,12 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ConsolidationRow } from "../ConsolidationRow";
+import React from "react";
+
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+import { ConsolidationRow } from "../ConsolidationRow";
 
-jest.mock("@/components/ui/table", () => ({
-  TableRow: ({
-    children,
-    ...props
-  }: {
-    children: React.ReactNode;
-    style?: React.CSSProperties;
-  }) => (
-    <tr data-testid="table-row" style={props.style}>
-      {children}
-    </tr>
-  ),
-  TableCell: ({
-    children,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => <td>{children}</td>,
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 
 jest.mock("@/components/ui/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -65,13 +45,13 @@ jest.mock("@/components/common/TableActionButtons", () => ({
   ),
 }));
 
-jest.mock("@/components/ui/status-badge", () => ({
+jest.mock("@/components/data-display/status-badge", () => ({
   StatusBadge: ({ label }: { status: string; label: string }) => (
     <span data-testid="status-badge">{label}</span>
   ),
 }));
 
-jest.mock("../getStatusLabel", () => ({
+jest.mock("@/lib/consolidations/getStatusLabel", () => ({
   getStatusLabel: (_t: unknown, status: string) => `status-${status}`,
 }));
 
@@ -81,7 +61,7 @@ const mockConsolidation: ConsolidateType = {
   status: "pending",
   deliveryDate: "2024-06-15",
   comment: null,
-  extraAttributes: null,
+  extraAttributes: "{}",
   client: {
     id: "client-1",
     fullName: "John Doe",
@@ -190,7 +170,7 @@ describe("ConsolidationRow", () => {
   it("animation delay applied via style", () => {
     renderInTable(<ConsolidationRow {...defaultProps} animationDelay={150} />);
 
-    const row = screen.getByTestId("table-row");
-    expect(row.style.animationDelay).toBe("150ms");
+    const row = screen.getByRole("row");
+    expect(row).toHaveStyle({ animationDelay: "150ms" });
   });
 });

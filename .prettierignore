@@ -1,21 +1,18 @@
-# Dependencies
 node_modules
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# Build outputs
 .next
 out
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml
+next-env.d.ts
+src/graphql/generated
+schema.graphql
+public
+.agents
+.claude
 build
 dist
-
-# Misc
+.turbo
 .env*
 *.log
-.DS_Store
-coverage
-.turbo
-
-# Generated files
-next-env.d.ts

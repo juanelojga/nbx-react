@@ -1,10 +1,11 @@
-import type { ConsolidateType } from "@/graphql/queries/consolidations";
+import { Package as PackageIcon } from "lucide-react";
+
 import type {
   ColumnDef,
   EmptyStateConfig,
   PaginationLabels,
-} from "@/components/ui/base-table";
-import { Package as PackageIcon } from "lucide-react";
+} from "@/components/data-display/base-table";
+import type { ConsolidateType } from "@/graphql/queries/consolidations";
 
 export function getConsolidationColumns(
   t: (key: string) => string
@@ -21,6 +22,12 @@ export function getConsolidationColumns(
       header: t("client"),
       cell: () => null,
       skeletonWidth: "9rem",
+    },
+    {
+      id: "description",
+      header: t("descriptionColumn"),
+      cell: () => null,
+      skeletonWidth: "12rem",
     },
     {
       id: "status",

@@ -1,32 +1,29 @@
 "use client";
 
-import { useCallback, useState } from "react";
 import { useMutation } from "@apollo/client/react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { ArrowLeft, Loader2, Package as PackageIcon, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCallback, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import { ExtraAttributesEditor } from "@/components/admin/ExtraAttributesEditor";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, ArrowLeft, Send, Package as PackageIcon } from "lucide-react";
-import { toast } from "sonner";
-import {
-  CREATE_CONSOLIDATE,
-  CreateConsolidateVariables,
-  CreateConsolidateResponse,
-} from "@/graphql/mutations/consolidations";
-import { ClientType } from "@/graphql/queries/clients";
-import { Package } from "../types";
-import {
-  ExtraAttributesEditor,
-  ExtraAttributeEntry,
-  serializeExtraAttributes,
-} from "@/components/admin/ExtraAttributesEditor";
+import { CREATE_CONSOLIDATE } from "@/graphql/mutations/consolidations";
+import { type ClientType } from "@/graphql/queries/clients";
+import type { ConsolidateType } from "@/graphql/queries/consolidations";
+import { serializeExtraAttributes } from "@/lib/consolidations/serializeExtraAttributes";
+import { createConsolidationFormSchema } from "@/lib/validation/consolidationFormSchema";
+import type { ExtraAttributeEntry } from "@/types/consolidation";
+
+import { type Package } from "../types";
 import { ConfirmCreateConsolidationDialog } from "./ConfirmCreateConsolidationDialog";
 
 interface ConsolidationFormProps {
@@ -34,30 +31,15 @@ interface ConsolidationFormProps {
   selectedPackages: Set<string>;
   packages: Package[];
   onBack: () => void;
-  onSuccess: (
-    consolidation: CreateConsolidateResponse["createConsolidate"]["consolidate"]
-  ) => void;
+  onSuccess: (consolidation: ConsolidateType) => void;
 }
 
-// Zod validation schema - needs to use translation values
-const getConsolidationSchema = (t: (key: string) => string) =>
-  z.object({
-    description: z.string().min(1, t("descriptionRequired")),
-    comment: z.string().optional(),
-    extraAttributes: z
-      .array(z.object({ key: z.string(), value: z.string() }))
-      .max(5)
-      .optional()
-      .default([]),
-    sendEmail: z.boolean().optional().default(true),
-  });
-
-type ConsolidationFormData = {
+interface ConsolidationFormData {
   description: string;
   comment?: string;
   extraAttributes?: ExtraAttributeEntry[];
   sendEmail?: boolean;
-};
+}
 
 export function ConsolidationForm({
   selectedClient,
@@ -76,7 +58,7 @@ export function ConsolidationForm({
     setValue,
     formState: { errors },
   } = useForm<ConsolidationFormData>({
-    resolver: zodResolver(getConsolidationSchema(t)),
+    resolver: zodResolver(createConsolidationFormSchema(t)),
     defaultValues: {
       description: "",
       comment: "",
@@ -93,25 +75,25 @@ export function ConsolidationForm({
   const sendEmail = watch("sendEmail");
   const extraAttributes = watch("extraAttributes");
 
-  const [createConsolidate, { loading, error }] = useMutation<
-    CreateConsolidateResponse,
-    CreateConsolidateVariables
-  >(CREATE_CONSOLIDATE, {
-    onCompleted: (data) => {
-      toast.success(t("successTitle"), {
-        description: t("successDescription", {
-          fullName: selectedClient.fullName,
-        }),
-      });
-      // Call success callback with consolidation data
-      onSuccess(data.createConsolidate.consolidate);
-    },
-    onError: (error) => {
-      toast.error(t("errorTitle"), {
-        description: error.message || t("errorDescription"),
-      });
-    },
-  });
+  const [createConsolidate, { loading, error }] = useMutation(
+    CREATE_CONSOLIDATE,
+    {
+      onCompleted: (data) => {
+        toast.success(t("successTitle"), {
+          description: t("successDescription", {
+            fullName: selectedClient.fullName ?? "",
+          }),
+        });
+        const consolidate = data.createConsolidate?.consolidate;
+        if (consolidate) onSuccess(consolidate);
+      },
+      onError: (error) => {
+        toast.error(t("errorTitle"), {
+          description: error.message || t("errorDescription"),
+        });
+      },
+    }
+  );
 
   // Get selected package details
   const selectedPackageDetails = packages.filter((pkg) =>
@@ -402,6 +384,7 @@ export function ConsolidationForm({
                       chargeName: t("chargeName"),
                       chargeAmount: t("chargeAmount"),
                       maxChargesReached: t("maxChargesReached"),
+                      removeCharge: t("removeCharge"),
                     }}
                   />
                 </div>

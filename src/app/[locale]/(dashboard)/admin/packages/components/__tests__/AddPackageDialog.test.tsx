@@ -1,14 +1,13 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedProvider, MockedResponse } from "@/test/MockedProvider";
-import { AddPackageDialog } from "@/app/[locale]/(dashboard)/admin/packages/components/AddPackageDialog";
-import { CREATE_PACKAGE } from "@/graphql/mutations/packages";
+import React from "react";
 import { toast } from "sonner";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+import { AddPackageDialog } from "@/app/[locale]/(dashboard)/admin/packages/components/AddPackageDialog";
+import { CREATE_PACKAGE } from "@/graphql/mutations/packages";
+import { MockedProvider, type MockedResponse } from "@/test/MockedProvider";
+
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));
@@ -274,9 +273,6 @@ describe("AddPackageDialog", () => {
 
     expect(defaultProps.onOpenChange).toHaveBeenCalledWith(false);
 
-    const barcodeInput = screen.getByLabelText(
-      /barcodeLabel/
-    ) as HTMLInputElement;
-    expect(barcodeInput.value).toBe("");
+    expect(screen.getByLabelText(/barcodeLabel/)).toHaveValue("");
   });
 });

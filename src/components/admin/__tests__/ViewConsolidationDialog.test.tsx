@@ -1,17 +1,17 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedProvider } from "@/test/MockedProvider";
-import { ViewConsolidationDialog } from "../ViewConsolidationDialog";
-import { GET_CONSOLIDATE_BY_ID } from "@/graphql/queries/consolidations";
 import { GraphQLError } from "graphql";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+import { GET_CONSOLIDATE_BY_ID } from "@/graphql/queries/consolidations";
+import { MockedProvider } from "@/test/MockedProvider";
+
+import { ViewConsolidationDialog } from "../ViewConsolidationDialog";
+
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));
-jest.mock("@/components/ui/status-badge", () => ({
+jest.mock("@/components/data-display/status-badge", () => ({
   StatusBadge: ({ status, label }: { status: string; label: string }) => (
     <span data-testid="status-badge" data-status={status}>
       {label}

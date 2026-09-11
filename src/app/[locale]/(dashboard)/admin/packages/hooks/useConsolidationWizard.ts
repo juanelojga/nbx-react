@@ -1,16 +1,15 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "@/lib/navigation";
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { ClientType } from "@/graphql/queries/clients";
-import {
-  RESOLVE_ALL_PACKAGES,
-  ResolveAllPackagesResponse,
-  ResolveAllPackagesVariables,
-} from "@/graphql/queries/packages";
-import { ConsolidateType } from "@/graphql/queries/consolidations";
+import { useCallback, useMemo, useState } from "react";
+
+import { type ClientType } from "@/graphql/queries/clients";
+import { type ConsolidateType } from "@/graphql/queries/consolidations";
+import { GET_ALL_PACKAGES } from "@/graphql/queries/packages";
+import { useRouter } from "@/i18n/navigation";
+import { compact } from "@/lib/graphql/compact";
+
 import type { Package } from "../types";
 
 interface Step {
@@ -65,26 +64,23 @@ export function useConsolidationWizard(): UseConsolidationWizardReturn {
 
   const queryVariables = useMemo(
     () => ({
-      client_id: selectedClient ? parseInt(selectedClient.id) : 0,
+      clientId: selectedClient ? selectedClient.id : "0",
       page: 1,
-      page_size: 20,
-      order_by: "-created_at",
+      pageSize: 20,
+      orderBy: "-created_at",
       search: "",
       notInConsolidate: true,
     }),
     [selectedClient]
   );
 
-  const { data, loading, error, refetch } = useQuery<
-    ResolveAllPackagesResponse,
-    ResolveAllPackagesVariables
-  >(RESOLVE_ALL_PACKAGES, {
+  const { data, loading, error, refetch } = useQuery(GET_ALL_PACKAGES, {
     variables: queryVariables,
     skip: currentStep !== 2 || !selectedClient,
     fetchPolicy: "network-only",
   });
 
-  const packages = data?.allPackages.results || [];
+  const packages = compact(data?.allPackages?.results);
   const hasError = !!error;
 
   const handleClientSelect = useCallback((client: ClientType | null) => {
@@ -143,7 +139,7 @@ export function useConsolidationWizard(): UseConsolidationWizardReturn {
 
   const handleRetryLoad = useCallback(() => {
     if (refetch) {
-      refetch();
+      void refetch();
     }
   }, [refetch]);
 

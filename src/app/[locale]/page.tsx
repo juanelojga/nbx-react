@@ -1,14 +1,16 @@
-import { LandingHeader } from "@/components/landing/LandingHeader";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+
+import { ContactSection } from "@/components/landing/ContactSection";
+import { FAQSection } from "@/components/landing/FAQSection";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { LandingHeader } from "@/components/landing/LandingHeader";
 import { ServicesSection } from "@/components/landing/ServicesSection";
-import { FAQSection } from "@/components/landing/FAQSection";
-import { ContactSection } from "@/components/landing/ContactSection";
-import { LocalBusinessJsonLd } from "@/components/seo/LocalBusinessJsonLd";
-import { FAQPageJsonLd } from "@/components/seo/FAQPageJsonLd";
-import { ServiceJsonLd } from "@/components/seo/ServiceJsonLd";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { FAQPageJsonLd } from "@/components/seo/FAQPageJsonLd";
+import { LocalBusinessJsonLd } from "@/components/seo/LocalBusinessJsonLd";
+import { ServiceJsonLd } from "@/components/seo/ServiceJsonLd";
+import { siteConfig } from "@/lib/site-config";
 
 export default async function LandingPage({
   params,
@@ -17,9 +19,6 @@ export default async function LandingPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
 
   const tFaq = await getTranslations({ locale, namespace: "landing.faq" });
   const tServices = await getTranslations({
@@ -41,7 +40,9 @@ export default async function LandingPage({
     { name: tServices("card4Title"), description: tServices("card4Text") },
   ];
 
-  const breadcrumbs = [{ name: "NarBox", url: `${siteUrl}/${locale}` }];
+  const breadcrumbs = [
+    { name: siteConfig.shortName, url: `${siteConfig.url}/${locale}` },
+  ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-[#1976D2]/20 selection:text-[#1976D2]">
@@ -69,12 +70,8 @@ export default async function LandingPage({
           </div>
 
           <div className="flex items-center gap-6 text-sm">
-            <a href="#" className="hover:text-white transition-colors">
-              {tFooter("privacyPolicy")}
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              {tFooter("termsOfService")}
-            </a>
+            <span>{tFooter("privacyPolicy")}</span>
+            <span>{tFooter("termsOfService")}</span>
           </div>
         </div>
       </footer>

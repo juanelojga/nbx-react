@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
+
 import type { ClientType } from "@/graphql/queries/clients";
+
 import type {
   ClientToDelete,
   ClientToEdit,
@@ -61,7 +63,7 @@ export function useClientDialogs(): UseClientDialogsReturn {
   const handleDeleteClient = useCallback((client: ClientType) => {
     setClientToDelete({
       id: client.id,
-      fullName: client.fullName,
+      fullName: client.fullName ?? "",
       email: client.email,
     });
     setIsDeleteDialogOpen(true);

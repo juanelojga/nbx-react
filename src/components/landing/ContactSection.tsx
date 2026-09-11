@@ -1,8 +1,10 @@
-import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { MessageCircle, MapPin } from "lucide-react";
-import { InstagramIcon } from "@/components/icons/InstagramIcon";
+import { MapPin, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+
+import { InstagramIcon } from "@/components/icons/InstagramIcon";
+import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/lib/site-config";
 
 export function ContactSection() {
   const t = useTranslations("landing.contact");
@@ -43,7 +45,7 @@ export function ContactSection() {
                   </div>
                 </div>
                 <Link
-                  href="https://wa.me/50766126130"
+                  href={siteConfig.whatsappUrl}
                   target="_blank"
                   className="block"
                 >
@@ -57,7 +59,7 @@ export function ContactSection() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Instagram */}
                 <Link
-                  href="https://instagram.com/narboxcourier"
+                  href={siteConfig.instagramUrl}
                   target="_blank"
                   className="bg-white rounded-xl p-4 ring-1 ring-border/50 flex items-center gap-3 hover:bg-slate-50 transition-colors group"
                 >

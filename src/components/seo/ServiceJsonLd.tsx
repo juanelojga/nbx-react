@@ -1,20 +1,21 @@
+import { siteConfig } from "@/lib/site-config";
+
 interface ServiceJsonLdProps {
-  services: Array<{
+  services: {
     name: string;
     description: string;
-  }>;
+  }[];
 }
 
 export function ServiceJsonLd({ services }: ServiceJsonLdProps) {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
+  const siteUrl = siteConfig.url;
 
   const schema = services.map((service) => ({
     "@context": "https://schema.org",
     "@type": "Service",
     provider: {
       "@type": "Organization",
-      name: "NarBox Courier",
+      name: siteConfig.name,
       url: siteUrl,
     },
     name: service.name,

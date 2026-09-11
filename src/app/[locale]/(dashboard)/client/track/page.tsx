@@ -1,30 +1,37 @@
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export default function TrackPackage() {
+import { ComingSoonCard } from "@/components/common/ComingSoonCard";
+import { PageHeader } from "@/components/data-display/page-header";
+
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "clientTrack" });
+  return { title: t("title") };
+}
+
+export default async function ClientTrackPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "clientTrack" });
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Track Package"
-        description="Enter tracking number to find your package"
+      <PageHeader title={t("title")} description={t("description")} />
+      <ComingSoonCard
+        intro={t("intro")}
+        features={[
+          t("feature1"),
+          t("feature2"),
+          t("feature3"),
+          t("feature4"),
+          t("feature5"),
+        ]}
       />
-      <Card>
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600">
-            This page will provide real-time package tracking features:
-          </p>
-          <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-            <li>Enter tracking number for instant lookup</li>
-            <li>View current package location</li>
-            <li>See delivery timeline and history</li>
-            <li>Estimated delivery date and time</li>
-            <li>Receive notifications for status changes</li>
-          </ul>
-        </CardContent>
-      </Card>
     </div>
   );
 }

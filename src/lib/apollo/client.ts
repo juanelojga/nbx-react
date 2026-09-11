@@ -2,275 +2,73 @@
 
 import {
   ApolloClient,
-  CombinedGraphQLErrors,
-  from,
+  ApolloLink,
   HttpLink,
   InMemoryCache,
-  Observable,
 } from "@apollo/client";
-import { ErrorLink } from "@apollo/client/link/error";
-import { setContext } from "@apollo/client/link/context";
+import { SetContextLink } from "@apollo/client/link/context";
+
+import { createErrorLink } from "@/lib/apollo/createErrorLink";
+import { GRAPHQL_ENDPOINT } from "@/lib/apollo/endpoint";
+import { authEvents, SESSION_EXPIRED_EVENT } from "@/lib/auth/authEvents";
+import { refreshAccessToken } from "@/lib/auth/refreshAccessToken";
 import {
   clearTokens,
   getAccessToken,
   getRefreshToken,
   isTokenExpired,
-  saveTokens,
 } from "@/lib/auth/tokens";
-import { REFRESH_TOKEN_MUTATION } from "@/graphql/mutations/auth";
-import { logger } from "@/lib/logger";
 
-// Get the GraphQL API URL from environment variables
-const GRAPHQL_API_URL =
-  process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || "http://localhost:8000/graphql";
-
-// HTTP Link - connects to the GraphQL endpoint
 const httpLink = new HttpLink({
-  uri: GRAPHQL_API_URL,
-  credentials: "include", // Include cookies for authentication
-  headers: {
-    "X-Requested-With": "XMLHttpRequest", // CSRF protection header
-  },
+  uri: GRAPHQL_ENDPOINT,
+  credentials: "include",
+  headers: { "X-Requested-With": "XMLHttpRequest" },
 });
 
-// Global variable to track ongoing refresh to prevent race conditions
-let refreshPromise: Promise<string | null> | null = null;
-
-/**
- * Perform token refresh with deduplication
- * Prevents multiple simultaneous refresh attempts
- */
-async function performTokenRefresh(): Promise<string | null> {
-  // If a refresh is already in progress, return that promise
-  if (refreshPromise) {
-    return refreshPromise;
-  }
-
-  // Create new refresh promise
-  refreshPromise = (async () => {
-    try {
-      const refreshToken = getRefreshToken();
-
-      if (!refreshToken) {
-        logger.error("Token refresh failed: No refresh token in localStorage");
-        throw new Error("No refresh token available");
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-      try {
-        const response = await fetch(GRAPHQL_API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            query: REFRESH_TOKEN_MUTATION.loc?.source.body,
-            variables: { refreshToken },
-          }),
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        const result = await response.json();
-
-        if (result.data?.refreshWithToken) {
-          const newAccessToken = result.data.refreshWithToken.token;
-          const newRefreshToken = result.data.refreshWithToken.refreshToken;
-          const refreshExpiresIn =
-            result.data.refreshWithToken.refreshExpiresIn;
-          // Save new access token and new refresh token (token rotation)
-          saveTokens(newAccessToken, newRefreshToken, refreshExpiresIn);
-          return newAccessToken;
-        }
-
-        throw new Error("Token refresh failed: Invalid response");
-      } catch (error) {
-        clearTimeout(timeoutId);
-        throw error;
-      }
-    } catch (error) {
-      logger.error("Token refresh failed:", error);
-      clearTokens();
-      return null;
-    } finally {
-      refreshPromise = null;
-    }
-  })();
-
-  return refreshPromise;
-}
-
-// Auth Link - adds JWT token to headers if available
-const authLink = setContext(async (_, { headers }) => {
+/** Attaches the JWT, refreshing it first when it is about to expire. */
+const authLink = new SetContextLink(async ({ headers }) => {
+  const previous = (headers ?? {}) as Record<string, string>;
   let token = getAccessToken();
-
-  // Check if token is expired and refresh if needed
   if (token && isTokenExpired(token)) {
-    const newToken = await performTokenRefresh();
-    if (newToken) {
-      token = newToken;
-    } else {
-      token = null;
-    }
+    token = await refreshAccessToken();
   }
-
   return {
-    headers: {
-      ...headers,
-      authorization: token ? `JWT ${token}` : "",
-    },
+    headers: { ...previous, authorization: token ? `JWT ${token}` : "" },
   };
 });
 
-// Error Link - global error handling with retry logic
-const errorLink = new ErrorLink(({ error, operation, forward }) => {
-  if (CombinedGraphQLErrors.is(error)) {
-    for (const gqlError of error.errors) {
-      logger.error(
-        `[GraphQL error]: Message: ${gqlError.message}, Location: ${JSON.stringify(gqlError.locations)}, Path: ${gqlError.path}`
-      );
-
-      // Handle authentication errors (401, token expired)
-      if (
-        gqlError.extensions?.code === "UNAUTHENTICATED" ||
-        gqlError.message.includes("Authentication") ||
-        gqlError.message.includes("Signature has expired") ||
-        gqlError.message.includes("token") ||
-        gqlError.message.includes("Token")
-      ) {
-        // Try to refresh the token
-        const refreshToken = getRefreshToken();
-        if (
-          refreshToken &&
-          !operation.operationName?.includes("RefreshToken")
-        ) {
-          return new Observable((observer) => {
-            performTokenRefresh()
-              .then((newToken) => {
-                if (newToken) {
-                  // Retry the failed request with new token
-                  const subscriber = {
-                    next: observer.next.bind(observer),
-                    error: observer.error.bind(observer),
-                    complete: observer.complete.bind(observer),
-                  };
-
-                  forward(operation).subscribe(subscriber);
-                } else {
-                  throw new Error("Refresh failed");
-                }
-              })
-              .catch(() => {
-                clearTokens();
-                if (typeof window !== "undefined") {
-                  window.location.href = "/login";
-                }
-                observer.error(gqlError);
-              });
-          });
-        } else {
-          // No refresh token available or already trying to refresh
-          clearTokens();
-          if (typeof window !== "undefined") {
-            window.location.href = "/login";
-          }
-        }
-      }
-    }
-  } else {
-    logger.error(`[Network error]: ${error}`);
-  }
+const errorLink = createErrorLink({
+  refresh: refreshAccessToken,
+  hasRefreshToken: () => getRefreshToken() !== null,
+  onSessionExpired: () => {
+    clearTokens();
+    authEvents.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+  },
 });
-
-// Create Apollo Client instance
-let apolloClient: ApolloClient | null = null;
 
 function createApolloClient(): ApolloClient {
   return new ApolloClient({
-    ssrMode: typeof window === "undefined", // Enable SSR mode on server
-    link: from([errorLink, authLink, httpLink]),
-    cache: new InMemoryCache({
-      typePolicies: {
-        Query: {
-          fields: {
-            // Cache policies for better performance (Vercel Best Practices 3.3)
-            allClients: {
-              // Cache clients list with merge strategy
-              keyArgs: ["search", "orderBy", "page", "pageSize"], // Cache based on search, sort, and pagination parameters
-              merge(_existing, incoming) {
-                // For pagination, always replace with incoming data
-                // Each page is treated as independent for simplicity
-                return incoming;
-              },
-            },
-            allPackages: {
-              // Cache packages list
-              keyArgs: [
-                "search",
-                "orderBy",
-                "page",
-                "pageSize",
-                "notInConsolidate",
-                "clientId",
-              ],
-              merge(_existing, incoming) {
-                // For pagination, always replace with incoming data
-                return incoming;
-              },
-            },
-          },
-        },
-        // Cache individual entities by ID for better normalization
-        Client: {
-          keyFields: ["id"],
-        },
-        Package: {
-          keyFields: ["id"],
-        },
-        User: {
-          keyFields: ["id"],
-        },
-      },
-    }),
+    ssrMode: typeof window === "undefined",
+    link: ApolloLink.from([errorLink, authLink, httpLink]),
+    // Graphene types (ClientType, PackageType, ...) all expose `id`, which is
+    // Apollo's default cache key, so no custom typePolicies are needed.
+    cache: new InMemoryCache(),
     defaultOptions: {
       watchQuery: {
-        // Use cache-first for better performance, fallback to network
         fetchPolicy: "cache-first",
-        nextFetchPolicy: "cache-and-network", // Refresh in background
-        errorPolicy: "all",
+        nextFetchPolicy: "cache-and-network",
       },
-      query: {
-        // Use cache-first instead of network-only for better performance
-        fetchPolicy: "cache-first",
-        errorPolicy: "all",
-      },
-      mutate: {
-        errorPolicy: "all",
-      },
+      query: { fetchPolicy: "cache-first" },
     },
-    devtools: {
-      enabled: process.env.NODE_ENV === "development",
-    },
+    devtools: { enabled: process.env.NODE_ENV === "development" },
   });
 }
 
-// Initialize Apollo Client (singleton pattern for client-side)
+let browserClient: ApolloClient | null = null;
+
+/** Per-request client on the server; a singleton in the browser. */
 export function getApolloClient(): ApolloClient {
-  if (typeof window === "undefined") {
-    // Always create a new client on the server
-    return createApolloClient();
-  }
-
-  // Create the Apollo Client once on the client
-  if (!apolloClient) {
-    apolloClient = createApolloClient();
-  }
-
-  return apolloClient;
+  if (typeof window === "undefined") return createApolloClient();
+  browserClient ??= createApolloClient();
+  return browserClient;
 }
-
-// Export the client instance for use in AuthContext
-export { apolloClient };

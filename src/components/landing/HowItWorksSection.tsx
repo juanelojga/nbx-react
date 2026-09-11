@@ -1,5 +1,5 @@
+import { PackageCheck, Plane, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { ShoppingBag, Plane, PackageCheck } from "lucide-react";
 
 export function HowItWorksSection() {
   const t = useTranslations("landing.howItWorks");
@@ -29,7 +29,7 @@ export function HowItWorksSection() {
   ];
 
   return (
-    <section className="py-20 bg-white relative">
+    <section id="how-it-works" className="py-20 bg-white relative">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
@@ -66,10 +66,10 @@ export function HowItWorksSection() {
 
               {/* Text */}
               <h3 className="text-xl font-bold font-(family-name:--font-work-sans) text-foreground mb-3">
-                {t(step.titleKey as Parameters<typeof t>[0])}
+                {t(step.titleKey)}
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                {t(step.textKey as Parameters<typeof t>[0])}
+                {t(step.textKey)}
               </p>
             </div>
           ))}

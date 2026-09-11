@@ -1,16 +1,13 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
+import { AlertCircle, Loader2, Package as PackageIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { BaseDialog } from "@/components/ui/base-dialog";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, Package as PackageIcon, Loader2 } from "lucide-react";
-import {
-  GET_PACKAGE,
-  GetPackageResponse,
-  GetPackageVariables,
-} from "@/graphql/queries/packages";
+
+import { BaseDialog } from "@/components/common/BaseDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { GET_PACKAGE } from "@/graphql/queries/packages";
 
 interface InfoRowProps {
   label: string;
@@ -42,10 +39,7 @@ export function PackageDetailsModal({
   packageId,
 }: PackageDetailsModalProps) {
   const t = useTranslations("adminPackages.detailsModal");
-  const { data, loading, error } = useQuery<
-    GetPackageResponse,
-    GetPackageVariables
-  >(GET_PACKAGE, {
+  const { data, loading, error } = useQuery(GET_PACKAGE, {
     variables: { id: parseInt(packageId || "0") },
     skip: !packageId || !open, // Skip query if no packageId or dialog is closed
   });
@@ -113,7 +107,11 @@ export function PackageDetailsModal({
     >
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-12">
+        <div
+          className="flex items-center justify-center py-12"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
             <p className="text-sm text-muted-foreground">{t("loading")}</p>

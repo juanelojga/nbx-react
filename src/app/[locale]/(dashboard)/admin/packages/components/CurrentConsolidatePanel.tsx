@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import { DollarSign, Layers, Package, Weight, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMemo } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Package, X, Layers, DollarSign, Weight } from "lucide-react";
-import { Package as PackageType } from "../types";
 import { cn } from "@/lib/utils";
+
+import { type Package as PackageType } from "../types";
 
 interface CurrentConsolidatePanelProps {
   selectedPackages: Set<string>; // Rule 7.11: Use Set for O(1) lookups

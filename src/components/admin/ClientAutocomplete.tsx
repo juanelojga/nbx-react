@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
 import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -19,37 +20,33 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { type ClientType, GET_ALL_CLIENTS } from "@/graphql/queries/clients";
 import { useDebounce } from "@/hooks/useDebounce";
-import {
-  ClientType,
-  GET_ALL_CLIENTS,
-  GetAllClientsResponse,
-  GetAllClientsVariables,
-} from "@/graphql/queries/clients";
+import { compact } from "@/lib/graphql/compact";
+import { cn } from "@/lib/utils";
 
-const MIN_SEARCH_LENGTH = 3;
+const DEFAULT_MIN_SEARCH_LENGTH = 3;
 
 interface ClientAutocompleteProps {
   onClientSelect: (client: ClientType | null) => void;
   selectedClient: ClientType | null;
+  /** Characters required before searching; 0 lists clients as soon as it opens. */
+  minSearchLength?: number;
 }
 
 export function ClientAutocomplete({
   onClientSelect,
   selectedClient,
+  minSearchLength = DEFAULT_MIN_SEARCH_LENGTH,
 }: ClientAutocompleteProps) {
   const t = useTranslations("clientAutocomplete");
   const [open, setOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 300);
 
-  const hasMinChars = debouncedSearch.length >= MIN_SEARCH_LENGTH;
+  const hasMinChars = debouncedSearch.length >= minSearchLength;
 
-  const { data, loading, error } = useQuery<
-    GetAllClientsResponse,
-    GetAllClientsVariables
-  >(GET_ALL_CLIENTS, {
+  const { data, loading, error } = useQuery(GET_ALL_CLIENTS, {
     variables: {
       page: 1,
       pageSize: 50,
@@ -59,7 +56,7 @@ export function ClientAutocomplete({
     skip: !open || !hasMinChars,
   });
 
-  const clients = data?.allClients.results || [];
+  const clients = compact(data?.allClients?.results);
 
   const handleSelect = (client: ClientType) => {
     onClientSelect(client);
@@ -107,7 +104,7 @@ export function ClientAutocomplete({
             {!hasMinChars && (
               <div className="py-6 px-4 text-center">
                 <p className="text-sm text-muted-foreground">
-                  {t("minCharsHint", { min: MIN_SEARCH_LENGTH })}
+                  {t("minCharsHint", { min: minSearchLength })}
                 </p>
               </div>
             )}
@@ -135,9 +132,11 @@ export function ClientAutocomplete({
                   <p className="text-sm text-muted-foreground">
                     {t("noClientsFound")}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {t("tryDifferentSearch")}
-                  </p>
+                  {searchInput && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t("tryDifferentSearch")}
+                    </p>
+                  )}
                 </div>
               </CommandEmpty>
             )}

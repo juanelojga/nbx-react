@@ -1,6 +1,8 @@
-import * as React from "react";
+// FORKED from shadcn (new-york): rounded-lg, font-semibold, hover shadow, active scale, taller sizes (h-10/h-9/h-12), border-2 outline, custom focus ring.
+// Re-apply these deltas after any `shadcn add` that overwrites this file.
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 

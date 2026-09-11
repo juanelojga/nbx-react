@@ -1,11 +1,10 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import React from "react";
+
 import { ConsolidationToolbar } from "../ConsolidationToolbar";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 
 jest.mock("@/components/ui/select", () => ({
   Select: ({

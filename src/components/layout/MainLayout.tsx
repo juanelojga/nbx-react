@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+
+import type { UserRole } from "@/types/user";
+
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  userRole: "admin" | "client";
+  userRole: UserRole;
 }
 
 const SIDEBAR_STORAGE_KEY = "sidebar-collapsed";

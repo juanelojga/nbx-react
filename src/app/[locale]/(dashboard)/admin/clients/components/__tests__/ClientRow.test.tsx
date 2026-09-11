@@ -1,29 +1,12 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ClientRow } from "../ClientRow";
+import React from "react";
+
 import type { ClientType } from "@/graphql/queries/clients";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+import { ClientRow } from "../ClientRow";
 
-jest.mock("@/components/ui/table", () => ({
-  TableRow: ({
-    children,
-    ...props
-  }: {
-    children: React.ReactNode;
-    style?: React.CSSProperties;
-  }) => (
-    <tr data-testid="table-row" style={props.style}>
-      {children}
-    </tr>
-  ),
-  TableCell: ({ children }: { children: React.ReactNode }) => (
-    <td>{children}</td>
-  ),
-}));
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 
 jest.mock("@/components/common/TableActionButtons", () => ({
   TableActionButtons: ({
@@ -141,7 +124,7 @@ describe("ClientRow", () => {
   it("animation delay applied via style", () => {
     renderInTable(<ClientRow {...defaultProps} animationDelay={150} />);
 
-    const row = screen.getByTestId("table-row");
-    expect(row.style.animationDelay).toBe("150ms");
+    const row = screen.getByRole("row");
+    expect(row).toHaveStyle({ animationDelay: "150ms" });
   });
 });

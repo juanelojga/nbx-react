@@ -1,4 +1,7 @@
-import { test as base, type BrowserContext } from "@playwright/test";
+import { type BrowserContext, test as base } from "@playwright/test";
+import { parse } from "graphql";
+
+import { addTypenames } from "../../src/test/addTypenames";
 import { resolvers } from "./mockStore";
 
 interface GraphQLRequest {
@@ -18,7 +21,7 @@ async function attachMockBackend(context: BrowserContext) {
     }
     let body: GraphQLRequest | GraphQLRequest[];
     try {
-      body = request.postDataJSON();
+      body = request.postDataJSON() as GraphQLRequest | GraphQLRequest[];
     } catch {
       await route.fulfill({
         status: 400,
@@ -33,10 +36,8 @@ async function attachMockBackend(context: BrowserContext) {
       if (!op && req.query) {
         // Apollo's raw-fetch refresh path doesn't send operationName.
         // Parse it out of the query body: `mutation Foo(...)` or `query Foo(...)`.
-        const m = req.query.match(
-          /^\s*(?:query|mutation|subscription)\s+(\w+)/
-        );
-        if (m) op = m[1];
+        const m = /^\s*(?:query|mutation|subscription)\s+(\w+)/.exec(req.query);
+        if (m?.[1]) op = m[1];
       }
       const resolver = resolvers[op];
       if (!resolver) {
@@ -49,7 +50,9 @@ async function attachMockBackend(context: BrowserContext) {
       }
       try {
         const data = resolver(req.variables ?? {});
-        return { data };
+        return {
+          data: req.query ? addTypenames(parse(req.query), data) : data,
+        };
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Mock resolver error";

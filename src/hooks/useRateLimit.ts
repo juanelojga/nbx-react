@@ -1,123 +1,122 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface RateLimitState {
   attempts: number;
-  isLocked: boolean;
+  /** Epoch ms when the lock lifts; null when not locked. */
   lockExpiry: number | null;
 }
 
-interface UseRateLimitReturn {
-  /** Attempt an action, returns false if rate limited */
+export interface UseRateLimitReturn {
+  /** Register an attempt. Returns false when the action is currently locked. */
   attempt: () => boolean;
-  /** Reset the rate limit counter */
   reset: () => void;
-  /** Whether the rate limit is currently active */
   isLocked: boolean;
-  /** Timestamp when the lock expires (null if not locked) */
   lockExpiry: number | null;
-  /** Number of remaining attempts before lock */
   remaining: number;
-  /** Total attempts made in current window */
   attempts: number;
 }
 
+const EMPTY: RateLimitState = { attempts: 0, lockExpiry: null };
+
+function isLockedState(state: RateLimitState, now: number): boolean {
+  return state.lockExpiry !== null && state.lockExpiry > now;
+}
+
+function readStored(key: string): RateLimitState {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return EMPTY;
+    const parsed = JSON.parse(raw) as Partial<RateLimitState>;
+    const state: RateLimitState = {
+      attempts: Number(parsed.attempts) || 0,
+      lockExpiry:
+        typeof parsed.lockExpiry === "number" ? parsed.lockExpiry : null,
+    };
+    // A lock that already lapsed resets the window.
+    if (state.lockExpiry !== null && state.lockExpiry <= Date.now())
+      return EMPTY;
+    return state;
+  } catch {
+    return EMPTY;
+  }
+}
+
+function writeStored(key: string, state: RateLimitState): void {
+  try {
+    if (state.attempts === 0 && state.lockExpiry === null) {
+      sessionStorage.removeItem(key);
+    } else {
+      sessionStorage.setItem(key, JSON.stringify(state));
+    }
+  } catch {
+    // Storage unavailable (private mode, quota): the limiter degrades to in-memory.
+  }
+}
+
 /**
- * Hook for implementing rate limiting on actions
+ * Client-side rate limiting for a user action: `maxAttempts` within a window,
+ * then locked for `windowMs`. The verdict is computed synchronously from a ref
+ * so back-to-back calls in one tick cannot both pass. With `storageKey`, the
+ * state survives page reloads via sessionStorage.
  *
- * @param maxAttempts - Maximum number of attempts allowed
- * @param windowMs - Time window in milliseconds before reset
- * @returns Rate limit control object
- *
- * @example
- * ```tsx
- * const { attempt, isLocked, remaining, lockExpiry } = useRateLimit(5, 60000);
- *
- * const handleSubmit = () => {
- *   if (!attempt()) {
- *     toast.error(`Too many attempts. Try again in ${Math.ceil((lockExpiry! - Date.now()) / 1000)}s`);
- *     return;
- *   }
- *   // Proceed with action
- * };
- * ```
+ * This is UX friction only; the backend must enforce real limits.
  */
 export function useRateLimit(
   maxAttempts: number,
-  windowMs: number
+  windowMs: number,
+  storageKey?: string
 ): UseRateLimitReturn {
-  const [state, setState] = useState<RateLimitState>({
-    attempts: 0,
-    isLocked: false,
-    lockExpiry: null,
-  });
+  // Lazily hydrate from storage. Nothing renders this state during SSR, so
+  // the server/client difference cannot produce a hydration mismatch.
+  const [state, setState] = useState<RateLimitState>(() =>
+    storageKey && typeof window !== "undefined" ? readStored(storageKey) : EMPTY
+  );
+  const stateRef = useRef<RateLimitState>(state);
 
-  // Clear lock when expiry time is reached
+  const commit = useCallback(
+    (next: RateLimitState) => {
+      stateRef.current = next;
+      setState(next);
+      if (storageKey) writeStored(storageKey, next);
+    },
+    [storageKey]
+  );
+
+  // Lift the lock when its expiry is reached.
   useEffect(() => {
-    if (state.lockExpiry && state.lockExpiry > Date.now()) {
-      const timeoutId = setTimeout(() => {
-        setState({
-          attempts: 0,
-          isLocked: false,
-          lockExpiry: null,
-        });
-      }, state.lockExpiry - Date.now());
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [state.lockExpiry]);
+    if (state.lockExpiry === null) return;
+    const delay = Math.max(0, state.lockExpiry - Date.now());
+    const timeoutId = setTimeout(() => commit(EMPTY), delay);
+    return () => clearTimeout(timeoutId);
+  }, [state.lockExpiry, commit]);
 
   const attempt = useCallback((): boolean => {
-    setState((prev) => {
-      // If already locked, stay locked
-      if (prev.isLocked) {
-        return prev;
-      }
+    const now = Date.now();
+    const current = stateRef.current;
+    if (isLockedState(current, now)) return false;
 
-      // Check if we should lock
-      if (prev.attempts >= maxAttempts - 1) {
-        const expiry = Date.now() + windowMs;
-        return {
-          attempts: prev.attempts + 1,
-          isLocked: true,
-          lockExpiry: expiry,
-        };
-      }
-
-      // Increment attempts
-      return {
-        ...prev,
-        attempts: prev.attempts + 1,
-      };
+    const attempts = current.attempts + 1;
+    commit({
+      attempts,
+      lockExpiry: attempts >= maxAttempts ? now + windowMs : null,
     });
+    return true;
+  }, [commit, maxAttempts, windowMs]);
 
-    // Return the state before this attempt to know if this attempt was allowed
-    return !state.isLocked && state.attempts < maxAttempts;
-  }, [maxAttempts, windowMs, state.isLocked, state.attempts]);
+  const reset = useCallback(() => commit(EMPTY), [commit]);
 
-  const reset = useCallback((): void => {
-    setState({
-      attempts: 0,
-      isLocked: false,
-      lockExpiry: null,
-    });
-  }, []);
+  // Derived from state only (render must stay pure); the effect above clears
+  // the lock when it lapses.
+  const isLocked = state.lockExpiry !== null;
 
   return {
     attempt,
     reset,
-    isLocked: state.isLocked,
-    lockExpiry: state.lockExpiry,
+    isLocked,
+    lockExpiry: isLocked ? state.lockExpiry : null,
     remaining: Math.max(0, maxAttempts - state.attempts),
     attempts: state.attempts,
   };
-}
-
-/**
- * Hook specifically for login rate limiting
- * Defaults: 5 attempts per 15 minutes
- */
-export function useLoginRateLimit(): UseRateLimitReturn {
-  return useRateLimit(5, 15 * 60 * 1000); // 5 attempts per 15 minutes
 }

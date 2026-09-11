@@ -1,5 +1,6 @@
 import { Eye, Pencil, Trash2 } from "lucide-react";
-import { ActionVariant } from "./table-action-buttons.types";
+
+import { type ActionVariant } from "./table-action-buttons.types";
 
 export const tooltipStyles: Record<ActionVariant, string> = {
   view: "rounded-lg bg-blue-950 px-3 py-1.5 text-xs font-medium text-blue-50",

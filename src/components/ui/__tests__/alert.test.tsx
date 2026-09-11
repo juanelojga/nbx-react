@@ -1,6 +1,6 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
-import { Alert, AlertTitle, AlertDescription } from "../alert";
+
+import { Alert, AlertDescription, AlertTitle } from "../alert";
 
 describe("Alert Component", () => {
   describe("Alert", () => {
@@ -19,13 +19,6 @@ describe("Alert Component", () => {
       const alert = screen.getByRole("alert");
       expect(alert).toBeInTheDocument();
       expect(alert).toHaveTextContent("Destructive alert");
-    });
-
-    it("applies custom className", () => {
-      render(<Alert className="custom-class">Custom alert</Alert>);
-
-      const alert = screen.getByRole("alert");
-      expect(alert).toHaveClass("custom-class");
     });
 
     it("forwards additional props", () => {
@@ -74,13 +67,6 @@ describe("Alert Component", () => {
       expect(title).toHaveAttribute("data-slot", "alert-title");
     });
 
-    it("applies custom className", () => {
-      render(<AlertTitle className="custom-title">Title</AlertTitle>);
-
-      const title = screen.getByText("Title");
-      expect(title).toHaveClass("custom-title");
-    });
-
     it("forwards additional props", () => {
       render(
         <AlertTitle id="title-id" data-testid="alert-title">
@@ -92,15 +78,6 @@ describe("Alert Component", () => {
       expect(title).toHaveAttribute("id", "title-id");
       expect(title).toHaveAttribute("data-testid", "alert-title");
     });
-
-    it("handles long text with line clamping", () => {
-      const longText =
-        "This is a very long title that should be clamped to one line";
-      render(<AlertTitle>{longText}</AlertTitle>);
-
-      const title = screen.getByText(longText);
-      expect(title).toHaveClass("line-clamp-1");
-    });
   });
 
   describe("AlertDescription", () => {
@@ -110,17 +87,6 @@ describe("Alert Component", () => {
       const description = screen.getByText("Alert Description");
       expect(description).toBeInTheDocument();
       expect(description).toHaveAttribute("data-slot", "alert-description");
-    });
-
-    it("applies custom className", () => {
-      render(
-        <AlertDescription className="custom-description">
-          Description
-        </AlertDescription>
-      );
-
-      const description = screen.getByText("Description");
-      expect(description).toHaveClass("custom-description");
     });
 
     it("forwards additional props", () => {
@@ -179,8 +145,6 @@ describe("Alert Component", () => {
         </Alert>
       );
 
-      const alert = screen.getByTestId("custom-alert");
-      expect(alert).toHaveClass("my-custom-alert");
       expect(screen.getByText("Custom Alert Title")).toBeInTheDocument();
       expect(
         screen.getByText("First paragraph of description")

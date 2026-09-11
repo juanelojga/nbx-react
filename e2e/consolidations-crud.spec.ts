@@ -1,5 +1,6 @@
-import { test, expect } from "./fixtures/mockBackend";
 import path from "path";
+
+import { expect, test } from "./fixtures/mockBackend";
 
 const screenshotsDir = path.join(__dirname, "screenshots");
 
@@ -59,7 +60,7 @@ test.describe.serial("Consolidations CRUD", () => {
 
     await expect(
       page.getByRole("heading", { name: "Add New Client" })
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await page.screenshot({
       path: path.join(screenshotsDir, "crud-consol-client-created.png"),
@@ -114,7 +115,7 @@ test.describe.serial("Consolidations CRUD", () => {
     ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("heading", { name: "Create New Package" })
-    ).not.toBeVisible();
+    ).toBeHidden();
     await page.waitForLoadState("networkidle");
 
     await expect(
@@ -311,7 +312,7 @@ test.describe.serial("Consolidations CRUD", () => {
     await dialog.getByRole("button", { name: "Close" }).first().click();
     await expect(
       page.getByRole("heading", { name: "View Consolidation Details" })
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   // ─── Test 6: Update — edit dialog auto-fills ALL fields ────────
@@ -367,7 +368,7 @@ test.describe.serial("Consolidations CRUD", () => {
     await dialog.getByRole("button", { name: "Cancel" }).click();
     await expect(
       page.getByRole("heading", { name: "Edit Consolidation" })
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   // ─── Test 7: Update — edit all fields and submit ───────────────
@@ -432,7 +433,7 @@ test.describe.serial("Consolidations CRUD", () => {
     // Dialog should close
     await expect(
       page.getByRole("heading", { name: "Edit Consolidation" })
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await page.screenshot({
       path: path.join(screenshotsDir, "crud-consol-after-edit.png"),
@@ -491,7 +492,7 @@ test.describe.serial("Consolidations CRUD", () => {
     await dialog.getByRole("button", { name: "Cancel" }).click();
     await expect(
       page.getByRole("heading", { name: "Edit Consolidation" })
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   // ─── Test 9: Delete — dialog and deletion ──────────────────────

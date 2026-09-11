@@ -1,11 +1,13 @@
+import { render, screen } from "@testing-library/react";
 import React from "react";
-import { render, act } from "@testing-library/react";
+
+import type { UseConsolidationDialogsReturn } from "../../hooks/useConsolidationDialogs";
 import { ConsolidationDialogs } from "../ConsolidationDialogs";
 
 jest.mock("next/dynamic", () => {
   return (loader: () => Promise<{ default: React.ComponentType }>) => {
     let Component: React.ComponentType | null = null;
-    loader().then((mod) => {
+    void loader().then((mod) => {
       Component = mod.default;
     });
     return function DynamicComponent(props: Record<string, unknown>) {
@@ -36,54 +38,54 @@ jest.mock("@/components/admin/DeleteConsolidationDialog", () => ({
 }));
 
 describe("ConsolidationDialogs", () => {
-  const defaultProps = {
+  const dialogs: UseConsolidationDialogsReturn = {
     isViewDialogOpen: false,
-    onViewDialogOpenChange: jest.fn(),
+    setIsViewDialogOpen: jest.fn(),
     isEditDialogOpen: false,
-    onEditDialogOpenChange: jest.fn(),
+    setIsEditDialogOpen: jest.fn(),
     isDeleteDialogOpen: false,
-    onDeleteDialogOpenChange: jest.fn(),
+    setIsDeleteDialogOpen: jest.fn(),
     consolidationIdToView: null,
     consolidationToEdit: null,
     consolidationToDelete: null,
-    onRefresh: jest.fn(),
+    handleViewConsolidation: jest.fn(),
+    handleEditConsolidation: jest.fn(),
+    handleDeleteConsolidation: jest.fn(),
   };
+  const defaultProps = { dialogs, onRefresh: jest.fn() };
 
   it("renders all 3 dialogs", async () => {
-    let result: ReturnType<typeof render>;
+    render(<ConsolidationDialogs {...defaultProps} />);
+    expect(await screen.findByTestId("view-dialog")).toBeInTheDocument();
 
-    await act(async () => {
-      result = render(<ConsolidationDialogs {...defaultProps} />);
-    });
-
-    expect(result!.getByTestId("view-dialog")).toBeInTheDocument();
-    expect(result!.getByTestId("edit-dialog")).toBeInTheDocument();
-    expect(result!.getByTestId("delete-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("view-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("edit-dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("delete-dialog")).toBeInTheDocument();
   });
 
   it("passes open state to dialogs", async () => {
-    let result: ReturnType<typeof render>;
+    render(
+      <ConsolidationDialogs
+        {...defaultProps}
+        dialogs={{
+          ...dialogs,
+          isViewDialogOpen: true,
+          isEditDialogOpen: true,
+          isDeleteDialogOpen: true,
+        }}
+      />
+    );
+    expect(await screen.findByTestId("view-dialog")).toBeInTheDocument();
 
-    await act(async () => {
-      result = render(
-        <ConsolidationDialogs
-          {...defaultProps}
-          isViewDialogOpen={true}
-          isEditDialogOpen={true}
-          isDeleteDialogOpen={true}
-        />
-      );
-    });
-
-    expect(result!.getByTestId("view-dialog")).toHaveAttribute(
+    expect(screen.getByTestId("view-dialog")).toHaveAttribute(
       "data-open",
       "true"
     );
-    expect(result!.getByTestId("edit-dialog")).toHaveAttribute(
+    expect(screen.getByTestId("edit-dialog")).toHaveAttribute(
       "data-open",
       "true"
     );
-    expect(result!.getByTestId("delete-dialog")).toHaveAttribute(
+    expect(screen.getByTestId("delete-dialog")).toHaveAttribute(
       "data-open",
       "true"
     );

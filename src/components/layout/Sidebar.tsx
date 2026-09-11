@@ -1,14 +1,20 @@
 "use client";
 
-import { Link, usePathname } from "@/lib/navigation";
+import { Package, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
-import { adminNavItems, clientNavItems, type NavItem } from "@/lib/navigation";
-import { X, Package } from "lucide-react";
+
+import {
+  adminNavItems,
+  clientNavItems,
+  type NavItem,
+} from "@/components/layout/nav-items";
 import { Button } from "@/components/ui/button";
+import { Link, usePathname } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
+import { UserRole } from "@/types/user";
 
 interface SidebarProps {
-  userRole: "admin" | "client";
+  userRole: UserRole;
   isMobileOpen: boolean;
   isDesktopCollapsed: boolean;
   onMobileClose: () => void;
@@ -22,8 +28,9 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("navigation");
-  const navItems: NavItem[] =
-    userRole === "admin" ? adminNavItems : clientNavItems;
+  const isAdmin = userRole === UserRole.ADMIN;
+  const roleKey = isAdmin ? "admin" : "client";
+  const navItems: NavItem[] = isAdmin ? adminNavItems : clientNavItems;
 
   return (
     <>
@@ -76,11 +83,11 @@ export function Sidebar({
             <div
               className={cn(
                 "h-1.5 w-1.5 rounded-full",
-                userRole === "admin" ? "bg-emerald-500" : "bg-blue-500"
+                isAdmin ? "bg-emerald-500" : "bg-blue-500"
               )}
             />
             <span className="text-[10px] font-medium uppercase tracking-wide">
-              {t(`role.${userRole}`)}
+              {t(`role.${roleKey}`)}
             </span>
           </div>
         </div>

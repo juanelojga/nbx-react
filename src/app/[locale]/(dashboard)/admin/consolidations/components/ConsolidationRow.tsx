@@ -1,12 +1,16 @@
 "use client";
 
-import { memo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { TableCell, TableRow } from "@/components/ui/table";
+import { memo } from "react";
+
+import { DataRowPrimaryCell } from "@/components/common/DataRowPrimaryCell";
+import { DataRowShell } from "@/components/common/DataRowShell";
 import { TableActionButtons } from "@/components/common/TableActionButtons";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusBadge } from "@/components/data-display/status-badge";
+import { TableCell } from "@/components/ui/table";
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
-import { getStatusLabel } from "./getStatusLabel";
+import { getStatusLabel } from "@/lib/consolidations/getStatusLabel";
+import { parseISODate } from "@/lib/date/parseISODate";
 
 interface ConsolidationRowProps {
   consolidation: ConsolidateType;
@@ -24,42 +28,27 @@ export const ConsolidationRow = memo(function ConsolidationRow({
   animationDelay = 0,
 }: ConsolidationRowProps) {
   const t = useTranslations("adminConsolidations");
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <TableRow
-      className="group relative transition-all duration-300 hover:bg-gradient-to-r hover:from-muted/80 hover:to-transparent border-l-4 border-l-transparent hover:border-l-primary"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        animationName: "fade-in",
-        animationDuration: "0.4s",
-        animationTimingFunction: "ease-out",
-        animationFillMode: "forwards",
-        animationDelay: `${animationDelay}ms`,
-      }}
-    >
-      <TableCell>
-        <div className="relative">
-          <div
-            className="font-mono text-xs font-semibold tracking-wide text-foreground transition-colors duration-300"
-            style={{ fontVariantNumeric: "tabular-nums" }}
-            title={consolidation.id}
-          >
-            <div className="max-w-[120px] truncate">{consolidation.id}</div>
-          </div>
-          <div
-            className={`absolute -bottom-0.5 left-0 h-[2px] bg-gradient-to-r from-primary to-secondary transition-all duration-500 ${
-              isHovered ? "w-full opacity-100" : "w-0 opacity-0"
-            }`}
-          />
-        </div>
-      </TableCell>
+    <DataRowShell animationDelay={animationDelay}>
+      <DataRowPrimaryCell
+        text={consolidation.id}
+        mono
+        className="max-w-[120px]"
+      />
       <TableCell>
         <div className="relative max-w-[200px]">
           <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300 truncate">
             {consolidation.client.fullName}
           </p>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div
+          className="max-w-[240px] truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300"
+          title={consolidation.description}
+        >
+          {consolidation.description}
         </div>
       </TableCell>
       <TableCell>
@@ -85,18 +74,13 @@ export const ConsolidationRow = memo(function ConsolidationRow({
               className="text-xs font-medium text-foreground/80 whitespace-nowrap"
               dateTime={consolidation.deliveryDate || undefined}
             >
-              {consolidation.deliveryDate
-                ? (() => {
-                    const [y, m, d] = consolidation.deliveryDate
-                      .split("-")
-                      .map(Number);
-                    return new Date(y, m - 1, d).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    });
-                  })()
-                : "\u2014"}
+              {parseISODate(
+                consolidation.deliveryDate ?? ""
+              )?.toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              }) ?? "\u2014"}
             </time>
           </div>
         </div>
@@ -134,20 +118,26 @@ export const ConsolidationRow = memo(function ConsolidationRow({
       <TableActionButtons
         onView={{
           onClick: () => onView(consolidation.id),
-          ariaLabel: `View ${consolidation.description}`,
+          ariaLabel: t("viewAriaLabel", {
+            description: consolidation.description,
+          }),
           tooltip: t("viewConsolidation"),
         }}
         onEdit={{
           onClick: () => onEdit(consolidation),
-          ariaLabel: `Edit ${consolidation.description}`,
+          ariaLabel: t("editAriaLabel", {
+            description: consolidation.description,
+          }),
           tooltip: t("editConsolidation"),
         }}
         onDelete={{
           onClick: () => onDelete(consolidation),
-          ariaLabel: `Delete ${consolidation.description}`,
+          ariaLabel: t("deleteAriaLabel", {
+            description: consolidation.description,
+          }),
           tooltip: t("deleteConsolidation"),
         }}
       />
-    </TableRow>
+    </DataRowShell>
   );
 });

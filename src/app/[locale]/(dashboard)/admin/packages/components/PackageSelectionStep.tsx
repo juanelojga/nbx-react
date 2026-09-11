@@ -1,13 +1,15 @@
 "use client";
 
+import { ArrowLeft, ArrowRight, Package, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, ArrowRight, Plus, Package } from "lucide-react";
-import { PackagesTable } from "./PackagesTable";
-import { CurrentConsolidatePanel } from "./CurrentConsolidatePanel";
-import { ClientType } from "@/graphql/queries/clients";
+import { Button } from "@/components/ui/button";
+import { type ClientType } from "@/graphql/queries/clients";
+
 import type { Package as PackageType } from "../types";
+import { CurrentConsolidatePanel } from "./CurrentConsolidatePanel";
+import { PackagesTable } from "./PackagesTable";
 
 interface PackageSelectionStepProps {
   selectedClient: ClientType;

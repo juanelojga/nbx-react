@@ -1,23 +1,25 @@
 "use client";
 
-import { memo, useCallback, useMemo, useState } from "react";
+import { Package as PackageIcon, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { TableCell, TableRow } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
+import { memo, useCallback, useMemo, useState } from "react";
+
 import { TableActionButtons } from "@/components/common/TableActionButtons";
 import {
   BaseTable,
   type ColumnDef,
   type EmptyStateConfig,
-} from "@/components/ui/base-table";
+} from "@/components/data-display/base-table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { TableCell, TableRow } from "@/components/ui/table";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Package as PackageIcon, Sparkles } from "lucide-react";
-import { Package } from "../types";
+
+import { type Package } from "../types";
 
 // Dynamically import dialog components for better bundle splitting
 const PackageDetailsModal = dynamic(

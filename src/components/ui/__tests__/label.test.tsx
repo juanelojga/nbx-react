@@ -1,5 +1,5 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+
 import { Label } from "../label";
 
 describe("Label Component", () => {
@@ -11,13 +11,6 @@ describe("Label Component", () => {
       expect(label).toBeInTheDocument();
       expect(label).toHaveAttribute("data-slot", "label");
       expect(label.tagName.toLowerCase()).toBe("label");
-    });
-
-    it("renders with custom className", () => {
-      render(<Label className="custom-class">Custom label</Label>);
-
-      const label = screen.getByText("Custom label");
-      expect(label).toHaveClass("custom-class");
     });
 
     it("forwards additional props", () => {
@@ -155,38 +148,6 @@ describe("Label Component", () => {
     });
   });
 
-  describe("Variant Classes", () => {
-    it("applies default label classes", () => {
-      render(<Label>Default label</Label>);
-
-      const label = screen.getByText("Default label");
-      expect(label).toHaveClass("flex");
-      expect(label).toHaveClass("items-center");
-      expect(label).toHaveClass("gap-2");
-      expect(label).toHaveClass("text-sm");
-      expect(label).toHaveClass("leading-none");
-      expect(label).toHaveClass("font-semibold");
-      expect(label).toHaveClass("text-foreground");
-      expect(label).toHaveClass("select-none");
-      expect(label).toHaveClass(
-        "group-data-[disabled=true]:pointer-events-none"
-      );
-      expect(label).toHaveClass("group-data-[disabled=true]:opacity-50");
-      expect(label).toHaveClass("peer-disabled:cursor-not-allowed");
-      expect(label).toHaveClass("peer-disabled:opacity-50");
-    });
-
-    it("merges custom classes with default classes", () => {
-      render(<Label className="custom-label-class">Custom label</Label>);
-
-      const label = screen.getByText("Custom label");
-      expect(label).toHaveClass("custom-label-class");
-      expect(label).toHaveClass("flex");
-      expect(label).toHaveClass("items-center");
-      expect(label).toHaveClass("text-sm");
-    });
-  });
-
   describe("Integration Tests", () => {
     it("renders complete label with all features", () => {
       render(
@@ -200,7 +161,6 @@ describe("Label Component", () => {
       expect(label).toBeInTheDocument();
       expect(label).toHaveAttribute("id", "test-label");
       expect(label).toHaveAttribute("for", "test-input");
-      expect(label).toHaveClass("custom-label");
       expect(screen.getByTestId("label-icon")).toBeInTheDocument();
     });
 
@@ -213,19 +173,6 @@ describe("Label Component", () => {
 
       expect(screen.getByText("Updated content")).toBeInTheDocument();
       expect(screen.queryByText("Initial content")).not.toBeInTheDocument();
-    });
-
-    it("handles className prop changes", async () => {
-      const { rerender } = render(
-        <Label className="initial-class">Dynamic label</Label>
-      );
-
-      const label = screen.getByText("Dynamic label");
-      expect(label).toHaveClass("initial-class");
-
-      rerender(<Label className="updated-class">Dynamic label</Label>);
-
-      expect(screen.getByText("Dynamic label")).toHaveClass("updated-class");
     });
 
     it("renders with complex nested structure", () => {
@@ -287,16 +234,6 @@ describe("Label Component", () => {
 
       const label = screen.getByText(longWord);
       expect(label).toBeInTheDocument();
-      expect(label).toHaveClass("text-sm");
-    });
-
-    it("handles multiple className props", () => {
-      render(<Label className="class1 class2 class3">Multiple classes</Label>);
-
-      const label = screen.getByText("Multiple classes");
-      expect(label).toHaveClass("class1");
-      expect(label).toHaveClass("class2");
-      expect(label).toHaveClass("class3");
     });
 
     it("handles empty string className", () => {

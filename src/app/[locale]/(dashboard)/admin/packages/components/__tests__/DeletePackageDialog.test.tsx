@@ -1,14 +1,12 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedProvider, MockedResponse } from "@/test/MockedProvider";
-import { DeletePackageDialog } from "@/app/[locale]/(dashboard)/admin/packages/components/DeletePackageDialog";
-import { DELETE_PACKAGE } from "@/graphql/mutations/packages";
 import { toast } from "sonner";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+import { DeletePackageDialog } from "@/app/[locale]/(dashboard)/admin/packages/components/DeletePackageDialog";
+import { DELETE_PACKAGE } from "@/graphql/mutations/packages";
+import { MockedProvider, type MockedResponse } from "@/test/MockedProvider";
+
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));
@@ -65,7 +63,7 @@ describe("DeletePackageDialog", () => {
       </MockedProvider>
     );
 
-    expect(container.innerHTML).toBe("");
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("renders barcode and warning message when open", () => {

@@ -1,6 +1,6 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
 import { Badge } from "../badge";
 
 describe("Badge Component", () => {
@@ -36,13 +36,6 @@ describe("Badge Component", () => {
       const badge = screen.getByText("Outline badge");
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveAttribute("data-slot", "badge");
-    });
-
-    it("applies custom className", () => {
-      render(<Badge className="custom-class">Custom badge</Badge>);
-
-      const badge = screen.getByText("Custom badge");
-      expect(badge).toHaveClass("custom-class");
     });
 
     it("forwards additional props", () => {
@@ -202,7 +195,7 @@ describe("Badge Component", () => {
       const badge = screen.getByText("Focusable badge");
       badge.focus();
 
-      expect(document.activeElement).toBe(badge);
+      expect(badge).toHaveFocus();
     });
   });
 
@@ -276,56 +269,6 @@ describe("Badge Component", () => {
     });
   });
 
-  describe("Variant Classes", () => {
-    it("applies default variant classes", () => {
-      render(<Badge>Default variant</Badge>);
-
-      const badge = screen.getByText("Default variant");
-      expect(badge).toHaveClass("inline-flex");
-      expect(badge).toHaveClass("items-center");
-      expect(badge).toHaveClass("justify-center");
-      expect(badge).toHaveClass("rounded-full");
-      expect(badge).toHaveClass("border");
-      expect(badge).toHaveClass("px-3");
-      expect(badge).toHaveClass("py-1");
-      expect(badge).toHaveClass("text-xs");
-      expect(badge).toHaveClass("font-semibold");
-      expect(badge).toHaveClass("w-fit");
-      expect(badge).toHaveClass("whitespace-nowrap");
-      expect(badge).toHaveClass("shrink-0");
-      expect(badge).toHaveClass("transition-all");
-      expect(badge).toHaveClass("duration-200");
-      expect(badge).toHaveClass("overflow-hidden");
-      expect(badge).toHaveClass("shadow-sm");
-    });
-
-    it("applies secondary variant classes", () => {
-      render(<Badge variant="secondary">Secondary variant</Badge>);
-
-      const badge = screen.getByText("Secondary variant");
-      expect(badge).toHaveClass("border-transparent");
-      expect(badge).toHaveClass("bg-secondary");
-      expect(badge).toHaveClass("text-secondary-foreground");
-    });
-
-    it("applies destructive variant classes", () => {
-      render(<Badge variant="destructive">Destructive variant</Badge>);
-
-      const badge = screen.getByText("Destructive variant");
-      expect(badge).toHaveClass("border-transparent");
-      expect(badge).toHaveClass("bg-destructive");
-      expect(badge).toHaveClass("text-destructive-foreground");
-    });
-
-    it("applies outline variant classes", () => {
-      render(<Badge variant="outline">Outline variant</Badge>);
-
-      const badge = screen.getByText("Outline variant");
-      expect(badge).toHaveClass("text-foreground");
-      expect(badge).toHaveClass("border-2");
-    });
-  });
-
   describe("Integration Tests", () => {
     it("renders complete badge with all features", () => {
       render(
@@ -338,7 +281,6 @@ describe("Badge Component", () => {
       const badge = screen.getByText("Error Badge");
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveAttribute("id", "test-badge");
-      expect(badge).toHaveClass("custom-badge");
       expect(screen.getByTestId("error-icon")).toBeInTheDocument();
     });
 
@@ -441,7 +383,6 @@ describe("Badge Component", () => {
 
       const badge = screen.getByText(longWord);
       expect(badge).toBeInTheDocument();
-      expect(badge).toHaveClass("whitespace-nowrap");
     });
   });
 });

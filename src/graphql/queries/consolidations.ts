@@ -1,10 +1,10 @@
-import { gql } from "@apollo/client";
-import { ConsolidationStatus } from "@/lib/validation/status";
+import type { ResultOf, VariablesOf } from "@graphql-typed-document-node/core";
 
-/**
- * Get all consolidations query with pagination, filtering, and sorting
- */
-export const GET_ALL_CONSOLIDATES = gql`
+import { graphql } from "@/graphql/generated";
+import type { ConsolidationListItemFragment } from "@/graphql/generated/graphql";
+
+/** Paginated consolidations with status and creation-date filters. */
+export const GET_ALL_CONSOLIDATES = graphql(/* GraphQL */ `
   query GetAllConsolidates(
     $search: String
     $page: Int
@@ -24,25 +24,7 @@ export const GET_ALL_CONSOLIDATES = gql`
       createdBefore: $createdBefore
     ) {
       results {
-        id
-        description
-        status
-        deliveryDate
-        comment
-        extraAttributes
-        totalCost
-        client {
-          id
-          fullName
-          email
-        }
-        packages {
-          id
-          barcode
-          description
-        }
-        createdAt
-        updatedAt
+        ...ConsolidationListItem
       }
       totalCount
       page
@@ -51,12 +33,9 @@ export const GET_ALL_CONSOLIDATES = gql`
       hasPrevious
     }
   }
-`;
+`);
 
-/**
- * Get single consolidation by ID with full details
- */
-export const GET_CONSOLIDATE_BY_ID = gql`
+export const GET_CONSOLIDATE_BY_ID = graphql(/* GraphQL */ `
   query GetConsolidateById($id: ID!) {
     consolidateById(id: $id) {
       id
@@ -67,9 +46,7 @@ export const GET_CONSOLIDATE_BY_ID = gql`
       extraAttributes
       totalCost
       client {
-        id
-        fullName
-        email
+        ...ClientSummary
         mobilePhoneNumber
       }
       packages {
@@ -95,79 +72,19 @@ export const GET_CONSOLIDATE_BY_ID = gql`
       updatedAt
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for consolidation queries
- */
-export interface ConsolidateClientType {
-  id: string;
-  fullName: string;
-  email: string;
-  mobilePhoneNumber?: string | null;
-}
+export type GetAllConsolidatesResponse = ResultOf<typeof GET_ALL_CONSOLIDATES>;
+export type GetAllConsolidatesVariables = VariablesOf<
+  typeof GET_ALL_CONSOLIDATES
+>;
+export type GetConsolidateByIdResponse = ResultOf<typeof GET_CONSOLIDATE_BY_ID>;
+export type GetConsolidateByIdVariables = VariablesOf<
+  typeof GET_CONSOLIDATE_BY_ID
+>;
 
-export interface ConsolidatePackageType {
-  id: string;
-  barcode: string;
-  description: string | null;
-  weight?: number | null;
-  weightUnit?: string | null;
-  courier?: string | null;
-  otherCourier?: string | null;
-  length?: number | null;
-  width?: number | null;
-  height?: number | null;
-  dimensionUnit?: string | null;
-  purchasedByNarbox?: boolean;
-  realPrice?: number | null;
-  servicePrice?: number | null;
-  transportationCost?: number | null;
-  serviceFee?: number | null;
-  arrivalDate?: string | null;
-}
-
-export interface ConsolidateType {
-  id: string;
-  description: string;
-  status: ConsolidationStatus;
-  deliveryDate: string | null;
-  comment: string | null;
-  extraAttributes: string | null;
-  totalCost?: number | null;
-  client: ConsolidateClientType;
-  packages: ConsolidatePackageType[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ConsolidateConnection {
-  results: ConsolidateType[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
-
-export interface GetAllConsolidatesResponse {
-  allConsolidates: ConsolidateConnection;
-}
-
-export interface GetAllConsolidatesVariables {
-  search?: string;
-  page?: number;
-  pageSize?: number;
-  orderBy?: string;
-  status?: string;
-  createdAfter?: string;
-  createdBefore?: string;
-}
-
-export interface GetConsolidateByIdVariables {
-  id: string;
-}
-
-export interface GetConsolidateByIdResponse {
-  consolidateById: ConsolidateType | null;
-}
+export type ConsolidateType = ConsolidationListItemFragment;
+export type ConsolidateDetailType = NonNullable<
+  GetConsolidateByIdResponse["consolidateById"]
+>;
+export type ConsolidatePackageType = ConsolidateDetailType["packages"][number];

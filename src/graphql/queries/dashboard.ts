@@ -1,10 +1,8 @@
-import { gql } from "@apollo/client";
+import type { ResultOf, VariablesOf } from "@graphql-typed-document-node/core";
 
-/**
- * Get dashboard statistics and recent items
- * Data is filtered based on user type (admin sees all, clients see only their own)
- */
-export const GET_DASHBOARD = gql`
+import { graphql } from "@/graphql/generated";
+
+export const GET_DASHBOARD = graphql(/* GraphQL */ `
   query GetDashboard(
     $recentPackagesLimit: Int
     $recentConsolidationsLimit: Int
@@ -33,9 +31,7 @@ export const GET_DASHBOARD = gql`
         servicePrice
         createdAt
         client {
-          id
-          fullName
-          email
+          ...ClientSummary
         }
       }
       recentConsolidations(limit: $recentConsolidationsLimit) {
@@ -45,9 +41,7 @@ export const GET_DASHBOARD = gql`
         deliveryDate
         createdAt
         client {
-          id
-          fullName
-          email
+          ...ClientSummary
         }
         packages {
           id
@@ -56,88 +50,15 @@ export const GET_DASHBOARD = gql`
       }
     }
   }
-`;
+`);
 
-/**
- * Dashboard statistics type
- * Contains aggregate data for packages, consolidations, clients, and financial info
- */
-export interface DashboardStatsType {
-  totalPackages: number;
-  recentPackages: number;
-  packagesPending: number;
-  packagesInTransit: number;
-  packagesDelivered: number;
-  totalConsolidations: number;
-  consolidationsPending: number;
-  consolidationsProcessing: number;
-  consolidationsInTransit: number;
-  consolidationsAwaitingPayment: number;
-  totalRealPrice: number;
-  totalServicePrice: number;
-  totalClients: number;
-}
-
-/**
- * Recent package type for dashboard
- * Simplified package info for dashboard display
- */
-export interface RecentPackageType {
-  id: string;
-  barcode: string;
-  description: string | null;
-  realPrice: number | null;
-  servicePrice: number | null;
-  createdAt: string;
-  client: {
-    id: string;
-    fullName: string;
-    email: string;
-  };
-}
-
-/**
- * Recent consolidation type for dashboard
- * Simplified consolidation info for dashboard display
- */
-export interface RecentConsolidationType {
-  id: string;
-  description: string;
-  status: string;
-  deliveryDate: string | null;
-  createdAt: string;
-  client: {
-    id: string;
-    fullName: string;
-    email: string;
-  };
-  packages: Array<{
-    id: string;
-    barcode: string;
-  }>;
-}
-
-/**
- * Main dashboard data type
- * Contains stats and recent items lists
- */
-export interface DashboardType {
-  stats: DashboardStatsType;
-  recentPackages: RecentPackageType[];
-  recentConsolidations: RecentConsolidationType[];
-}
-
-/**
- * GraphQL query response type for dashboard
- */
-export interface GetDashboardResponse {
-  dashboard: DashboardType;
-}
-
-/**
- * Variables for dashboard query
- */
-export interface GetDashboardVariables {
-  recentPackagesLimit?: number;
-  recentConsolidationsLimit?: number;
-}
+export type GetDashboardResponse = ResultOf<typeof GET_DASHBOARD>;
+export type GetDashboardVariables = VariablesOf<typeof GET_DASHBOARD>;
+export type DashboardType = NonNullable<GetDashboardResponse["dashboard"]>;
+export type DashboardStatsType = NonNullable<DashboardType["stats"]>;
+export type RecentPackageType = NonNullable<
+  NonNullable<DashboardType["recentPackages"]>[number]
+>;
+export type RecentConsolidationType = NonNullable<
+  NonNullable<DashboardType["recentConsolidations"]>[number]
+>;

@@ -1,6 +1,10 @@
 "use client";
 
 import { Menu, PanelLeft, PanelLeftClose } from "lucide-react";
+import { useTranslations } from "next-intl";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserRoleString } from "@/lib/utils/user-role";
+import { UserRole } from "@/types/user";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -25,6 +27,8 @@ export function Header({
   onDesktopSidebarToggle,
   isDesktopSidebarCollapsed,
 }: HeaderProps) {
+  const t = useTranslations("header");
+  const tNav = useTranslations("navigation");
   const { user, logout } = useAuth();
 
   const isValidName = (value: string | null | undefined) =>
@@ -52,8 +56,7 @@ export function Header({
     return user.email.slice(0, 2).toUpperCase();
   };
 
-  const isAdmin =
-    user?.role !== undefined && getUserRoleString(user.role) === "admin";
+  const isAdmin = user?.role === UserRole.ADMIN;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-blue-200/60 bg-blue-50 shadow-sm shadow-blue-900/5">
@@ -67,7 +70,7 @@ export function Header({
           size="icon"
           className="mr-2 lg:hidden rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200 active:scale-95"
           onClick={onMenuClick}
-          aria-label="Toggle menu"
+          aria-label={t("toggleMenu")}
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -79,7 +82,9 @@ export function Header({
           className="mr-2 hidden lg:flex rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200 active:scale-95"
           onClick={onDesktopSidebarToggle}
           aria-label={
-            isDesktopSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+            isDesktopSidebarCollapsed
+              ? t("expandSidebar")
+              : t("collapseSidebar")
           }
           aria-expanded={!isDesktopSidebarCollapsed}
           aria-controls="desktop-sidebar"
@@ -121,7 +126,7 @@ export function Header({
                     isAdmin ? "text-[#1976D2]" : "text-muted-foreground"
                   }`}
                 >
-                  {isAdmin ? "Admin" : "Client"}
+                  {isAdmin ? tNav("role.admin") : tNav("role.client")}
                 </span>
               </div>
             </button>
@@ -149,14 +154,14 @@ export function Header({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer rounded-lg">
-              Account Settings
+              {t("accountSettings")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => logout()}
               className="text-destructive cursor-pointer font-semibold rounded-lg"
             >
-              Logout
+              {t("logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,10 +1,7 @@
 import { isValidISODate, todayISO } from "@/lib/date/todayISO";
 
 export type DateRangeError =
-  | "invalidDate"
-  | "invalidDateRange"
-  | "futureDate"
-  | null;
+  "invalidDate" | "invalidDateRange" | "futureDate" | null;
 
 export function validateDateRange(
   createdAfter: string,

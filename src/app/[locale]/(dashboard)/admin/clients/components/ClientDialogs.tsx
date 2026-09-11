@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { ClientToDelete, ClientToEdit } from "./clients-table.types";
+
+import type { UseClientDialogsReturn } from "../hooks/useClientDialogs";
 
 const AddClientDialog = dynamic(
   () =>
@@ -33,57 +34,34 @@ const ViewClientDialog = dynamic(
 );
 
 interface ClientDialogsProps {
-  isAddDialogOpen: boolean;
-  onAddDialogOpenChange: (open: boolean) => void;
-  isDeleteDialogOpen: boolean;
-  onDeleteDialogOpenChange: (open: boolean) => void;
-  isEditDialogOpen: boolean;
-  onEditDialogOpenChange: (open: boolean) => void;
-  isViewDialogOpen: boolean;
-  onViewDialogOpenChange: (open: boolean) => void;
-  clientToDelete: ClientToDelete | null;
-  clientToEdit: ClientToEdit | null;
-  clientIdToView: string | null;
-  onRefresh: () => void;
+  dialogs: UseClientDialogsReturn;
+  onRefresh: () => void | Promise<void>;
 }
 
-export function ClientDialogs({
-  isAddDialogOpen,
-  onAddDialogOpenChange,
-  isDeleteDialogOpen,
-  onDeleteDialogOpenChange,
-  isEditDialogOpen,
-  onEditDialogOpenChange,
-  isViewDialogOpen,
-  onViewDialogOpenChange,
-  clientToDelete,
-  clientToEdit,
-  clientIdToView,
-  onRefresh,
-}: ClientDialogsProps) {
+export function ClientDialogs({ dialogs, onRefresh }: ClientDialogsProps) {
   return (
     <>
       <AddClientDialog
-        open={isAddDialogOpen}
-        onOpenChange={onAddDialogOpenChange}
+        open={dialogs.isAddDialogOpen}
+        onOpenChange={dialogs.setIsAddDialogOpen}
         onClientCreated={onRefresh}
       />
       <DeleteClientDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={onDeleteDialogOpenChange}
-        client={clientToDelete}
+        open={dialogs.isDeleteDialogOpen}
+        onOpenChange={dialogs.setIsDeleteDialogOpen}
+        client={dialogs.clientToDelete}
         onClientDeleted={onRefresh}
       />
       <EditClientDialog
-        open={isEditDialogOpen}
-        onOpenChange={onEditDialogOpenChange}
-        client={clientToEdit}
+        open={dialogs.isEditDialogOpen}
+        onOpenChange={dialogs.setIsEditDialogOpen}
+        client={dialogs.clientToEdit}
         onClientUpdated={onRefresh}
       />
       <ViewClientDialog
-        open={isViewDialogOpen}
-        onOpenChange={onViewDialogOpenChange}
-        clientId={clientIdToView}
+        open={dialogs.isViewDialogOpen}
+        onOpenChange={dialogs.setIsViewDialogOpen}
+        clientId={dialogs.clientIdToView}
       />
     </>
   );

@@ -1,8 +1,9 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter } from "@/lib/navigation";
 import { useTransition } from "react";
+
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 export default function LanguageSelector() {
   const t = useTranslations("common");

@@ -1,9 +1,8 @@
-import { gql } from "@apollo/client";
+import type { ResultOf } from "@graphql-typed-document-node/core";
 
-/**
- * Get pricing configuration (superuser-only)
- */
-export const GET_PRICING_CONFIG = gql`
+import { graphql } from "@/graphql/generated";
+
+export const GET_PRICING_CONFIG = graphql(/* GraphQL */ `
   query GetPricingConfig {
     pricingConfig {
       serviceFeePercentage
@@ -11,17 +10,9 @@ export const GET_PRICING_CONFIG = gql`
       updatedAt
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for pricing config query
- */
-export interface PricingConfigType {
-  serviceFeePercentage: number;
-  transportationRatePerLb: number;
-  updatedAt: string;
-}
-
-export interface GetPricingConfigResponse {
-  pricingConfig: PricingConfigType;
-}
+export type GetPricingConfigResponse = ResultOf<typeof GET_PRICING_CONFIG>;
+export type PricingConfigType = NonNullable<
+  GetPricingConfigResponse["pricingConfig"]
+>;

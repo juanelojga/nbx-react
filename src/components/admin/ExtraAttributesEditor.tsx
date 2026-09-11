@@ -1,14 +1,11 @@
 "use client";
 
+import { Plus, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X } from "lucide-react";
-
-export interface ExtraAttributeEntry {
-  key: string;
-  value: string;
-}
+import type { ExtraAttributeEntry } from "@/types/consolidation";
 
 interface ExtraAttributesEditorProps {
   value: ExtraAttributeEntry[];
@@ -22,6 +19,7 @@ interface ExtraAttributesEditorProps {
     chargeName: string;
     chargeAmount: string;
     maxChargesReached: string;
+    removeCharge: string;
   };
   errors?: Record<string, string | undefined>;
 }
@@ -73,7 +71,11 @@ export function ExtraAttributesEditor({
           {value.map((entry, index) => (
             <div key={index} className="flex items-start gap-2">
               <div className="flex-1 space-y-1">
+                <Label htmlFor={`extra-key-${index}`} className="sr-only">
+                  {labels.chargeName}
+                </Label>
                 <Input
+                  id={`extra-key-${index}`}
                   placeholder={labels.chargeName}
                   value={entry.key}
                   onChange={(e) => handleChange(index, "key", e.target.value)}
@@ -91,7 +93,11 @@ export function ExtraAttributesEditor({
                 )}
               </div>
               <div className="w-32 space-y-1">
+                <Label htmlFor={`extra-value-${index}`} className="sr-only">
+                  {labels.chargeAmount}
+                </Label>
                 <Input
+                  id={`extra-value-${index}`}
                   type="number"
                   step="0.01"
                   min="0"
@@ -117,6 +123,7 @@ export function ExtraAttributesEditor({
                 size="icon"
                 onClick={() => handleRemove(index)}
                 disabled={disabled}
+                aria-label={labels.removeCharge}
                 className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive"
               >
                 <X className="h-4 w-4" />
@@ -145,35 +152,4 @@ export function ExtraAttributesEditor({
       </Button>
     </div>
   );
-}
-
-export function serializeExtraAttributes(
-  entries: ExtraAttributeEntry[]
-): string | undefined {
-  const filtered = entries.filter(
-    (e) => e.key.trim() !== "" && e.value.trim() !== ""
-  );
-  if (filtered.length === 0) return undefined;
-  const obj: Record<string, string> = {};
-  for (const entry of filtered) {
-    obj[entry.key.trim()] = entry.value.trim();
-  }
-  return JSON.stringify(obj);
-}
-
-export function parseExtraAttributes(
-  json: string | null
-): ExtraAttributeEntry[] {
-  if (!json) return [];
-  try {
-    const obj = JSON.parse(json);
-    if (typeof obj !== "object" || obj === null || Array.isArray(obj))
-      return [];
-    return Object.entries(obj).map(([key, value]) => ({
-      key,
-      value: String(value),
-    }));
-  } catch {
-    return [];
-  }
 }

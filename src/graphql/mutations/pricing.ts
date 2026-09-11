@@ -1,9 +1,8 @@
-import { gql } from "@apollo/client";
+import type { ResultOf, VariablesOf } from "@graphql-typed-document-node/core";
 
-/**
- * Update pricing configuration (superuser-only)
- */
-export const UPDATE_PRICING_CONFIG = gql`
+import { graphql } from "@/graphql/generated";
+
+export const UPDATE_PRICING_CONFIG = graphql(/* GraphQL */ `
   mutation UpdatePricingConfig(
     $serviceFeePercentage: Float
     $transportationRatePerLb: Float
@@ -19,22 +18,11 @@ export const UPDATE_PRICING_CONFIG = gql`
       }
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for update pricing config mutation
- */
-export interface UpdatePricingConfigVariables {
-  serviceFeePercentage?: number;
-  transportationRatePerLb?: number;
-}
-
-export interface UpdatePricingConfigResponse {
-  updatePricingConfig: {
-    pricingConfig: {
-      serviceFeePercentage: number;
-      transportationRatePerLb: number;
-      updatedAt: string;
-    };
-  };
-}
+export type UpdatePricingConfigResponse = ResultOf<
+  typeof UPDATE_PRICING_CONFIG
+>;
+export type UpdatePricingConfigVariables = VariablesOf<
+  typeof UPDATE_PRICING_CONFIG
+>;

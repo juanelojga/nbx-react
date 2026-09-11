@@ -1,14 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation } from "@apollo/client/react";
+import { Loader2, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { BaseDialog, DialogFooter } from "@/components/ui/base-dialog";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { BaseDialog } from "@/components/common/BaseDialog";
 import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Pencil } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -16,13 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   UPDATE_CONSOLIDATE,
-  UpdateConsolidateVariables,
-  UpdateConsolidateResponse,
+  type UpdateConsolidateVariables,
 } from "@/graphql/mutations/consolidations";
-import { toast } from "sonner";
-import { ConsolidationStatus } from "@/lib/validation/status";
+import { type ConsolidationStatus } from "@/types/consolidation";
 
 interface EditConsolidationDialogProps {
   open: boolean;
@@ -44,9 +45,7 @@ interface FormData {
   comment: string;
 }
 
-interface ValidationErrors {
-  [key: string]: string | undefined;
-}
+type ValidationErrors = Record<string, string | undefined>;
 
 export function EditConsolidationDialog({
   open,
@@ -90,17 +89,14 @@ export function EditConsolidationDialog({
     }
   }, [consolidation]);
 
-  const [updateConsolidate, { loading }] = useMutation<
-    UpdateConsolidateResponse,
-    UpdateConsolidateVariables
-  >(UPDATE_CONSOLIDATE, {
-    onCompleted: async () => {
+  const [updateConsolidate, { loading }] = useMutation(UPDATE_CONSOLIDATE, {
+    onCompleted: () => {
       toast.success(t("successTitle"), {
         description: t("successDescription"),
       });
       onOpenChange(false);
       if (onConsolidationUpdated) {
-        await onConsolidationUpdated();
+        void onConsolidationUpdated();
       }
     },
     onError: (error) => {

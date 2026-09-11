@@ -1,6 +1,8 @@
-import { renderHook, act } from "@testing-library/react";
-import { useClientDialogs } from "../useClientDialogs";
+import { act, renderHook } from "@testing-library/react";
+
 import type { ClientType } from "@/graphql/queries/clients";
+
+import { useClientDialogs } from "../useClientDialogs";
 
 const mockClient: ClientType = {
   id: "client-1",
@@ -81,7 +83,13 @@ describe("useClientDialogs", () => {
     const { result } = renderHook(() => useClientDialogs());
     const clientWithNullNames = {
       ...mockClient,
-      user: { ...mockClient.user, firstName: null, lastName: null },
+      user: {
+        id: "user-1",
+        isSuperuser: false,
+        email: "john@example.com",
+        firstName: null,
+        lastName: null,
+      },
     };
 
     act(() => {

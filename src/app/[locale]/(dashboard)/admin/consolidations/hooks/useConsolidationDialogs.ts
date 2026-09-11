@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
+
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
+
 import type { ConsolidationToDelete } from "../components/consolidations-table.types";
 
 export interface UseConsolidationDialogsReturn {
@@ -47,7 +49,10 @@ export function useConsolidationDialogs(): UseConsolidationDialogsReturn {
       setConsolidationToDelete({
         id: consolidation.id,
         description: consolidation.description,
-        client: consolidation.client,
+        client: {
+          fullName: consolidation.client.fullName ?? "",
+          email: consolidation.client.email,
+        },
         packagesCount: consolidation.packages.length,
       });
       setIsDeleteDialogOpen(true);

@@ -1,19 +1,17 @@
 import type { MetadataRoute } from "next";
-import { routing } from "../../i18n/routing";
+
+import { routing } from "@/i18n/routing";
+import { siteConfig } from "@/lib/site-config";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://narboxcourier.com";
+  const languages = Object.fromEntries(
+    routing.locales.map((locale) => [locale, `${siteConfig.url}/${locale}`])
+  );
 
   return routing.locales.map((locale) => ({
-    url: `${siteUrl}/${locale}`,
-    lastModified: new Date(),
+    url: `${siteConfig.url}/${locale}`,
     changeFrequency: "weekly" as const,
     priority: 1.0,
-    alternates: {
-      languages: Object.fromEntries(
-        routing.locales.map((loc) => [loc, `${siteUrl}/${loc}`])
-      ),
-    },
+    alternates: { languages },
   }));
 }

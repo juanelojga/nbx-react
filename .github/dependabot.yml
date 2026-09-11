@@ -1,0 +1,54 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      next:
+        patterns:
+          ["next", "eslint-config-next", "@next/*", "@netlify/plugin-nextjs"]
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      radix:
+        patterns: ["@radix-ui/*"]
+      lint:
+        patterns:
+          [
+            "eslint",
+            "eslint-*",
+            "typescript-eslint",
+            "prettier",
+            "lint-staged",
+            "husky",
+          ]
+      testing:
+        patterns:
+          [
+            "jest",
+            "jest-*",
+            "@types/jest",
+            "@testing-library/*",
+            "@playwright/test",
+          ]
+      graphql-codegen:
+        patterns: ["@graphql-codegen/*", "@graphql-typed-document-node/*"]
+      tailwind:
+        patterns:
+          ["tailwindcss", "@tailwindcss/*", "tw-animate-css", "tailwind-merge"]
+    ignore:
+      # TypeScript 7 (native compiler) has no JS API yet: Next/typescript-eslint break.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      - dependency-name: graphql
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: monthly

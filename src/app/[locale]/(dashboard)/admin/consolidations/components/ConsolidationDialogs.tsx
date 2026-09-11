@@ -1,8 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { ConsolidateType } from "@/graphql/queries/consolidations";
-import type { ConsolidationToDelete } from "./consolidations-table.types";
+
+import type { UseConsolidationDialogsReturn } from "../hooks/useConsolidationDialogs";
 
 const ViewConsolidationDialog = dynamic(
   () =>
@@ -27,47 +27,31 @@ const DeleteConsolidationDialog = dynamic(
 );
 
 interface ConsolidationDialogsProps {
-  isViewDialogOpen: boolean;
-  onViewDialogOpenChange: (open: boolean) => void;
-  isEditDialogOpen: boolean;
-  onEditDialogOpenChange: (open: boolean) => void;
-  isDeleteDialogOpen: boolean;
-  onDeleteDialogOpenChange: (open: boolean) => void;
-  consolidationIdToView: string | null;
-  consolidationToEdit: ConsolidateType | null;
-  consolidationToDelete: ConsolidationToDelete | null;
-  onRefresh: () => void;
+  dialogs: UseConsolidationDialogsReturn;
+  onRefresh: () => void | Promise<void>;
 }
 
 export function ConsolidationDialogs({
-  isViewDialogOpen,
-  onViewDialogOpenChange,
-  isEditDialogOpen,
-  onEditDialogOpenChange,
-  isDeleteDialogOpen,
-  onDeleteDialogOpenChange,
-  consolidationIdToView,
-  consolidationToEdit,
-  consolidationToDelete,
+  dialogs,
   onRefresh,
 }: ConsolidationDialogsProps) {
   return (
     <>
       <ViewConsolidationDialog
-        open={isViewDialogOpen}
-        onOpenChange={onViewDialogOpenChange}
-        consolidationId={consolidationIdToView}
+        open={dialogs.isViewDialogOpen}
+        onOpenChange={dialogs.setIsViewDialogOpen}
+        consolidationId={dialogs.consolidationIdToView}
       />
       <EditConsolidationDialog
-        open={isEditDialogOpen}
-        onOpenChange={onEditDialogOpenChange}
-        consolidation={consolidationToEdit}
+        open={dialogs.isEditDialogOpen}
+        onOpenChange={dialogs.setIsEditDialogOpen}
+        consolidation={dialogs.consolidationToEdit}
         onConsolidationUpdated={onRefresh}
       />
       <DeleteConsolidationDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={onDeleteDialogOpenChange}
-        consolidation={consolidationToDelete}
+        open={dialogs.isDeleteDialogOpen}
+        onOpenChange={dialogs.setIsDeleteDialogOpen}
+        consolidation={dialogs.consolidationToDelete}
         onConsolidationDeleted={onRefresh}
       />
     </>

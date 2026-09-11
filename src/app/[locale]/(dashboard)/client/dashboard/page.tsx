@@ -1,30 +1,37 @@
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export default function ClientDashboard() {
+import { ComingSoonCard } from "@/components/common/ComingSoonCard";
+import { PageHeader } from "@/components/data-display/page-header";
+
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "clientDashboard" });
+  return { title: t("title") };
+}
+
+export default async function ClientDashboardPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "clientDashboard" });
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Dashboard"
-        description="Welcome to your NarBox dashboard"
+      <PageHeader title={t("title")} description={t("description")} />
+      <ComingSoonCard
+        intro={t("intro")}
+        features={[
+          t("feature1"),
+          t("feature2"),
+          t("feature3"),
+          t("feature4"),
+          t("feature5"),
+        ]}
       />
-      <Card>
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600">
-            Your dashboard will provide an overview of your shipping activity:
-          </p>
-          <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-            <li>Active shipments and tracking information</li>
-            <li>Recent package history</li>
-            <li>Pending deliveries</li>
-            <li>Quick actions for common tasks</li>
-            <li>Important notifications and updates</li>
-          </ul>
-        </CardContent>
-      </Card>
     </div>
   );
 }

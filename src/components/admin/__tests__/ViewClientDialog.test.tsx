@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedProvider } from "@/test/MockedProvider";
-import { ViewClientDialog } from "../ViewClientDialog";
-import { GET_CLIENT } from "@/graphql/queries/clients";
 import { GraphQLError } from "graphql";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+import { GET_CLIENT } from "@/graphql/queries/clients";
+import { MockedProvider } from "@/test/MockedProvider";
+
+import { ViewClientDialog } from "../ViewClientDialog";
+
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));

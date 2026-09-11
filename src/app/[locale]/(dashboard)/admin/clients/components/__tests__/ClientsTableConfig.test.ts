@@ -29,8 +29,8 @@ describe("getClientColumns", () => {
 
     const sortableColumns = columns.filter((c) => c.sortable);
     expect(sortableColumns).toHaveLength(2);
-    expect(sortableColumns[0].sortField).toBe("full_name");
-    expect(sortableColumns[1].sortField).toBe("email");
+    expect(sortableColumns[0]?.sortField).toBe("full_name");
+    expect(sortableColumns[1]?.sortField).toBe("email");
   });
 });
 

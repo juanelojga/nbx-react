@@ -1,14 +1,12 @@
-import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedProvider, MockedResponse } from "@/test/MockedProvider";
-import { AddClientDialog } from "@/components/admin/AddClientDialog";
-import { CREATE_CLIENT } from "@/graphql/mutations/clients";
 import { toast } from "sonner";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+import { AddClientDialog } from "@/components/admin/AddClientDialog";
+import { CREATE_CLIENT } from "@/graphql/mutations/clients";
+import { MockedProvider, type MockedResponse } from "@/test/MockedProvider";
+
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));

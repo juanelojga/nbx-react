@@ -220,8 +220,9 @@ function consolidateShape(cs: MockConsolidate, detailed = false) {
   const pkgs = cs.packageIds
     .map((id) => store.packages.find((p) => p.id === id))
     .filter((p): p is MockPackage => !!p);
-  const client = pkgs[0]
-    ? store.clients.find((c) => c.id === pkgs[0].clientId)
+  const firstPackage = pkgs[0];
+  const client = firstPackage
+    ? store.clients.find((c) => c.id === firstPackage.clientId)
     : undefined;
 
   const packagesRealPriceSum = pkgs.reduce((s, p) => s + (p.realPrice ?? 0), 0);
@@ -232,15 +233,15 @@ function consolidateShape(cs: MockConsolidate, detailed = false) {
   let extrasSum = 0;
   if (cs.extraAttributes) {
     try {
-      const parsed = JSON.parse(cs.extraAttributes);
+      const parsed: unknown = JSON.parse(cs.extraAttributes);
       if (Array.isArray(parsed)) {
-        extrasSum = parsed.reduce(
+        extrasSum = (parsed as { amount?: string | number }[]).reduce(
           (s: number, e: { amount?: string | number }) => {
             const amt =
               typeof e.amount === "string"
                 ? parseFloat(e.amount)
                 : (e.amount ?? 0);
-            return s + (isNaN(amt as number) ? 0 : (amt as number));
+            return s + (isNaN(amt) ? 0 : amt);
           },
           0
         );
@@ -334,7 +335,6 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
       },
     },
   }),
-  Logout: () => ({ revokeToken: { revoked: true } }),
   GetCurrentUser: () => ({ me: { ...store.adminUser } }),
 
   // Pricing
@@ -523,7 +523,7 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
   UpdateClient: (vars) => {
     const c = store.clients.find((x) => x.id === String(vars.id));
     if (!c) throw new Error("Client not found");
-    const assign = <K extends keyof MockClient>(key: K, v: unknown) => {
+    const assign = (key: keyof MockClient, v: unknown) => {
       if (v !== undefined && v !== null) (c[key] as unknown) = v;
     };
     assign("firstName", vars.firstName);
@@ -559,8 +559,9 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
   },
   DeleteClient: (vars) => {
     const idx = store.clients.findIndex((x) => x.id === String(vars.id));
-    if (idx >= 0) {
-      const clientId = store.clients[idx].id;
+    const existing = store.clients[idx];
+    if (idx >= 0 && existing) {
+      const clientId = existing.id;
       store.clients.splice(idx, 1);
       // Also remove packages & consolidates for that client
       store.packages = store.packages.filter((p) => p.clientId !== clientId);
@@ -575,8 +576,8 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
   },
 
   // Packages
-  ResolveAllPackages: (vars) => {
-    const clientId = String(vars.client_id);
+  GetAllPackages: (vars) => {
+    const clientId = String(vars.clientId);
     const search = ((vars.search as string) ?? "").toLowerCase();
     let results = store.packages.filter((p) => p.clientId === clientId);
     if (search) {
@@ -587,7 +588,7 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
       );
     }
     const page = (vars.page as number) ?? 1;
-    const pageSize = (vars.page_size as number) ?? 10;
+    const pageSize = (vars.pageSize as number) ?? 10;
     const paged = results.slice((page - 1) * pageSize, page * pageSize);
     return {
       allPackages: {
@@ -634,7 +635,7 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
   UpdatePackage: (vars) => {
     const p = store.packages.find((x) => x.id === String(vars.id));
     if (!p) throw new Error("Package not found");
-    const assign = <K extends keyof MockPackage>(key: K, v: unknown) => {
+    const assign = (key: keyof MockPackage, v: unknown) => {
       if (v !== undefined) (p[key] as unknown) = v;
     };
     assign("courier", vars.courier);
@@ -651,7 +652,7 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
     assign("purchasedByNarbox", vars.purchasedByNarbox);
     assign("arrivalDate", vars.arrivalDate);
     assign("comments", vars.comments);
-    if (vars.clientId) p.clientId = String(vars.clientId);
+    if (typeof vars.clientId === "string") p.clientId = vars.clientId;
     p.updatedAt = nowIso();
     return { updatePackage: { package: packageShape(p, true) } };
   },
@@ -673,8 +674,9 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
         const pkgs = c.packageIds
           .map((id) => store.packages.find((p) => p.id === id))
           .filter((p): p is MockPackage => !!p);
-        const client = pkgs[0]
-          ? store.clients.find((cl) => cl.id === pkgs[0].clientId)
+        const firstPkg = pkgs[0];
+        const client = firstPkg
+          ? store.clients.find((cl) => cl.id === firstPkg.clientId)
           : undefined;
         if (client && fullName(client).toLowerCase().includes(search))
           return true;
@@ -719,10 +721,8 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
   UpdateConsolidate: (vars) => {
     const cs = store.consolidates.find((x) => x.id === String(vars.id));
     if (!cs) throw new Error("Consolidate not found");
-    if (vars.description !== undefined && vars.description !== null)
-      cs.description = String(vars.description);
-    if (vars.status !== undefined && vars.status !== null)
-      cs.status = String(vars.status);
+    if (typeof vars.description === "string") cs.description = vars.description;
+    if (typeof vars.status === "string") cs.status = vars.status;
     if (vars.deliveryDate !== undefined)
       cs.deliveryDate = (vars.deliveryDate as string) ?? null;
     if (vars.comment !== undefined)

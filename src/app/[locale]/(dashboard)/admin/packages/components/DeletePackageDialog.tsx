@@ -1,16 +1,13 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
-import { BaseDialog } from "@/components/ui/base-dialog";
-import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import {
-  DELETE_PACKAGE,
-  DeletePackageResponse,
-  DeletePackageVariables,
-} from "@/graphql/mutations/packages";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+
+import { BaseDialog } from "@/components/common/BaseDialog";
+import { Button } from "@/components/ui/button";
+import { DELETE_PACKAGE } from "@/graphql/mutations/packages";
 
 interface DeletePackageDialogProps {
   open: boolean;
@@ -29,12 +26,9 @@ export function DeletePackageDialog({
   onPackageDeleted,
 }: DeletePackageDialogProps) {
   const t = useTranslations("adminPackages.deleteDialog");
-  const [deletePackage, { loading }] = useMutation<
-    DeletePackageResponse,
-    DeletePackageVariables
-  >(DELETE_PACKAGE, {
-    onCompleted: async (data) => {
-      if (data.deletePackage.success) {
+  const [deletePackage, { loading }] = useMutation(DELETE_PACKAGE, {
+    onCompleted: (data) => {
+      if (data.deletePackage?.success) {
         toast.success(t("successTitle"), {
           description: t("successDescription", {
             barcode: package_?.barcode || "",
@@ -43,7 +37,7 @@ export function DeletePackageDialog({
         onOpenChange(false);
         // Trigger table refresh
         if (onPackageDeleted) {
-          await onPackageDeleted();
+          void onPackageDeleted();
         }
       } else {
         toast.error(t("errorTitle"), {

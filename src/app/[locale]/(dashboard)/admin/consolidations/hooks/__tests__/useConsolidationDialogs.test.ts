@@ -1,6 +1,8 @@
-import { renderHook, act } from "@testing-library/react";
-import { useConsolidationDialogs } from "../useConsolidationDialogs";
+import { act, renderHook } from "@testing-library/react";
+
 import type { ConsolidateType } from "@/graphql/queries/consolidations";
+
+import { useConsolidationDialogs } from "../useConsolidationDialogs";
 
 const mockConsolidation: ConsolidateType = {
   id: "cons-1",
@@ -8,7 +10,8 @@ const mockConsolidation: ConsolidateType = {
   status: "pending",
   deliveryDate: "2024-06-15",
   comment: null,
-  extraAttributes: null,
+  extraAttributes: "{}",
+  totalCost: null,
   client: {
     id: "client-1",
     fullName: "John Doe",
@@ -68,7 +71,6 @@ describe("useConsolidationDialogs", () => {
       id: "cons-1",
       description: "Test consolidation",
       client: {
-        id: "client-1",
         fullName: "John Doe",
         email: "john@example.com",
       },

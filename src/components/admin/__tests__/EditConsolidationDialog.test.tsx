@@ -1,14 +1,13 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MockedProvider, MockedResponse } from "@/test/MockedProvider";
-import { EditConsolidationDialog } from "@/components/admin/EditConsolidationDialog";
-import { UPDATE_CONSOLIDATE } from "@/graphql/mutations/consolidations";
+import React from "react";
 import { toast } from "sonner";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+import { EditConsolidationDialog } from "@/components/admin/EditConsolidationDialog";
+import { UPDATE_CONSOLIDATE } from "@/graphql/mutations/consolidations";
+import { MockedProvider, type MockedResponse } from "@/test/MockedProvider";
+
+jest.mock("next-intl", () => jest.requireActual("@/test/mockNextIntl"));
 jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));
@@ -129,7 +128,7 @@ describe("EditConsolidationDialog", () => {
         <EditConsolidationDialog {...defaultProps} consolidation={null} />
       </MockedProvider>
     );
-    expect(container.innerHTML).toBe("");
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("prefills form from consolidation prop", async () => {

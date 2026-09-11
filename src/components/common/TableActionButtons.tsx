@@ -1,12 +1,13 @@
 "use client";
 
 import { TableCell } from "@/components/ui/table";
+
 import { ActionButton } from "./ActionButton";
-import { TableActionButtonsProps } from "./table-action-buttons.types";
+import { type TableActionButtonsProps } from "./table-action-buttons.types";
 
 export type {
-  TableAction,
   ActionVariant,
+  TableAction,
   TableActionButtonsProps,
 } from "./table-action-buttons.types";
 

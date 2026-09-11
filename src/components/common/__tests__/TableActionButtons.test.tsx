@@ -1,8 +1,9 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import React from "react";
+
+import { type TableAction } from "../table-action-buttons.types";
 import { TableActionButtons } from "../TableActionButtons";
-import { TableAction } from "../table-action-buttons.types";
 
 jest.mock("../ActionButton", () => ({
   ActionButton: ({

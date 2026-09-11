@@ -33,11 +33,17 @@ services:
 
       # Keep node_modules and .next inside the container — prevents the host
       # mount from shadowing the packages installed during `docker build`.
-      - /app/node_modules
-      - /app/.next
+      # Named volumes survive `docker compose down`; run `docker compose down -v`
+      # after changing dependencies so they are reinstalled.
+      - node_modules:/app/node_modules
+      - next_cache:/app/.next
 
     # Allow the container to reach services running on the host machine
     # (e.g. Django backend on localhost:8000) via `host.docker.internal`.
     # Works on Linux (docker adds host-gateway automatically), macOS, and Windows.
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+volumes:
+  node_modules:
+  next_cache:

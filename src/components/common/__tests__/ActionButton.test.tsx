@@ -1,8 +1,9 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import React from "react";
+
 import { ActionButton } from "../ActionButton";
-import { TableAction } from "../table-action-buttons.types";
+import { type TableAction } from "../table-action-buttons.types";
 
 jest.mock("@/components/ui/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => (
@@ -36,37 +37,40 @@ jest.mock("@/components/ui/tooltip", () => ({
   ),
 }));
 
-jest.mock("@/components/ui/enhanced-table", () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const ReactMock = require("react");
-  const Mock = ReactMock.forwardRef(function MockButton(
-    {
-      actionVariant,
-      icon: Icon,
-      onClick,
-      ...props
-    }: {
-      actionVariant: string;
-      icon: React.ElementType;
-      onClick?: () => void;
-      "aria-label"?: string;
-    },
-    ref: React.Ref<HTMLButtonElement>
-  ) {
-    return (
-      <button
-        ref={ref}
-        data-testid={`action-button-${actionVariant}`}
-        onClick={onClick}
-        {...props}
-      >
-        <Icon data-testid={`icon-${actionVariant}`} />
-      </button>
-    );
-  });
-  Mock.displayName = "EnhancedTableActionButton";
-  return { EnhancedTableActionButton: Mock };
-});
+jest.mock(
+  "@/components/data-display/enhanced-table/EnhancedTableActionButton",
+  () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const ReactMock = require("react");
+    const Mock = ReactMock.forwardRef(function MockButton(
+      {
+        actionVariant,
+        icon: Icon,
+        onClick,
+        ...props
+      }: {
+        actionVariant: string;
+        icon: React.ElementType;
+        onClick?: () => void;
+        "aria-label"?: string;
+      },
+      ref: React.Ref<HTMLButtonElement>
+    ) {
+      return (
+        <button
+          ref={ref}
+          data-testid={`action-button-${actionVariant}`}
+          onClick={onClick}
+          {...props}
+        >
+          <Icon data-testid={`icon-${actionVariant}`} />
+        </button>
+      );
+    });
+    Mock.displayName = "EnhancedTableActionButton";
+    return { EnhancedTableActionButton: Mock };
+  }
+);
 
 const createAction = (overrides?: Partial<TableAction>): TableAction => ({
   onClick: jest.fn(),

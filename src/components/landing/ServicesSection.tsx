@@ -1,4 +1,6 @@
+import { Building2, Ship, ShoppingCart, Truck } from "lucide-react";
 import { useTranslations } from "next-intl";
+
 import {
   Card,
   CardContent,
@@ -6,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ShoppingCart, Ship, Truck, Building2 } from "lucide-react";
 
 export function ServicesSection() {
   const t = useTranslations("landing.services");
@@ -64,12 +65,12 @@ export function ServicesSection() {
                   {service.icon}
                 </div>
                 <CardTitle className="text-xl font-bold text-foreground">
-                  {t(service.titleKey as Parameters<typeof t>[0])}
+                  {t(service.titleKey)}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <CardDescription className="text-base text-muted-foreground">
-                  {t(service.textKey as Parameters<typeof t>[0])}
+                  {t(service.textKey)}
                 </CardDescription>
               </CardContent>
             </Card>

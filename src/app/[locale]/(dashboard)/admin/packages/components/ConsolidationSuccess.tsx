@@ -1,25 +1,27 @@
 "use client";
 
-import { useMemo } from "react";
-import { useTranslations } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
-  CheckCircle2,
-  Package as PackageIcon,
-  User,
-  FileText,
-  Calendar,
-  Layers,
   ArrowRight,
-  RotateCcw,
-  Weight,
+  Calendar,
+  CheckCircle2,
   DollarSign,
+  FileText,
+  Layers,
+  Package as PackageIcon,
+  RotateCcw,
+  User,
+  Weight,
 } from "lucide-react";
-import { ConsolidateType } from "@/graphql/queries/consolidations";
-import { Package } from "../types";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { type ConsolidateType } from "@/graphql/queries/consolidations";
 import { cn } from "@/lib/utils";
+
+import { type Package } from "../types";
 
 interface ConsolidationSuccessProps {
   consolidation: ConsolidateType;
@@ -79,9 +81,7 @@ export function ConsolidationSuccess({
     cancelled: "bg-red-500",
   };
 
-  const statusColor =
-    statusColors[consolidation.status as keyof typeof statusColors] ||
-    "bg-gray-500";
+  const statusColor = statusColors[consolidation.status] || "bg-gray-500";
 
   return (
     <div className="space-y-6">
@@ -188,7 +188,7 @@ export function ConsolidationSuccess({
 
             {/* Success Text */}
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground mb-2">
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground mb-2">
                 {t("title")}
               </h1>
               <p className="text-lg text-muted-foreground">

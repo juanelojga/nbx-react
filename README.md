@@ -1,126 +1,53 @@
-# NBX React Application
+# NBX React
+
+Frontend for **NarBox Courier**, a package handling and consolidation service.
+Next.js 16 (App Router) + React 19 + TypeScript, talking to the
+[`nbx-django`](../nbx-django) GraphQL backend via Apollo Client.
 
 [![codecov](https://codecov.io/gh/juanelojga/nbx-react/branch/main/graph/badge.svg)](https://codecov.io/gh/juanelojga/nbx-react)
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Stack
 
-## Testing & Coverage
+- Next.js 16 with Turbopack, React 19, TypeScript (strict)
+- Apollo Client 4 with GraphQL Code Generator (`schema.graphql` is committed)
+- next-intl (`es` default, `en`), Tailwind CSS v4, shadcn/ui, React Hook Form + Zod
+- Jest + Testing Library for unit tests, Playwright for E2E (mocked backend)
 
-This project includes comprehensive unit tests with coverage reporting via Codecov.
-
-### Running Tests
-
-```bash
-# Run all tests
-pnpm test
-
-# Run tests in watch mode
-pnpm run test:watch
-
-# Run tests with coverage report
-pnpm run test:coverage
-
-# Run tests for CI (with coverage)
-pnpm run test:ci
-```
-
-### Coverage Reports
-
-Coverage reports are generated in the `coverage/` directory and uploaded to Codecov on every push to main/develop branches.
-
-## Getting Started
-
-First, run the development server:
+## Getting started
 
 ```bash
-pnpm run dev
+corepack enable          # pnpm 10 is pinned in package.json
+pnpm install
+cp .env.example .env.local   # point NEXT_PUBLIC_GRAPHQL_ENDPOINT at the backend
+pnpm dev                 # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or with Docker: `pnpm docker:up` (see `docker-compose.yml`; run
+`docker compose down -v` after changing dependencies).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command               | What it does                                       |
+| --------------------- | -------------------------------------------------- |
+| `pnpm dev` / `build`  | Dev server / production build                      |
+| `pnpm lint`           | ESLint (type-aware); `pnpm format` runs Prettier   |
+| `pnpm type-check`     | `next typegen` + `tsc --noEmit`                    |
+| `pnpm test`           | Unit tests (`test:coverage`, `test:watch`)         |
+| `pnpm test:e2e`       | Playwright against the mocked GraphQL backend      |
+| `pnpm codegen`        | Regenerate `src/graphql/generated` from the schema |
+| `pnpm codegen:schema` | Refresh `schema.graphql` from a running backend    |
 
-## Learn More
+## Project layout
 
-To learn more about Next.js, take a look at the following resources:
+See [`CLAUDE.md`](CLAUDE.md) for the architecture, conventions and the
+design guidelines it links to (`docs/TABLE_DESIGN_SPEC.md`,
+`docs/TYPOGRAPHY_GUIDELINES.md`). Backend follow-ups for authentication are
+tracked in `docs/AUTH_BACKEND_FOLLOWUP.md`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Running with Docker
-
-The project includes a Docker development setup that lets you run this app (and other projects) in parallel without port conflicts.
-
-### Prerequisites
-
-- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
-
-### First-time setup
-
-1. Copy the Docker environment template:
-
-   ```bash
-   cp .env.docker.example .env.docker
-   ```
-
-2. Open `.env.docker` and set your values:
-
-   ```env
-   # Port exposed on your machine — change per project to avoid collisions
-   HOST_PORT=3001
-
-   # Reach the Django backend from inside Docker (not "localhost")
-   NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://host.docker.internal:8000/graphql
-   ```
-
-3. Build the image and start the container:
-
-   ```bash
-   docker compose --env-file .env.docker up --build
-   ```
-
-   The app will be available at `http://localhost:3001` (or whichever `HOST_PORT` you set).
-
-   > **Important:** The `--env-file .env.docker` flag is required so Docker Compose can read `HOST_PORT` for the port mapping. Without it, the port always falls back to `3000`.
-
-### Subsequent runs
-
-```bash
-docker compose --env-file .env.docker up    # start
-docker compose --env-file .env.docker down  # stop and remove containers
-```
-
-Or use the pnpm scripts:
-
-```bash
-pnpm run docker:up
-pnpm run docker:down
-```
-
-### Running multiple projects in parallel
-
-Each project has its own `.env.docker`. To avoid port collisions, assign a unique `HOST_PORT` to each:
-
-| Project   | `HOST_PORT` | URL                   |
-| --------- | ----------- | --------------------- |
-| nbx-react | `3001`      | http://localhost:3001 |
-| other-app | `3002`      | http://localhost:3002 |
-
-Both `docker compose --env-file .env.docker up` commands can run simultaneously in separate terminals.
-
-### How it works
-
-- **Source code** is mounted as a volume into the container — Turbopack hot-reload works exactly as in local dev.
-- **`node_modules` and `.next`** live inside the container to prevent conflicts with host-installed packages.
-- **`.env.local`** is loaded first (your app variables); **`.env.docker`** is loaded second and overrides Docker-specific values (`NEXT_PUBLIC_GRAPHQL_ENDPOINT`). The `--env-file .env.docker` flag is also passed to `docker compose` so that `HOST_PORT` is available for the port mapping interpolation at parse time.
-- **`host.docker.internal`** resolves to your host machine inside the container, allowing the Django backend running on `localhost:8000` to be reached from Docker (works on Linux, macOS, and Windows).
+Netlify builds `main` with `@netlify/plugin-nextjs` (`netlify.toml`).
+Public build-time variables live in `netlify.toml` / the Netlify dashboard.
+GitHub Actions (`.github/workflows/ci.yml`) runs codegen drift check, lint,
+format check, type check, unit tests with coverage, a production build and
+the Playwright suite on every push and pull request.

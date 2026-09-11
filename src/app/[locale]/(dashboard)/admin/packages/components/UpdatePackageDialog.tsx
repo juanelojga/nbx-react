@@ -1,36 +1,30 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, Loader2, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { BaseDialog, DialogFooter } from "@/components/ui/base-dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Pencil, AlertCircle } from "lucide-react";
-import { ClientAutocomplete } from "@/components/admin/ClientAutocomplete";
-import type { ClientType } from "@/graphql/queries/clients";
-import {
-  UPDATE_PACKAGE,
-  UpdatePackageVariables,
-  UpdatePackageResponse,
-} from "@/graphql/mutations/packages";
-import {
-  GET_PACKAGE,
-  GetPackageResponse,
-  GetPackageVariables,
-} from "@/graphql/queries/packages";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+import { ClientAutocomplete } from "@/components/admin/ClientAutocomplete";
+import { PackageFormFields } from "@/components/admin/PackageFormFields";
+import { BaseDialog } from "@/components/common/BaseDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { UPDATE_PACKAGE } from "@/graphql/mutations/packages";
+import type { ClientType } from "@/graphql/queries/clients";
+import { GET_PACKAGE } from "@/graphql/queries/packages";
+import { toPackageFormValues } from "@/lib/packages/toPackageFormValues";
+import { toUpdatePackageVariables } from "@/lib/packages/toUpdatePackageVariables";
+import {
+  createPackageFormSchema,
+  EMPTY_PACKAGE_FORM,
+  type PackageFormValues,
+} from "@/lib/validation/packageFormSchema";
 
 interface UpdatePackageDialogProps {
   open: boolean;
@@ -38,28 +32,6 @@ interface UpdatePackageDialogProps {
   packageId: string | null;
   showClientSelector?: boolean;
   onPackageUpdated?: () => void | Promise<void>;
-}
-
-interface FormData {
-  courier: string;
-  otherCourier: string;
-  length: string;
-  width: string;
-  height: string;
-  dimensionUnit: string;
-  weight: string;
-  weightUnit: string;
-  isDocumentHolder: boolean;
-  description: string;
-  purchaseLink: string;
-  purchasedByNarbox: boolean;
-  realPrice: string;
-  arrivalDate: string;
-  comments: string;
-}
-
-interface ValidationErrors {
-  [key: string]: string | undefined;
 }
 
 export function UpdatePackageDialog({
@@ -71,296 +43,77 @@ export function UpdatePackageDialog({
 }: UpdatePackageDialogProps) {
   const t = useTranslations("adminPackages.editDialog");
   const [selectedClient, setSelectedClient] = useState<ClientType | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    courier: "",
-    otherCourier: "",
-    length: "",
-    width: "",
-    height: "",
-    dimensionUnit: "cm",
-    weight: "",
-    weightUnit: "lb",
-    isDocumentHolder: false,
-    description: "",
-    purchaseLink: "",
-    purchasedByNarbox: false,
-    realPrice: "",
-    arrivalDate: "",
-    comments: "",
-  });
 
-  const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
-    {}
+  const schema = useMemo(
+    () => createPackageFormSchema(t, { mode: "update", requireClient: false }),
+    [t]
   );
+  const form = useForm<PackageFormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: EMPTY_PACKAGE_FORM,
+  });
+  const { reset } = form;
 
-  // Query to fetch package details
   const {
     data,
     loading: queryLoading,
     error: queryError,
-  } = useQuery<GetPackageResponse, GetPackageVariables>(GET_PACKAGE, {
+  } = useQuery(GET_PACKAGE, {
     variables: { id: parseInt(packageId || "0") },
     skip: !packageId || !open,
   });
+  const pkg = data?.package;
 
-  // Mutation to update package
-  const [updatePackage, { loading: mutationLoading }] = useMutation<
-    UpdatePackageResponse,
-    UpdatePackageVariables
-  >(UPDATE_PACKAGE, {
-    onCompleted: async (data) => {
-      toast.success(t("successTitle"), {
-        description: t("successDescription", {
-          barcode: data.updatePackage.package.barcode,
-        }),
-      });
-      handleClose();
-      // Trigger refresh
-      if (onPackageUpdated) {
-        await onPackageUpdated();
-      }
-    },
-    onError: (error) => {
-      toast.error(t("errorTitle"), {
-        description: error.message,
-      });
-    },
+  // Seed the form once the package arrives (keyed on id so re-fetches don't clobber edits).
+  useEffect(() => {
+    if (!pkg) return;
+    reset(toPackageFormValues(pkg));
+    setSelectedClient(
+      pkg.client
+        ? ({
+            id: pkg.client.id,
+            fullName: pkg.client.fullName,
+            email: pkg.client.email,
+          } as ClientType)
+        : null
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reseed only when a different package loads
+  }, [pkg?.id, reset]);
+
+  const handleClose = useCallback(() => {
+    reset(EMPTY_PACKAGE_FORM);
+    setSelectedClient(null);
+    onOpenChange(false);
+  }, [reset, onOpenChange]);
+
+  const [updatePackage, { loading: mutationLoading }] = useMutation(
+    UPDATE_PACKAGE,
+    {
+      onCompleted: (result) => {
+        toast.success(t("successTitle"), {
+          description: t("successDescription", {
+            barcode: result.updatePackage?.package?.barcode ?? "",
+          }),
+        });
+        handleClose();
+        void onPackageUpdated?.();
+      },
+      onError: (error) => {
+        toast.error(t("errorTitle"), { description: error.message });
+      },
+    }
+  );
+
+  const onSubmit = form.handleSubmit(async (values) => {
+    if (!packageId) return;
+    await updatePackage({
+      variables: toUpdatePackageVariables(packageId, values, {
+        includeClient: showClientSelector && Boolean(selectedClient),
+      }),
+    }).catch(() => undefined);
   });
 
-  // Track the last processed package to avoid unnecessary re-renders
-  const lastPackageIdRef = useRef<string | null>(null);
-
-  // Populate form with existing package data when data is loaded
-  // Using queueMicrotask to defer state update and avoid cascading renders
-  useEffect(() => {
-    if (data?.package) {
-      const pkg = data.package;
-      // Only update form if the package data has actually changed
-      if (lastPackageIdRef.current !== pkg.id) {
-        lastPackageIdRef.current = pkg.id;
-
-        // Helper to format date for input[type="date"]
-        const formatDateForInput = (dateString: string | null) => {
-          if (!dateString) return "";
-          try {
-            const date = new Date(dateString);
-            return date.toISOString().split("T")[0];
-          } catch {
-            return "";
-          }
-        };
-
-        // Defer state update to avoid synchronous setState in effect
-        queueMicrotask(() => {
-          setFormData({
-            courier: pkg.courier || "",
-            otherCourier: pkg.otherCourier || "",
-            length: pkg.length?.toString() || "",
-            width: pkg.width?.toString() || "",
-            height: pkg.height?.toString() || "",
-            dimensionUnit: pkg.dimensionUnit || "cm",
-            weight: pkg.weight?.toString() || "",
-            weightUnit: pkg.weightUnit || "lb",
-            isDocumentHolder:
-              pkg.weight === 0.5 && (pkg.weightUnit || "lb") === "lb",
-            description: pkg.description || "",
-            purchaseLink: pkg.purchaseLink || "",
-            purchasedByNarbox: pkg.purchasedByNarbox ?? false,
-            realPrice: pkg.realPrice?.toString() || "",
-            arrivalDate: formatDateForInput(pkg.arrivalDate),
-            comments: pkg.comments || "",
-          });
-          if (pkg.client) {
-            setSelectedClient({
-              id: pkg.client.id,
-              fullName: pkg.client.fullName,
-              email: pkg.client.email,
-            } as ClientType);
-          }
-        });
-      }
-    }
-  }, [data]);
-
-  const handleClose = () => {
-    setFormData({
-      courier: "",
-      otherCourier: "",
-      length: "",
-      width: "",
-      height: "",
-      dimensionUnit: "cm",
-      weight: "",
-      weightUnit: "lb",
-      isDocumentHolder: false,
-      description: "",
-      purchaseLink: "",
-      purchasedByNarbox: false,
-      realPrice: "",
-      arrivalDate: "",
-      comments: "",
-    });
-    setValidationErrors({});
-    setSelectedClient(null);
-    lastPackageIdRef.current = null;
-    onOpenChange(false);
-  };
-
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    if (field === "purchasedByNarbox") {
-      setFormData((prev) => ({
-        ...prev,
-        purchasedByNarbox: value === "true",
-      }));
-    } else if (field === "isDocumentHolder") {
-      const checked = value === "true";
-      setFormData((prev) => ({
-        ...prev,
-        isDocumentHolder: checked,
-        ...(checked ? { weight: "", weightUnit: "lb" } : {}),
-      }));
-      if (checked && validationErrors.weight) {
-        setValidationErrors((prev) => ({ ...prev, weight: undefined }));
-      }
-    } else {
-      setFormData((prev) => ({ ...prev, [field]: value }));
-    }
-    // Clear validation error for this field
-    if (validationErrors[field]) {
-      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  const validateForm = (): boolean => {
-    const errors: ValidationErrors = {};
-
-    if (showClientSelector && !selectedClient) {
-      errors.clientId = t("clientRequired");
-    }
-
-    // Required: Weight (skipped when Document Holder is selected)
-    if (!formData.isDocumentHolder) {
-      if (!formData.weight.trim()) {
-        errors.weight = t("weightRequired");
-      } else {
-        const weightVal = parseFloat(formData.weight.trim());
-        if (isNaN(weightVal) || weightVal <= 0) {
-          errors.weight = t("positiveNumberError");
-        }
-      }
-    }
-
-    // Optional: Numeric fields must be > 0 if provided
-    const numericFields = [
-      { key: "length", label: "Length" },
-      { key: "width", label: "Width" },
-      { key: "height", label: "Height" },
-      { key: "realPrice", label: "Real price" },
-    ];
-
-    numericFields.forEach(({ key }) => {
-      const value = (formData[key as keyof FormData] as string).trim();
-      if (value) {
-        const numValue = parseFloat(value);
-        if (isNaN(numValue) || numValue <= 0) {
-          errors[key] = t("positiveNumberError");
-        }
-      }
-    });
-
-    // Optional: Purchase link must be valid URL if provided
-    if (formData.purchaseLink.trim()) {
-      try {
-        new URL(formData.purchaseLink.trim());
-      } catch {
-        errors.purchaseLink = t("invalidUrlError");
-      }
-    }
-
-    // Optional: Arrival date must be valid date if provided
-    if (formData.arrivalDate.trim()) {
-      const dateValue = new Date(formData.arrivalDate.trim());
-      if (isNaN(dateValue.getTime())) {
-        errors.arrivalDate = t("invalidDateError");
-      }
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm() || !packageId) {
-      return;
-    }
-
-    // Prepare variables - only include non-empty optional fields
-    const variables: UpdatePackageVariables = {
-      id: packageId,
-    };
-
-    // Add optional string fields
-    if (formData.courier.trim()) {
-      variables.courier = formData.courier.trim();
-    }
-    if (formData.otherCourier.trim()) {
-      variables.otherCourier = formData.otherCourier.trim();
-    }
-    if (formData.dimensionUnit.trim()) {
-      variables.dimensionUnit = formData.dimensionUnit.trim();
-    }
-    if (formData.isDocumentHolder) {
-      variables.weightUnit = "lb";
-    } else if (formData.weightUnit.trim()) {
-      variables.weightUnit = formData.weightUnit.trim();
-    }
-    if (formData.description.trim()) {
-      variables.description = formData.description.trim();
-    }
-    if (formData.purchaseLink.trim()) {
-      variables.purchaseLink = formData.purchaseLink.trim();
-    }
-    if (formData.comments.trim()) {
-      variables.comments = formData.comments.trim();
-    }
-
-    // Add optional numeric fields
-    if (formData.length.trim()) {
-      variables.length = parseFloat(formData.length.trim());
-    }
-    if (formData.width.trim()) {
-      variables.width = parseFloat(formData.width.trim());
-    }
-    if (formData.height.trim()) {
-      variables.height = parseFloat(formData.height.trim());
-    }
-    if (formData.isDocumentHolder) {
-      variables.weight = 0.5;
-    } else if (formData.weight.trim()) {
-      variables.weight = parseFloat(formData.weight.trim());
-    }
-    if (formData.realPrice.trim()) {
-      variables.realPrice = parseFloat(formData.realPrice.trim());
-    }
-
-    // Add purchasedByNarbox
-    variables.purchasedByNarbox = formData.purchasedByNarbox;
-
-    // Add arrival date if provided
-    if (formData.arrivalDate.trim()) {
-      variables.arrivalDate = formData.arrivalDate.trim();
-    }
-
-    if (showClientSelector && selectedClient) {
-      variables.clientId = selectedClient.id;
-    }
-
-    await updatePackage({ variables }).catch(() => {});
-  };
-
-  const isLoading = queryLoading || mutationLoading;
+  const isBusy = queryLoading || mutationLoading;
 
   return (
     <BaseDialog
@@ -371,479 +124,59 @@ export function UpdatePackageDialog({
       description={t("description")}
       icon={Pencil}
     >
-      {/* Loading State */}
       {queryLoading && (
-        <div className="flex items-center justify-center py-12">
+        <div
+          className="flex items-center justify-center py-12"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <Loader2
+              className="h-12 w-12 animate-spin text-primary"
+              aria-hidden
+            />
             <p className="text-sm text-muted-foreground">{t("loading")}</p>
           </div>
         </div>
       )}
 
-      {/* Error State */}
       {queryError && !queryLoading && (
         <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle className="h-4 w-4" aria-hidden />
           <AlertDescription>{t("loadError")}</AlertDescription>
         </Alert>
       )}
 
-      {/* Form */}
-      {data?.package && !queryLoading && (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {showClientSelector && (
-            <div className="space-y-2">
-              <Label>
-                {t("clientLabel")} <span className="text-destructive">*</span>
-              </Label>
-              <ClientAutocomplete
-                selectedClient={selectedClient}
-                onClientSelect={(client) => {
-                  setSelectedClient(client);
-                  if (client && validationErrors.clientId) {
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      clientId: undefined,
-                    }));
-                  }
-                }}
-              />
-              {validationErrors.clientId && (
-                <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                  <span className="text-base">⚠</span>
-                  {validationErrors.clientId}
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Barcode (Read-only) */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("identificationTitle")}
-            </h3>
-            <div className="space-y-2">
-              <Label htmlFor="barcode-readonly">{t("barcodeLabel")}</Label>
-              <Input
-                id="barcode-readonly"
-                value={data.package.barcode}
-                disabled
-                className="bg-muted cursor-not-allowed"
-              />
-              <p className="text-xs text-muted-foreground">
-                {t("barcodeHelper")}
-              </p>
-            </div>
-          </div>
-
-          {/* Basic Information */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("basicInfoTitle")}
-            </h3>
-            <div className="space-y-2">
-              <Label htmlFor="description">{t("descriptionLabel")}</Label>
-              <Input
-                id="description"
-                value={formData.description}
-                onChange={(e) =>
-                  handleInputChange("description", e.target.value)
-                }
-                disabled={isLoading}
-                placeholder={t("descriptionPlaceholder")}
-              />
-            </div>
-          </div>
-
-          {/* Courier Information */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("courierInfoTitle")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Courier */}
-              <div className="space-y-2">
-                <Label htmlFor="courier">{t("courierLabel")}</Label>
-                <Input
-                  id="courier"
-                  value={formData.courier}
-                  onChange={(e) => handleInputChange("courier", e.target.value)}
-                  disabled={isLoading}
-                  placeholder={t("courierPlaceholder")}
-                />
-              </div>
-
-              {/* Other Courier */}
-              <div className="space-y-2">
-                <Label htmlFor="otherCourier">{t("otherCourierLabel")}</Label>
-                <Input
-                  id="otherCourier"
-                  value={formData.otherCourier}
-                  onChange={(e) =>
-                    handleInputChange("otherCourier", e.target.value)
-                  }
-                  disabled={isLoading}
-                  placeholder={t("otherCourierPlaceholder")}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Dimensions */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("dimensionsTitle")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Length */}
-              <div className="space-y-2">
-                <Label htmlFor="length">{t("lengthLabel")}</Label>
-                <Input
-                  id="length"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.length}
-                  onChange={(e) => handleInputChange("length", e.target.value)}
-                  disabled={isLoading}
-                  aria-invalid={!!validationErrors.length}
-                  placeholder={t("dimensionPlaceholder")}
-                />
-                {validationErrors.length && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.length}
-                  </p>
-                )}
-              </div>
-
-              {/* Width */}
-              <div className="space-y-2">
-                <Label htmlFor="width">{t("widthLabel")}</Label>
-                <Input
-                  id="width"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.width}
-                  onChange={(e) => handleInputChange("width", e.target.value)}
-                  disabled={isLoading}
-                  aria-invalid={!!validationErrors.width}
-                  placeholder={t("dimensionPlaceholder")}
-                />
-                {validationErrors.width && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.width}
-                  </p>
-                )}
-              </div>
-
-              {/* Height */}
-              <div className="space-y-2">
-                <Label htmlFor="height">{t("heightLabel")}</Label>
-                <Input
-                  id="height"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.height}
-                  onChange={(e) => handleInputChange("height", e.target.value)}
-                  disabled={isLoading}
-                  aria-invalid={!!validationErrors.height}
-                  placeholder={t("dimensionPlaceholder")}
-                />
-                {validationErrors.height && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.height}
-                  </p>
-                )}
-              </div>
-
-              {/* Dimension Unit */}
-              <div className="space-y-2">
-                <Label htmlFor="dimensionUnit">{t("unitLabel")}</Label>
-                <Select
-                  value={formData.dimensionUnit}
-                  onValueChange={(value) =>
-                    handleInputChange("dimensionUnit", value)
-                  }
-                  disabled={isLoading}
-                >
-                  <SelectTrigger id="dimensionUnit" className="w-full">
-                    <SelectValue placeholder={t("unitPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cm">{t("unitCm")}</SelectItem>
-                    <SelectItem value="in">{t("unitIn")}</SelectItem>
-                    <SelectItem value="m">{t("unitM")}</SelectItem>
-                    <SelectItem value="ft">{t("unitFt")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {/* Weight */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("weightTitle")}
-            </h3>
-
-            {/* Document Holder helper */}
-            <div className="flex items-start space-x-3">
-              <Checkbox
-                id="isDocumentHolder"
-                checked={formData.isDocumentHolder}
-                onCheckedChange={(checked) =>
-                  handleInputChange(
-                    "isDocumentHolder",
-                    checked === true ? "true" : "false"
-                  )
-                }
-                disabled={isLoading}
-              />
-              <div className="grid gap-1 leading-none">
-                <Label htmlFor="isDocumentHolder" className="cursor-pointer">
-                  {t("documentHolderLabel")}
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  {t("documentHolderDescription")}
-                </p>
-              </div>
-            </div>
-
-            {!formData.isDocumentHolder && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Weight Value */}
+      {pkg && !queryLoading && (
+        <form onSubmit={onSubmit} className="space-y-6" noValidate>
+          <PackageFormFields
+            form={form}
+            namespace="adminPackages.editDialog"
+            mode="update"
+            disabled={isBusy}
+            computed={{
+              servicePrice: pkg.servicePrice,
+              transportationCost: pkg.transportationCost,
+              serviceFee: pkg.serviceFee,
+            }}
+            clientSelector={
+              showClientSelector ? (
                 <div className="space-y-2">
-                  <Label htmlFor="weight">
-                    {t("weightLabel")}{" "}
+                  <Label>
+                    {t("clientLabel")}{" "}
                     <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    id="weight"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.weight}
-                    onChange={(e) =>
-                      handleInputChange("weight", e.target.value)
-                    }
-                    disabled={isLoading}
-                    aria-invalid={!!validationErrors.weight}
-                    placeholder={t("weightPlaceholder")}
+                  <ClientAutocomplete
+                    selectedClient={selectedClient}
+                    onClientSelect={(client) => {
+                      setSelectedClient(client);
+                      form.setValue("clientId", client?.id ?? "");
+                    }}
                   />
-                  {validationErrors.weight && (
-                    <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                      <span className="text-base">⚠</span>
-                      {validationErrors.weight}
-                    </p>
-                  )}
                 </div>
-
-                {/* Weight Unit */}
-                <div className="space-y-2">
-                  <Label htmlFor="weightUnit">{t("unitLabel")}</Label>
-                  <Select
-                    value={formData.weightUnit}
-                    onValueChange={(value) =>
-                      handleInputChange("weightUnit", value)
-                    }
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger id="weightUnit" className="w-full">
-                      <SelectValue placeholder={t("unitPlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="kg">{t("unitKg")}</SelectItem>
-                      <SelectItem value="lb">{t("unitLb")}</SelectItem>
-                      <SelectItem value="g">{t("unitG")}</SelectItem>
-                      <SelectItem value="oz">{t("unitOz")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Pricing */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("pricingTitle")}
-            </h3>
-
-            {/* Purchased by Narbox */}
-            <div className="flex items-start space-x-3">
-              <Checkbox
-                id="purchasedByNarbox"
-                checked={formData.purchasedByNarbox}
-                onCheckedChange={(checked) =>
-                  handleInputChange(
-                    "purchasedByNarbox",
-                    checked === true ? "true" : "false"
-                  )
-                }
-                disabled={isLoading}
-              />
-              <div className="grid gap-1 leading-none">
-                <Label htmlFor="purchasedByNarbox" className="cursor-pointer">
-                  {t("purchasedByNarboxLabel")}
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  {t("purchasedByNarboxDescription")}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Real Price (editable) */}
-              <div className="space-y-2">
-                <Label htmlFor="realPrice">{t("realPriceLabel")}</Label>
-                <Input
-                  id="realPrice"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.realPrice}
-                  onChange={(e) =>
-                    handleInputChange("realPrice", e.target.value)
-                  }
-                  disabled={isLoading}
-                  aria-invalid={!!validationErrors.realPrice}
-                  placeholder={t("dimensionPlaceholder")}
-                />
-                {validationErrors.realPrice && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.realPrice}
-                  </p>
-                )}
-              </div>
-
-              {/* Service Price (read-only, auto-calculated) */}
-              <div className="space-y-2">
-                <Label htmlFor="servicePrice-readonly">
-                  {t("servicePriceLabel")}
-                </Label>
-                <Input
-                  id="servicePrice-readonly"
-                  value={
-                    data?.package.servicePrice != null
-                      ? `$${data.package.servicePrice.toFixed(2)}`
-                      : "—"
-                  }
-                  disabled
-                  className="bg-muted cursor-not-allowed"
-                />
-              </div>
-
-              {/* Transportation Cost (read-only) */}
-              <div className="space-y-2">
-                <Label htmlFor="transportationCost-readonly">
-                  {t("transportationCostLabel")}
-                </Label>
-                <Input
-                  id="transportationCost-readonly"
-                  value={
-                    data?.package.transportationCost != null
-                      ? `$${data.package.transportationCost.toFixed(2)}`
-                      : "—"
-                  }
-                  disabled
-                  className="bg-muted cursor-not-allowed"
-                />
-              </div>
-
-              {/* Service Fee (read-only) */}
-              <div className="space-y-2">
-                <Label htmlFor="serviceFee-readonly">
-                  {t("serviceFeeLabel")}
-                </Label>
-                <Input
-                  id="serviceFee-readonly"
-                  value={
-                    data?.package.serviceFee != null
-                      ? `$${data.package.serviceFee.toFixed(2)}`
-                      : "—"
-                  }
-                  disabled
-                  className="bg-muted cursor-not-allowed"
-                />
-              </div>
-            </div>
-
-            <p className="text-xs text-muted-foreground">
-              {t("computedFieldsNote")}
-            </p>
-          </div>
-
-          {/* Additional Details */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("additionalDetailsTitle")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Purchase Link */}
-              <div className="space-y-2">
-                <Label htmlFor="purchaseLink">{t("purchaseLinkLabel")}</Label>
-                <Input
-                  id="purchaseLink"
-                  type="url"
-                  value={formData.purchaseLink}
-                  onChange={(e) =>
-                    handleInputChange("purchaseLink", e.target.value)
-                  }
-                  disabled={isLoading}
-                  aria-invalid={!!validationErrors.purchaseLink}
-                  placeholder={t("purchaseLinkPlaceholder")}
-                />
-                {validationErrors.purchaseLink && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.purchaseLink}
-                  </p>
-                )}
-              </div>
-
-              {/* Arrival Date */}
-              <div className="space-y-2">
-                <Label htmlFor="arrivalDate">{t("arrivalDateLabel")}</Label>
-                <Input
-                  id="arrivalDate"
-                  type="date"
-                  value={formData.arrivalDate}
-                  onChange={(e) =>
-                    handleInputChange("arrivalDate", e.target.value)
-                  }
-                  disabled={isLoading}
-                  aria-invalid={!!validationErrors.arrivalDate}
-                />
-                {validationErrors.arrivalDate && (
-                  <p className="text-sm text-destructive font-medium flex items-center gap-1">
-                    <span className="text-base">⚠</span>
-                    {validationErrors.arrivalDate}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Comments */}
-            <div className="space-y-2">
-              <Label htmlFor="comments">{t("commentsLabel")}</Label>
-              <Textarea
-                id="comments"
-                value={formData.comments}
-                onChange={(e) => handleInputChange("comments", e.target.value)}
-                disabled={isLoading}
-                placeholder={t("commentsPlaceholder")}
-                rows={3}
-              />
-            </div>
-          </div>
-
+              ) : undefined
+            }
+          />
           <DialogFooter>
             <Button
               type="button"
@@ -853,15 +186,15 @@ export function UpdatePackageDialog({
             >
               {t("cancel")}
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" disabled={isBusy}>
+              {mutationLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
                   {t("updating")}
                 </>
               ) : (
                 <>
-                  <Pencil className="mr-2 h-4 w-4" />
+                  <Pencil className="mr-2 h-4 w-4" aria-hidden />
                   {t("updateButton")}
                 </>
               )}

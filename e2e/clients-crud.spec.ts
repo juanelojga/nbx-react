@@ -1,5 +1,6 @@
-import { test, expect } from "./fixtures/mockBackend";
 import path from "path";
+
+import { expect, test } from "./fixtures/mockBackend";
 
 const screenshotsDir = path.join(__dirname, "screenshots");
 
@@ -98,7 +99,7 @@ test.describe.serial("Clients CRUD", () => {
     // Dialog should close
     await expect(
       page.getByRole("heading", { name: "Add New Client" })
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await page.screenshot({
       path: path.join(screenshotsDir, "clients-list-after-create.png"),
@@ -157,7 +158,7 @@ test.describe.serial("Clients CRUD", () => {
     await dialog.getByRole("button", { name: "Close" }).first().click();
     await expect(
       page.getByRole("heading", { name: "View Client Details" })
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   test("should edit client", async ({ page }) => {
@@ -211,7 +212,7 @@ test.describe.serial("Clients CRUD", () => {
     // Dialog should close
     await expect(
       page.getByRole("heading", { name: "Edit Client" })
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await page.screenshot({
       path: path.join(screenshotsDir, "clients-list-after-update.png"),
@@ -326,6 +327,6 @@ test.describe.serial("Clients CRUD", () => {
     await page.getByRole("button", { name: "Cancel" }).click();
     await expect(
       page.getByRole("heading", { name: "Add New Client" })
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 });

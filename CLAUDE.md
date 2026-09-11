@@ -16,9 +16,10 @@ pnpm start                  # Start production server
 
 # Code Quality
 pnpm run lint               # ESLint check
-ppnpm run lint:fix           # ESLint auto-fix
+pnpm run lint:fix           # ESLint auto-fix
 pnpm run format             # Prettier format all files
-pnpm run type-check         # TypeScript type checking (tsc --noEmit)
+pnpm run type-check         # next typegen + tsc --noEmit
+pnpm codegen                # Regenerate src/graphql/generated from schema.graphql
 
 # Testing
 pnpm test                   # Run all unit tests (Jest)
@@ -32,7 +33,7 @@ pnpm exec playwright test e2e/file.spec.ts    # Single E2E test
 pnpm dlx shadcn add <component-name>         # Add shadcn component to src/components/ui/
 
 # Docker
-pnpm run docker:up          # Start container
+pnpm run docker:up          # Start container (docker compose down -v after dependency changes)
 pnpm run docker:down        # Stop container
 ```
 
@@ -51,14 +52,15 @@ pnpm run docker:down        # Stop container
 - `src/graphql/queries/` and `src/graphql/mutations/` - GraphQL operations grouped by domain (auth, clients, packages), each exporting gql documents + TypeScript interfaces
 - `src/lib/apollo/` - Apollo Client config with JWT auth link, error link (auto token refresh on 401), SSR singleton
 - `src/lib/auth/` - Token handling (localStorage keys: `narbox_access_token`, `narbox_refresh_token`)
-- `src/contexts/AuthContext.tsx` - Provides `user`, `loading`, `isAuthenticated`, `login()`, `logout()`; maps superusers to ADMIN role, regular users to CLIENT
-- `src/components/ui/` - shadcn/ui components (do not edit manually, use `pnpm dlx shadcn add`)
+- `src/contexts/AuthContext.tsx` - Provides `user`, `loading`, `isAuthenticated`, `login()`, `logout()`; maps superusers to ADMIN role, regular users to CLIENT. Token refresh lives in `src/lib/auth/refreshAccessToken.ts` (single in-flight lock); role gating in the `admin/` and `client/` layouts. Backend follow-ups: `docs/AUTH_BACKEND_FOLLOWUP.md`
+- `src/components/ui/` - shadcn/ui components only (add with `pnpm dlx shadcn add`). `button.tsx` and `input.tsx` are deliberate forks; see the header comment in each before re-adding them
+- `src/components/data-display/` - bespoke table system (`BaseTable`, `EnhancedTable*`, pagination, skeleton, `StatusBadge`, `StatCard`, `PageHeader`)
 - `src/components/admin/` - Admin-specific components
 - `src/components/common/` - Shared components
 - `src/components/layout/` - Header, Sidebar, MainLayout
 - `messages/en.json`, `messages/es.json` - i18n translation files (Spanish is default)
 
-**Internationalization:** next-intl with middleware in `middleware.ts`. Locale routing config in `src/lib/i18n/`. Use `useTranslations()` in client components, `getTranslations()` in server components. Locale stored in `NEXT_LOCALE` cookie. Timezone: `America/Guayaquil`.
+**Internationalization:** next-intl with the Next 16 proxy convention at `src/proxy.ts` (must live next to `src/app`). Locale routing config in `src/i18n/`. Use `useTranslations()` in client components, `getTranslations()` in server components. Locale stored in `NEXT_LOCALE` cookie. Timezone: `America/Guayaquil`.
 
 **Path alias:** `@/*` maps to `./src/*`
 
@@ -72,41 +74,41 @@ pnpm run docker:down        # Stop container
 
 ### Typography
 
-Two-font system: **Work Sans** for headings/titles (bold/extrabold), **Inter** for body/data. Compact scale: h1=`text-2xl font-extrabold`, h2=`text-lg font-bold`, h3=`text-base font-bold`, h4=`text-sm font-bold`. Do not use `text-3xl` or larger for headings. Full spec: `documents/TYPOGRAPHY_GUIDELINES.md`.
+Two-font system: **Work Sans** for headings/titles (bold/extrabold), **Inter** for body/data. Compact scale: h1=`text-2xl font-extrabold`, h2=`text-lg font-bold`, h3=`text-base font-bold`, h4=`text-sm font-bold`. Do not use `text-3xl` or larger for headings. Full spec: `docs/TYPOGRAPHY_GUIDELINES.md`.
 
-Font loading pattern for new pages/layouts:
-
-```typescript
-import { Work_Sans, Inter } from "next/font/google";
-const workSansFont = Work_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-work-sans",
-  display: "swap",
-});
-const interFont = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-inter",
-  display: "swap",
-});
-// Apply: <div className={`${workSansFont.variable} ${interFont.variable}`}>
-```
+Fonts are loaded **once** in `src/app/[locale]/layout.tsx` (`--font-work-sans`, `--font-inter`) and mapped in `globals.css` (`--font-heading`, `--font-sans`); base `h1`–`h6` styles already apply Work Sans and the compact scale. Do not load fonts per page. Marketing surfaces (`src/components/landing/*`, `src/app/[locale]/page.tsx`) are exempt from the size cap and may use display sizes for hero/section titles.
 
 ### Table Design
 
-All data tables **must** use `src/components/ui/base-table.tsx` (`BaseTable` component) as the foundation. Do not build tables from scratch or directly use low-level table primitives — always compose on top of `BaseTable`, which provides selection, sorting, pagination, skeleton loading, and empty states out of the box. Define column configurations via the `ColumnDef<T>` type and pass data, handlers, and options as props. Visual style must follow `docs/TABLE_DESIGN_SPEC.md`: `rounded-2xl` containers with `backdrop-blur-sm`, gradient headers, left-bordered rows with hover effects, color-coded action buttons (blue/amber/red gradients). Reference implementation: `src/app/(dashboard)/admin/packages/components/PackagesTable.tsx`.
+All data tables **must** use `src/components/data-display/base-table.tsx` (`BaseTable` component) as the foundation. Do not build tables from scratch or directly use low-level table primitives — always compose on top of `BaseTable`, which provides selection, sorting, pagination, skeleton loading, and empty states out of the box. Define column configurations via the `ColumnDef<T>` type and pass data, handlers, and options as props. Visual style must follow `docs/TABLE_DESIGN_SPEC.md`: `rounded-2xl` containers with `backdrop-blur-sm`, gradient headers, left-bordered rows with hover effects, color-coded action buttons (blue/amber/red gradients). Reference implementation: `src/app/[locale]/(dashboard)/admin/packages/components/PackagesTable.tsx`. Admin list pages compose `useAdminListPage` (`src/hooks/useAdminListPage.ts`) with `ListPageShell`, `SearchToolbar` and `DataRowShell` from `src/components/common/`.
 
 ### GraphQL Pattern
 
+Documents are typed with GraphQL Code Generator (`client-preset`). The schema lives in `schema.graphql` (committed) and generated code in `src/graphql/generated/` (committed, never edited by hand).
+
 ```typescript
 // src/graphql/queries/domain.ts
-export const GET_ITEMS = gql`query GetItems { ... }`;
-export interface GetItemsResponse {
-  items: Item[];
-}
-// Usage: const { data } = useQuery<GetItemsResponse>(GET_ITEMS);
+import type { ResultOf, VariablesOf } from "@graphql-typed-document-node/core";
+import { graphql } from "@/graphql/generated";
+
+export const GET_ITEMS = graphql(/* GraphQL */ `
+  query GetItems($page: Int) {
+    items(page: $page) {
+      results {
+        ...ItemSummary
+      }
+    }
+  }
+`);
+export type GetItemsResponse = ResultOf<typeof GET_ITEMS>;
+export type GetItemsVariables = VariablesOf<typeof GET_ITEMS>;
+// Usage: const { data } = useQuery(GET_ITEMS, { variables }); // fully typed
 ```
+
+- Shared selections live in `src/graphql/fragments/` (`ClientSummary`, `ClientDetail`, `PackageListItem`, `PackageDetail`, `ConsolidationListItem`).
+- After editing any document run `pnpm codegen` (CI runs `pnpm codegen:check`). Lists from Graphene are nullable; use `compact()` / `toListConnection()` from `src/lib/graphql/`.
+- When the backend schema changes, refresh `schema.graphql` from a running backend: `NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:8000/graphql pnpm codegen:schema` (or `python nbxdjango/manage.py graphql_schema --out ../nbx-react/schema.graphql` in the nbx-django repo).
+- Every operation name must have a resolver in `e2e/fixtures/mockStore.ts` (enforced by `src/graphql/__tests__/documents.test.ts`).
 
 ## Environment Variables
 
@@ -125,11 +127,11 @@ The Playwright MCP server is configured in `.mcp.json` and available during Clau
 - **Check both locales** (`/es` and `/en`) when changes affect translated content or layout that may shift with different text lengths.
 - **Check responsive behavior** by capturing screenshots at desktop (1280px) and mobile (375px) widths when layout changes are involved.
 - **Verify table rendering** against `docs/TABLE_DESIGN_SPEC.md` when modifying or creating data tables — confirm gradient headers, rounded containers, hover effects, and action button colors render correctly.
-- **Verify typography** against `documents/TYPOGRAPHY_GUIDELINES.md` — confirm Work Sans is used for headings and Inter for body text, and that heading sizes respect the compact scale (no `text-3xl` or larger).
+- **Verify typography** against `docs/TYPOGRAPHY_GUIDELINES.md` — confirm Work Sans is used for headings and Inter for body text, and that heading sizes respect the compact scale (no `text-3xl` or larger).
 - **Debug visual issues** by navigating pages, inspecting element states (hover, focus, active), and taking snapshots to compare before/after.
 
-Workflow: `pnpm run dev` to start the server, then use Playwright MCP browser tools (`browser_navigate`, `browser_screenshot`, `browser_click`, etc.) to interact with and capture the running app.
+Workflow: `pnpm run dev` to start the server, then use Playwright MCP browser tools (`browser_navigate`, `browser_take_screenshot`, `browser_click`, etc.) to interact with and capture the running app.
 
 ## Deployment
 
-Netlify via `@netlify/plugin-nextjs`. CI/CD: GitHub Actions runs lint, type-check, tests with coverage (uploaded to Codecov), and Playwright E2E tests (report uploaded as artifact).
+Netlify via `@netlify/plugin-nextjs` (`netlify.toml`; public build vars in `[context.production.environment]`). CI (`.github/workflows/ci.yml`): codegen drift check, lint, format check, type-check, unit tests with coverage (Codecov), production build, and Playwright E2E against the mocked backend (report uploaded as artifact). Dependabot keeps dependencies grouped and weekly; TypeScript and graphql majors are pinned (see `.github/dependabot.yml`).

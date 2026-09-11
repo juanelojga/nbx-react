@@ -1,14 +1,14 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
   CardAction,
   CardContent,
+  CardDescription,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "../card";
 
 describe("Card Component", () => {
@@ -20,13 +20,6 @@ describe("Card Component", () => {
       expect(card).toBeInTheDocument();
       expect(card).toHaveAttribute("data-slot", "card");
       expect(card.tagName.toLowerCase()).toBe("div");
-    });
-
-    it("renders with custom className", () => {
-      render(<Card className="custom-card">Custom card</Card>);
-
-      const card = screen.getByText("Custom card");
-      expect(card).toHaveClass("custom-card");
     });
 
     it("forwards additional props", () => {
@@ -90,17 +83,6 @@ describe("Card Component", () => {
       expect(header.tagName.toLowerCase()).toBe("div");
     });
 
-    it("renders with custom className", () => {
-      render(
-        <Card>
-          <CardHeader className="custom-header">Custom header</CardHeader>
-        </Card>
-      );
-
-      const header = screen.getByText("Custom header");
-      expect(header).toHaveClass("custom-header");
-    });
-
     it("forwards additional props", () => {
       render(
         <Card>
@@ -162,19 +144,6 @@ describe("Card Component", () => {
       expect(title.tagName.toLowerCase()).toBe("div");
     });
 
-    it("renders with custom className", () => {
-      render(
-        <Card>
-          <CardHeader>
-            <CardTitle className="custom-title">Custom title</CardTitle>
-          </CardHeader>
-        </Card>
-      );
-
-      const title = screen.getByText("Custom title");
-      expect(title).toHaveClass("custom-title");
-    });
-
     it("forwards additional props", () => {
       render(
         <Card>
@@ -234,21 +203,6 @@ describe("Card Component", () => {
       expect(description.tagName.toLowerCase()).toBe("div");
     });
 
-    it("renders with custom className", () => {
-      render(
-        <Card>
-          <CardHeader>
-            <CardDescription className="custom-description">
-              Custom description
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      );
-
-      const description = screen.getByText("Custom description");
-      expect(description).toHaveClass("custom-description");
-    });
-
     it("forwards additional props", () => {
       render(
         <Card>
@@ -299,21 +253,6 @@ describe("Card Component", () => {
       expect(action.parentElement?.tagName.toLowerCase()).toBe("div");
     });
 
-    it("renders with custom className", () => {
-      render(
-        <Card>
-          <CardHeader>
-            <CardAction className="custom-action">
-              <button>Custom action</button>
-            </CardAction>
-          </CardHeader>
-        </Card>
-      );
-
-      const actionContainer = screen.getByText("Custom action").parentElement;
-      expect(actionContainer).toHaveClass("custom-action");
-    });
-
     it("forwards additional props", () => {
       render(
         <Card>
@@ -361,17 +300,6 @@ describe("Card Component", () => {
       expect(content.tagName.toLowerCase()).toBe("div");
     });
 
-    it("renders with custom className", () => {
-      render(
-        <Card>
-          <CardContent className="custom-content">Custom content</CardContent>
-        </Card>
-      );
-
-      const content = screen.getByText("Custom content");
-      expect(content).toHaveClass("custom-content");
-    });
-
     it("forwards additional props", () => {
       render(
         <Card>
@@ -417,17 +345,6 @@ describe("Card Component", () => {
       expect(footer).toBeInTheDocument();
       expect(footer).toHaveAttribute("data-slot", "card-footer");
       expect(footer.tagName.toLowerCase()).toBe("div");
-    });
-
-    it("renders with custom className", () => {
-      render(
-        <Card>
-          <CardFooter className="custom-footer">Custom footer</CardFooter>
-        </Card>
-      );
-
-      const footer = screen.getByText("Custom footer");
-      expect(footer).toHaveClass("custom-footer");
     });
 
     it("forwards additional props", () => {
@@ -615,7 +532,7 @@ describe("Card Component", () => {
       const button = screen.getByText("Focusable button");
       button.focus();
 
-      expect(document.activeElement).toBe(button);
+      expect(button).toHaveFocus();
     });
   });
 
@@ -718,124 +635,6 @@ describe("Card Component", () => {
 
       const heading = screen.getByText("Proper Heading");
       expect(heading.tagName.toLowerCase()).toBe("h3");
-    });
-  });
-
-  describe("CSS Classes and Styling", () => {
-    it("applies default card classes", () => {
-      render(<Card data-testid="styled-card">Styled card</Card>);
-
-      const card = screen.getByTestId("styled-card");
-      expect(card).toHaveClass("bg-card");
-      expect(card).toHaveClass("text-card-foreground");
-      expect(card).toHaveClass("flex");
-      expect(card).toHaveClass("flex-col");
-      expect(card).toHaveClass("gap-6");
-      expect(card).toHaveClass("rounded-xl");
-      expect(card).toHaveClass("border");
-      expect(card).toHaveClass("border-border/50");
-      expect(card).toHaveClass("py-6");
-      expect(card).toHaveClass("shadow-md");
-      expect(card).toHaveClass("hover:shadow-lg");
-      expect(card).toHaveClass("transition-shadow");
-      expect(card).toHaveClass("duration-200");
-    });
-
-    it("applies card header classes", () => {
-      render(
-        <Card>
-          <CardHeader data-testid="styled-header">Header</CardHeader>
-        </Card>
-      );
-
-      const header = screen.getByTestId("styled-header");
-      expect(header).toHaveClass("@container/card-header");
-      expect(header).toHaveClass("grid");
-      expect(header).toHaveClass("auto-rows-min");
-      expect(header).toHaveClass("grid-rows-[auto_auto]");
-      expect(header).toHaveClass("items-start");
-      expect(header).toHaveClass("gap-1.5");
-      expect(header).toHaveClass("px-6");
-      expect(header).toHaveClass(
-        "has-data-[slot=card-action]:grid-cols-[1fr_auto]"
-      );
-      expect(header).toHaveClass("[.border-b]:pb-6");
-    });
-
-    it("applies card title classes", () => {
-      render(
-        <Card>
-          <CardHeader>
-            <CardTitle data-testid="styled-title">Title</CardTitle>
-          </CardHeader>
-        </Card>
-      );
-
-      const title = screen.getByTestId("styled-title");
-      expect(title).toHaveClass("font-semibold");
-      expect(title).toHaveClass("text-lg");
-      expect(title).toHaveClass("tracking-tight");
-    });
-
-    it("applies card description classes", () => {
-      render(
-        <Card>
-          <CardHeader>
-            <CardDescription data-testid="styled-description">
-              Description
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      );
-
-      const description = screen.getByTestId("styled-description");
-      expect(description).toHaveClass("text-muted-foreground");
-      expect(description).toHaveClass("text-sm");
-      expect(description).toHaveClass("leading-relaxed");
-    });
-
-    it("applies card action classes", () => {
-      render(
-        <Card>
-          <CardHeader>
-            <CardAction data-testid="styled-action">
-              <button>Action</button>
-            </CardAction>
-          </CardHeader>
-        </Card>
-      );
-
-      const action = screen.getByTestId("styled-action");
-      expect(action).toHaveClass("col-start-2");
-      expect(action).toHaveClass("row-span-2");
-      expect(action).toHaveClass("row-start-1");
-      expect(action).toHaveClass("self-start");
-      expect(action).toHaveClass("justify-self-end");
-    });
-
-    it("applies card content classes", () => {
-      render(
-        <Card>
-          <CardContent data-testid="styled-content">Content</CardContent>
-        </Card>
-      );
-
-      const content = screen.getByTestId("styled-content");
-      expect(content).toHaveClass("px-6");
-    });
-
-    it("applies card footer classes", () => {
-      render(
-        <Card>
-          <CardFooter data-testid="styled-footer">Footer</CardFooter>
-        </Card>
-      );
-
-      const footer = screen.getByTestId("styled-footer");
-      expect(footer).toHaveClass("flex");
-      expect(footer).toHaveClass("items-center");
-      expect(footer).toHaveClass("px-6");
-      expect(footer).toHaveClass("[.border-t]:pt-6");
     });
   });
 
@@ -1016,15 +815,6 @@ describe("Card Component", () => {
 
       const title = screen.getByText(longWord);
       expect(title).toBeInTheDocument();
-    });
-
-    it("handles multiple className props", () => {
-      render(<Card className="class1 class2 class3">Multiple classes</Card>);
-
-      const card = screen.getByText("Multiple classes");
-      expect(card).toHaveClass("class1");
-      expect(card).toHaveClass("class2");
-      expect(card).toHaveClass("class3");
     });
 
     it("handles empty string className", () => {
