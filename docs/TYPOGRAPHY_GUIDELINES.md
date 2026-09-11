@@ -354,12 +354,8 @@ Our scale uses **aggressive title reduction** (3 sizes down from standard):
 
    ```typescript
    import { Work_Sans, Inter } from "next/font/google";
-   const workSansFont = Work_Sans({
-     /* config */
-   });
-   const interFont = Inter({
-     /* config */
-   });
+   const workSansFont = Work_Sans({/* config */});
+   const interFont = Inter({/* config */});
    ```
 
 2. **Apply font variables to root**

@@ -48,7 +48,6 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-
 :root {
   /* Brand Colors */
   --brand-green: 76 175 80; /* #4CAF50 - Primary Action */

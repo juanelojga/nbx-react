@@ -46,12 +46,13 @@ mutation {
 ```
 
 **Response fields:**
-| Field | Description |
-|-------|-------------|
-| `token` | JWT access token (short-lived) |
-| `refreshToken` | Refresh token (long-lived, used to obtain new access tokens) |
-| `payload` | Token payload (contains user email, exp, etc.) |
-| `refreshExpiresIn` | Refresh token expiration time in seconds |
+
+| Field              | Description                                                  |
+| ------------------ | ------------------------------------------------------------ |
+| `token`            | JWT access token (short-lived)                               |
+| `refreshToken`     | Refresh token (long-lived, used to obtain new access tokens) |
+| `payload`          | Token payload (contains user email, exp, etc.)               |
+| `refreshExpiresIn` | Refresh token expiration time in seconds                     |
 
 Include the access token in subsequent requests:
 
@@ -401,12 +402,13 @@ mutation {
 ```
 
 **Response fields:**
-| Field | Description |
-|-------|-------------|
-| `token` | JWT access token (short-lived) |
-| `refreshToken` | Refresh token (long-lived, used to obtain new access tokens) |
-| `payload` | Token payload (contains user email, exp, etc.) |
-| `refreshExpiresIn` | Refresh token expiration time in seconds |
+
+| Field              | Description                                                  |
+| ------------------ | ------------------------------------------------------------ |
+| `token`            | JWT access token (short-lived)                               |
+| `refreshToken`     | Refresh token (long-lived, used to obtain new access tokens) |
+| `payload`          | Token payload (contains user email, exp, etc.)               |
+| `refreshExpiresIn` | Refresh token expiration time in seconds                     |
 
 ---
 
@@ -660,17 +662,19 @@ mutation RefreshToken($refreshToken: String!) {
 ```
 
 **Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `refreshToken` | String | Yes | The refresh token string obtained from `emailAuth` |
+
+| Parameter      | Type   | Required | Description                                        |
+| -------------- | ------ | -------- | -------------------------------------------------- |
+| `refreshToken` | String | Yes      | The refresh token string obtained from `emailAuth` |
 
 **Response:**
-| Field | Description |
-|-------|-------------|
-| `token` | New JWT access token (valid for 5 minutes) |
-| `refreshToken` | New refresh token (old one is automatically revoked) |
-| `payload` | Token payload with user information and updated expiration |
-| `refreshExpiresIn` | Refresh token expiration in seconds (7 days) |
+
+| Field              | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `token`            | New JWT access token (valid for 5 minutes)                 |
+| `refreshToken`     | New refresh token (old one is automatically revoked)       |
+| `payload`          | Token payload with user information and updated expiration |
+| `refreshExpiresIn` | Refresh token expiration in seconds (7 days)               |
 
 **Security Notes:**
 

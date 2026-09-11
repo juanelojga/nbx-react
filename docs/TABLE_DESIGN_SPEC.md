@@ -505,20 +505,12 @@ aria-sort={sortOrder === "asc" ? "ascending" : "descending"}
 
 ```tsx
 // 1. Memoized row component
-const TableRow = memo(function TableRow(
-  {
-    /* props */
-  }
-) {
+const TableRow = memo(function TableRow({/* props */}) {
   // Row logic and rendering
 });
 
 // 2. Main table component
-export function DataTable(
-  {
-    /* props */
-  }
-) {
+export function DataTable({/* props */}) {
   // State management
   // Event handlers with useCallback
   // Memoized derived values with useMemo
