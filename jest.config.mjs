@@ -34,7 +34,7 @@ const customJestConfig = {
   coverageProvider: "v8",
   // Floors are ratcheted upward as coverage grows; never lower them.
   coverageThreshold: {
-    global: { statements: 50, branches: 65, functions: 55, lines: 50 },
+    global: { statements: 60, branches: 70, functions: 65, lines: 60 },
     "./src/lib/auth/": {
       statements: 85,
       branches: 75,
