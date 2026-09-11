@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -47,7 +48,6 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-@import "tw-animate-css";
 
 :root {
   /* Brand Colors */

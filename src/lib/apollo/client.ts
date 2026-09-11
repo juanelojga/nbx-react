@@ -240,15 +240,10 @@ function createApolloClient(): ApolloClient {
         // Use cache-first for better performance, fallback to network
         fetchPolicy: "cache-first",
         nextFetchPolicy: "cache-and-network", // Refresh in background
-        errorPolicy: "all",
       },
       query: {
         // Use cache-first instead of network-only for better performance
         fetchPolicy: "cache-first",
-        errorPolicy: "all",
-      },
-      mutate: {
-        errorPolicy: "all",
       },
     },
     devtools: {
