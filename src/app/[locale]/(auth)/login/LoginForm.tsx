@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, Link } from "@/i18n/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import LanguageSelector from "@/components/LanguageSelector";
+import { ErrorAlert } from "@/components/common/ErrorAlert";
+import { FormFieldWrapper } from "@/components/common/FormFieldWrapper";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -13,100 +16,65 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { ErrorAlert } from "@/components/common/ErrorAlert";
-import LanguageSelector from "@/components/LanguageSelector";
 import { useLoginRateLimit } from "@/hooks/useLoginRateLimit";
+import { Link, useRouter } from "@/i18n/navigation";
 import { getDefaultRoute } from "@/lib/auth/getDefaultRoute";
+import {
+  createLoginFormSchema,
+  type LoginFormValues,
+} from "@/lib/validation/loginFormSchema";
 import { sanitizeEmail } from "@/lib/validation/sanitizeEmail";
-import { validateEmail, validatePassword } from "@/lib/validation/auth";
+
+const secondsUntil = (timestamp: number | null) =>
+  timestamp ? Math.max(0, Math.ceil((timestamp - Date.now()) / 1000)) : 0;
 
 export function LoginForm() {
   const t = useTranslations("login");
   const router = useRouter();
   const { login, loading, error, user, isAuthenticated } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
-  const [validationErrors, setValidationErrors] = useState<{
-    email?: string;
-    password?: string;
-  }>({});
   const { attempt, isLocked, lockExpiry } = useLoginRateLimit();
 
-  // Redirect if already logged in
+  const schema = useMemo(() => createLoginFormSchema(t), [t]);
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: "", password: "" },
+  });
+  const {
+    register,
+    formState: { errors },
+  } = form;
+
+  // Already signed in: go straight to the role dashboard.
   useEffect(() => {
     if (isAuthenticated && user) {
       router.push(getDefaultRoute(user.role));
     }
   }, [isAuthenticated, user, router]);
 
-  const validateForm = (): boolean => {
-    const errors: { email?: string; password?: string } = {};
-
-    // Email validation using Zod for comprehensive RFC-compliant checks
-    const emailValidation = validateEmail(email);
-    if (!emailValidation.success) {
-      errors.email = email ? t("emailInvalid") : t("emailRequired");
-    }
-
-    // Password validation using Zod schema
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.success) {
-      errors.password = password
-        ? t("passwordMinLength")
-        : t("passwordRequired");
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = form.handleSubmit(async ({ email, password }) => {
     setFormError(null);
 
-    // Check rate limiting
-    if (isLocked) {
-      const remainingSeconds = lockExpiry
-        ? Math.ceil((lockExpiry - Date.now()) / 1000)
-        : 0;
+    if (isLocked || !attempt()) {
       setFormError(
-        t("rateLimitExceeded", { seconds: remainingSeconds }) ||
-          `Too many login attempts. Please try again in ${remainingSeconds} seconds.`
-      );
-      return;
-    }
-
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
-
-    // Check rate limit before attempting
-    if (!attempt()) {
-      const remainingSeconds = lockExpiry
-        ? Math.ceil((lockExpiry - Date.now()) / 1000)
-        : 0;
-      setFormError(
-        t("rateLimitExceeded", { seconds: remainingSeconds }) ||
-          `Too many login attempts. Please try again in ${remainingSeconds} seconds.`
+        t("rateLimitExceeded", { seconds: secondsUntil(lockExpiry) })
       );
       return;
     }
 
     try {
-      // Sanitize email before sending
-      const sanitizedEmail = sanitizeEmail(email);
-      await login(sanitizedEmail, password);
-      // Redirect is handled in AuthContext
+      await login(sanitizeEmail(email), password);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : t("loginFailed"));
     }
-  };
+  });
+
+  const isDisabled = loading || isLocked;
 
   return (
-    <Card className="w-full shadow-2xl border-border/50 backdrop-blur-sm bg-card/95">
+    <Card className="border-border/50 shadow-2xl backdrop-blur-sm bg-card/95">
       <CardHeader className="space-y-2 pb-6">
         <div className="flex justify-end mb-2">
           <LanguageSelector />
@@ -121,41 +89,29 @@ export function LoginForm() {
       <CardContent>
         {(formError || error) && (
           <ErrorAlert
-            message={formError || error || "An error occurred"}
+            message={formError || error || t("loginFailed")}
             onClose={() => setFormError(null)}
           />
         )}
-        <form onSubmit={handleSubmit} className="space-y-5 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">{t("email")}</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder={t("emailPlaceholder")}
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setValidationErrors((prev) => ({ ...prev, email: undefined }));
-              }}
-              disabled={loading || isLocked}
-              aria-invalid={!!validationErrors.email}
-              aria-describedby={
-                validationErrors.email ? "email-error" : undefined
-              }
-            />
-            {validationErrors.email && (
-              <p
-                id="email-error"
-                className="text-sm text-destructive font-medium flex items-center gap-1 animate-shake"
-              >
-                <span className="text-base">⚠</span>
-                {validationErrors.email}
-              </p>
+        <form onSubmit={onSubmit} className="space-y-5 mt-4" noValidate>
+          <FormFieldWrapper
+            id="email"
+            label={t("email")}
+            error={errors.email?.message}
+          >
+            {(field) => (
+              <Input
+                {...field}
+                {...register("email")}
+                type="email"
+                autoComplete="email"
+                placeholder={t("emailPlaceholder")}
+                disabled={isDisabled}
+              />
             )}
-          </div>
+          </FormFieldWrapper>
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">{t("password")}</Label>
+            <div className="flex items-center justify-end">
               <Link
                 href="/forgot-password"
                 className="text-sm text-secondary hover:text-secondary/80 transition-colors font-medium"
@@ -163,53 +119,44 @@ export function LoginForm() {
                 {t("forgotPassword")}
               </Link>
             </div>
-            <Input
+            <FormFieldWrapper
               id="password"
-              type="password"
-              placeholder={t("passwordPlaceholder")}
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setValidationErrors((prev) => ({
-                  ...prev,
-                  password: undefined,
-                }));
-              }}
-              disabled={loading || isLocked}
-              aria-invalid={!!validationErrors.password}
-              aria-describedby={
-                validationErrors.password ? "password-error" : undefined
-              }
-            />
-            {validationErrors.password && (
-              <p
-                id="password-error"
-                className="text-sm text-destructive font-medium flex items-center gap-1 animate-shake"
-              >
-                <span className="text-base">⚠</span>
-                {validationErrors.password}
-              </p>
-            )}
+              label={t("password")}
+              error={errors.password?.message}
+            >
+              {(field) => (
+                <Input
+                  {...field}
+                  {...register("password")}
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder={t("passwordPlaceholder")}
+                  disabled={isDisabled}
+                />
+              )}
+            </FormFieldWrapper>
           </div>
           <Button
             type="submit"
             className="w-full relative group overflow-hidden"
-            disabled={loading || isLocked}
+            disabled={isDisabled}
             size="lg"
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
               {loading ? (
                 <>
-                  {/* Rule 6.1: Animate wrapper span instead of inner element */}
-                  <span className="animate-spin">
-                    <span className="block h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                  <span className="animate-spin" aria-hidden="true">
+                    <span className="block h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
                   </span>
                   {t("signingIn")}
                 </>
               ) : (
                 <>
                   {t("signIn")}
-                  <span className="group-hover:translate-x-1 transition-transform">
+                  <span
+                    className="group-hover:translate-x-1 transition-transform"
+                    aria-hidden="true"
+                  >
                     →
                   </span>
                 </>

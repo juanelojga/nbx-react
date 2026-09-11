@@ -4,7 +4,6 @@ import { useCallback, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,7 @@ import { ClientType } from "@/graphql/queries/clients";
 import { Package } from "../types";
 import { ExtraAttributesEditor } from "@/components/admin/ExtraAttributesEditor";
 import { serializeExtraAttributes } from "@/lib/consolidations/serializeExtraAttributes";
+import { createConsolidationFormSchema } from "@/lib/validation/consolidationFormSchema";
 import type { ExtraAttributeEntry } from "@/types/consolidation";
 import { ConfirmCreateConsolidationDialog } from "./ConfirmCreateConsolidationDialog";
 
@@ -36,19 +36,6 @@ interface ConsolidationFormProps {
     consolidation: CreateConsolidateResponse["createConsolidate"]["consolidate"]
   ) => void;
 }
-
-// Zod validation schema - needs to use translation values
-const getConsolidationSchema = (t: (key: string) => string) =>
-  z.object({
-    description: z.string().min(1, t("descriptionRequired")),
-    comment: z.string().optional(),
-    extraAttributes: z
-      .array(z.object({ key: z.string(), value: z.string() }))
-      .max(5)
-      .optional()
-      .default([]),
-    sendEmail: z.boolean().optional().default(true),
-  });
 
 type ConsolidationFormData = {
   description: string;
@@ -74,7 +61,7 @@ export function ConsolidationForm({
     setValue,
     formState: { errors },
   } = useForm<ConsolidationFormData>({
-    resolver: zodResolver(getConsolidationSchema(t)),
+    resolver: zodResolver(createConsolidationFormSchema(t)),
     defaultValues: {
       description: "",
       comment: "",

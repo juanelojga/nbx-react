@@ -1,34 +1,64 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, Loader2, Save } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect, useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import { FormFieldWrapper } from "@/components/common/FormFieldWrapper";
 import { PageHeader } from "@/components/data-display/page-header";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, Save, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  GET_PRICING_CONFIG,
-  GetPricingConfigResponse,
-} from "@/graphql/queries/pricing";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   UPDATE_PRICING_CONFIG,
-  UpdatePricingConfigVariables,
-  UpdatePricingConfigResponse,
+  type UpdatePricingConfigResponse,
+  type UpdatePricingConfigVariables,
 } from "@/graphql/mutations/pricing";
-import { toast } from "sonner";
+import {
+  GET_PRICING_CONFIG,
+  type GetPricingConfigResponse,
+} from "@/graphql/queries/pricing";
+import {
+  createPricingFormSchema,
+  type PricingFormValues,
+} from "@/lib/validation/pricingFormSchema";
+
+const EMPTY_PRICING_FORM: PricingFormValues = {
+  transportationRatePerLb: "",
+  serviceFeePercentage: "",
+};
 
 export function PricingConfigForm() {
   const t = useTranslations("pricingConfig");
 
-  const [transportationRate, setTransportationRate] = useState("");
-  const [serviceFeePercentage, setServiceFeePercentage] = useState("");
+  const schema = useMemo(() => createPricingFormSchema(t), [t]);
+  const form = useForm<PricingFormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: EMPTY_PRICING_FORM,
+  });
+  const {
+    register,
+    reset,
+    formState: { errors },
+  } = form;
 
   const { data, loading, error } =
     useQuery<GetPricingConfigResponse>(GET_PRICING_CONFIG);
+  const config = data?.pricingConfig;
+
+  useEffect(() => {
+    if (config) {
+      reset({
+        transportationRatePerLb: String(config.transportationRatePerLb),
+        serviceFeePercentage: String(config.serviceFeePercentage),
+      });
+    }
+  }, [config, reset]);
 
   const [updatePricingConfig, { loading: saving }] = useMutation<
     UpdatePricingConfigResponse,
@@ -40,53 +70,33 @@ export function PricingConfigForm() {
       });
     },
     onError: (err) => {
-      toast.error(t("errorTitle"), {
-        description: err.message,
-      });
+      toast.error(t("errorTitle"), { description: err.message });
     },
     refetchQueries: [{ query: GET_PRICING_CONFIG }],
   });
 
-  useEffect(() => {
-    if (data?.pricingConfig) {
-      queueMicrotask(() => {
-        setTransportationRate(
-          data.pricingConfig.transportationRatePerLb.toString()
-        );
-        setServiceFeePercentage(
-          data.pricingConfig.serviceFeePercentage.toString()
-        );
-      });
-    }
-  }, [data]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const variables: UpdatePricingConfigVariables = {};
-
-    if (transportationRate.trim()) {
-      variables.transportationRatePerLb = parseFloat(transportationRate.trim());
-    }
-    if (serviceFeePercentage.trim()) {
-      variables.serviceFeePercentage = parseFloat(serviceFeePercentage.trim());
-    }
-
-    await updatePricingConfig({ variables }).catch(() => {});
-  };
+  const onSubmit = form.handleSubmit(async (values) => {
+    await updatePricingConfig({
+      variables: {
+        transportationRatePerLb: Number.parseFloat(
+          values.transportationRatePerLb
+        ),
+        serviceFeePercentage: Number.parseFloat(values.serviceFeePercentage),
+      },
+    }).catch(() => undefined);
+  });
 
   const formatDateTime = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return "—";
-    }
+    const date = new Date(dateString);
+    return Number.isNaN(date.getTime())
+      ? "—"
+      : date.toLocaleString(undefined, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
   };
 
   return (
@@ -100,7 +110,10 @@ export function PricingConfigForm() {
           aria-live="polite"
         >
           <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <Loader2
+              className="h-12 w-12 animate-spin text-primary"
+              aria-hidden
+            />
             <p className="text-sm text-muted-foreground">{t("loading")}</p>
           </div>
         </div>
@@ -108,69 +121,72 @@ export function PricingConfigForm() {
 
       {error && !loading && (
         <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle className="h-4 w-4" aria-hidden />
           <AlertDescription>{t("loadingError")}</AlertDescription>
         </Alert>
       )}
 
-      {data?.pricingConfig && !loading && (
+      {config && !loading && (
         <Card>
           <CardContent className="pt-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={onSubmit} className="space-y-6" noValidate>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="transportationRate">
-                    {t("transportationRateLabel")}
-                  </Label>
-                  <Input
-                    id="transportationRate"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={transportationRate}
-                    onChange={(e) => setTransportationRate(e.target.value)}
-                    disabled={saving}
-                    placeholder={t("transportationRatePlaceholder")}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="serviceFeePercentage">
-                    {t("serviceFeePercentageLabel")}
-                  </Label>
-                  <Input
-                    id="serviceFeePercentage"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="1"
-                    value={serviceFeePercentage}
-                    onChange={(e) => setServiceFeePercentage(e.target.value)}
-                    disabled={saving}
-                    placeholder={t("serviceFeePercentagePlaceholder")}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {t("serviceFeePercentageHelper")}
-                  </p>
-                </div>
+                <FormFieldWrapper
+                  id="transportationRate"
+                  label={t("transportationRateLabel")}
+                  error={errors.transportationRatePerLb?.message}
+                >
+                  {(field) => (
+                    <Input
+                      {...field}
+                      {...register("transportationRatePerLb")}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      disabled={saving}
+                      placeholder={t("transportationRatePlaceholder")}
+                    />
+                  )}
+                </FormFieldWrapper>
+                <FormFieldWrapper
+                  id="serviceFeePercentage"
+                  label={t("serviceFeePercentageLabel")}
+                  hint={t("serviceFeePercentageHelper")}
+                  error={errors.serviceFeePercentage?.message}
+                >
+                  {(field) => (
+                    <Input
+                      {...field}
+                      {...register("serviceFeePercentage")}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="1"
+                      disabled={saving}
+                      placeholder={t("serviceFeePercentagePlaceholder")}
+                    />
+                  )}
+                </FormFieldWrapper>
               </div>
 
-              {data.pricingConfig.updatedAt && (
+              {config.updatedAt && (
                 <p className="text-sm text-muted-foreground">
-                  {t("lastUpdatedLabel")}:{" "}
-                  {formatDateTime(data.pricingConfig.updatedAt)}
+                  {t("lastUpdatedLabel")}: {formatDateTime(config.updatedAt)}
                 </p>
               )}
 
               <Button type="submit" disabled={saving}>
                 {saving ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2
+                      className="mr-2 h-4 w-4 animate-spin"
+                      aria-hidden
+                    />
                     {t("saving")}
                   </>
                 ) : (
                   <>
-                    <Save className="mr-2 h-4 w-4" />
+                    <Save className="mr-2 h-4 w-4" aria-hidden />
                     {t("saveButton")}
                   </>
                 )}

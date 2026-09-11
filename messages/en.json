@@ -868,7 +868,9 @@
     "successDescription": "The pricing parameters have been saved.",
     "errorTitle": "Failed to update pricing configuration",
     "loadingError": "Failed to load pricing configuration.",
-    "loading": "Loading pricing configuration..."
+    "loading": "Loading pricing configuration...",
+    "transportationRateInvalid": "Enter a valid rate (0 or more)",
+    "serviceFeePercentageInvalid": "Enter a decimal between 0 and 1 (e.g., 0.10 for 10%)"
   },
   "header": {
     "toggleMenu": "Toggle menu",

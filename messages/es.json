@@ -868,7 +868,9 @@
     "successDescription": "Los parámetros de precios han sido guardados.",
     "errorTitle": "Error al actualizar la configuración de precios",
     "loadingError": "Error al cargar la configuración de precios.",
-    "loading": "Cargando configuración de precios..."
+    "loading": "Cargando configuración de precios...",
+    "transportationRateInvalid": "Ingresa una tarifa válida (0 o mayor)",
+    "serviceFeePercentageInvalid": "Ingresa un decimal entre 0 y 1 (ej. 0.10 para 10%)"
   },
   "header": {
     "toggleMenu": "Abrir menú",
