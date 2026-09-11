@@ -1,10 +1,8 @@
-import { gql } from "@apollo/client";
+import type { ResultOf } from "@graphql-typed-document-node/core";
 
-/**
- * Get current authenticated user query
- * Note: Verify the query name with backend (me, currentUser, viewer, etc.)
- */
-export const GET_CURRENT_USER = gql`
+import { graphql } from "@/graphql/generated";
+
+export const GET_CURRENT_USER = graphql(/* GraphQL */ `
   query GetCurrentUser {
     me {
       id
@@ -14,19 +12,7 @@ export const GET_CURRENT_USER = gql`
       isSuperuser
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for query responses
- */
-export interface BackendUser {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  isSuperuser: boolean;
-}
-
-export interface GetCurrentUserResponse {
-  me: BackendUser;
-}
+export type GetCurrentUserResponse = ResultOf<typeof GET_CURRENT_USER>;
+export type BackendUser = NonNullable<GetCurrentUserResponse["me"]>;

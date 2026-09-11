@@ -6,8 +6,8 @@ export function mapBackendUser(backendUser: BackendUser): User {
   return {
     id: backendUser.id,
     email: backendUser.email,
-    firstName: backendUser.firstName,
-    lastName: backendUser.lastName,
+    firstName: backendUser.firstName ?? "",
+    lastName: backendUser.lastName ?? "",
     role: backendUser.isSuperuser ? UserRole.ADMIN : UserRole.CLIENT,
     isSuperuser: backendUser.isSuperuser,
   };

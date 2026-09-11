@@ -1,9 +1,8 @@
-import { gql } from "@apollo/client";
+import type { ResultOf, VariablesOf } from "@graphql-typed-document-node/core";
 
-/**
- * Create client mutation
- */
-export const CREATE_CLIENT = gql`
+import { graphql } from "@/graphql/generated";
+
+export const CREATE_CLIENT = graphql(/* GraphQL */ `
   mutation CreateClient(
     $buildingNumber: String
     $city: String
@@ -35,72 +34,13 @@ export const CREATE_CLIENT = gql`
       state: $state
     ) {
       client {
-        id
-        fullName
-        email
-        extraEmail1
-        extraEmail2
-        identificationNumber
-        state
-        city
-        mainStreet
-        secondaryStreet
-        buildingNumber
-        mobilePhoneNumber
-        phoneNumber
-        createdAt
-        updatedAt
+        ...ClientDetail
       }
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for mutation variables and response
- */
-export interface CreateClientVariables {
-  buildingNumber?: string;
-  city?: string;
-  email: string;
-  extraEmail1?: string;
-  extraEmail2?: string;
-  firstName: string;
-  identificationNumber?: string;
-  lastName: string;
-  mainStreet?: string;
-  mobilePhoneNumber?: string;
-  phoneNumber?: string;
-  secondaryStreet?: string;
-  state?: string;
-}
-
-export interface CreateClientResponse {
-  createClient: {
-    client: {
-      id: string;
-      fullName: string;
-      email: string;
-      extraEmail1: string | null;
-      extraEmail2: string | null;
-      identificationNumber: string | null;
-      state: string | null;
-      city: string | null;
-      mainStreet: string | null;
-      secondaryStreet: string | null;
-      buildingNumber: string | null;
-      mobilePhoneNumber: string | null;
-      phoneNumber: string | null;
-      createdAt: string;
-      updatedAt: string;
-    };
-  };
-}
-
-/**
- * Update client mutation
- * This mutation is restricted to superusers
- */
-export const UPDATE_CLIENT = gql`
+export const UPDATE_CLIENT = graphql(/* GraphQL */ `
   mutation UpdateClient(
     $id: ID!
     $firstName: String
@@ -132,89 +72,24 @@ export const UPDATE_CLIENT = gql`
       phoneNumber: $phoneNumber
     ) {
       client {
-        id
-        fullName
-        email
-        extraEmail1
-        extraEmail2
-        city
-        state
-        mobilePhoneNumber
-        phoneNumber
-        identificationNumber
-        mainStreet
-        secondaryStreet
-        buildingNumber
-        updatedAt
+        ...ClientDetail
       }
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for update client mutation
- */
-export interface UpdateClientVariables {
-  id: string;
-  firstName?: string;
-  lastName?: string;
-  extraEmail1?: string;
-  extraEmail2?: string;
-  identificationNumber?: string;
-  state?: string;
-  city?: string;
-  mainStreet?: string;
-  secondaryStreet?: string;
-  buildingNumber?: string;
-  mobilePhoneNumber?: string;
-  phoneNumber?: string;
-}
-
-export interface UpdateClientResponse {
-  updateClient: {
-    client: {
-      id: string;
-      fullName: string;
-      email: string;
-      extraEmail1: string | null;
-      extraEmail2: string | null;
-      city: string | null;
-      state: string | null;
-      mobilePhoneNumber: string | null;
-      phoneNumber: string | null;
-      identificationNumber: string | null;
-      mainStreet: string | null;
-      secondaryStreet: string | null;
-      buildingNumber: string | null;
-      updatedAt: string;
-    };
-  };
-}
-
-/**
- * Delete client mutation
- * This mutation is restricted to superusers
- */
-export const DELETE_CLIENT = gql`
+export const DELETE_CLIENT = graphql(/* GraphQL */ `
   mutation DeleteClient($id: ID!, $deleteUser: Boolean) {
     deleteClient(id: $id, deleteUser: $deleteUser) {
       ok
       message
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for delete client mutation
- */
-export interface DeleteClientVariables {
-  id: string;
-  deleteUser?: boolean;
-}
-
-export interface DeleteClientResponse {
-  deleteClient: {
-    ok: boolean;
-    message: string | null;
-  };
-}
+export type CreateClientResponse = ResultOf<typeof CREATE_CLIENT>;
+export type CreateClientVariables = VariablesOf<typeof CREATE_CLIENT>;
+export type UpdateClientResponse = ResultOf<typeof UPDATE_CLIENT>;
+export type UpdateClientVariables = VariablesOf<typeof UPDATE_CLIENT>;
+export type DeleteClientResponse = ResultOf<typeof DELETE_CLIENT>;
+export type DeleteClientVariables = VariablesOf<typeof DELETE_CLIENT>;

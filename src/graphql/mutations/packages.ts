@@ -1,9 +1,8 @@
-import { gql } from "@apollo/client";
+import type { ResultOf, VariablesOf } from "@graphql-typed-document-node/core";
 
-/**
- * Create package mutation
- */
-export const CREATE_PACKAGE = gql`
+import { graphql } from "@/graphql/generated";
+
+export const CREATE_PACKAGE = graphql(/* GraphQL */ `
   mutation CreatePackage(
     $barcode: String!
     $clientId: ID!
@@ -41,77 +40,13 @@ export const CREATE_PACKAGE = gql`
       comments: $comments
     ) {
       package {
-        id
-        barcode
-        description
-        purchasedByNarbox
-        weight
-        weightUnit
-        realPrice
-        servicePrice
-        transportationCost
-        serviceFee
-        createdAt
+        ...PackageDetail
       }
     }
   }
-`;
+`);
 
-/**
- * Delete package mutation
- */
-export const DELETE_PACKAGE = gql`
-  mutation DeletePackage($id: ID!) {
-    deletePackage(id: $id) {
-      success
-    }
-  }
-`;
-
-/**
- * TypeScript types for create package mutation
- */
-export interface CreatePackageVariables {
-  barcode: string;
-  clientId: string;
-  courier: string;
-  otherCourier?: string;
-  length?: number;
-  width?: number;
-  height?: number;
-  dimensionUnit?: string;
-  weight: number;
-  weightUnit?: string;
-  description?: string;
-  purchaseLink?: string;
-  realPrice?: number;
-  purchasedByNarbox?: boolean;
-  arrivalDate?: string;
-  comments?: string;
-}
-
-export interface CreatePackageResponse {
-  createPackage: {
-    package: {
-      id: string;
-      barcode: string;
-      description: string | null;
-      purchasedByNarbox: boolean;
-      weight: number;
-      weightUnit: string | null;
-      realPrice: number | null;
-      servicePrice: number | null;
-      transportationCost: number | null;
-      serviceFee: number | null;
-      createdAt: string;
-    };
-  };
-}
-
-/**
- * Update package mutation
- */
-export const UPDATE_PACKAGE = gql`
+export const UPDATE_PACKAGE = graphql(/* GraphQL */ `
   mutation UpdatePackage(
     $id: ID!
     $courier: String
@@ -149,101 +84,23 @@ export const UPDATE_PACKAGE = gql`
       clientId: $clientId
     ) {
       package {
-        id
-        barcode
-        courier
-        otherCourier
-        length
-        width
-        height
-        dimensionUnit
-        weight
-        weightUnit
-        description
-        purchaseLink
-        realPrice
-        servicePrice
-        purchasedByNarbox
-        transportationCost
-        serviceFee
-        arrivalDate
-        comments
-        client {
-          id
-          fullName
-          email
-        }
-        createdAt
-        updatedAt
+        ...PackageDetail
       }
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for delete package mutation
- */
-export interface DeletePackageVariables {
-  id: string;
-}
+export const DELETE_PACKAGE = graphql(/* GraphQL */ `
+  mutation DeletePackage($id: ID!) {
+    deletePackage(id: $id) {
+      success
+    }
+  }
+`);
 
-export interface DeletePackageResponse {
-  deletePackage: {
-    success: boolean;
-  };
-}
-
-/**
- * TypeScript types for update package mutation
- */
-export interface UpdatePackageVariables {
-  id: string;
-  courier?: string;
-  otherCourier?: string;
-  length?: number;
-  width?: number;
-  height?: number;
-  dimensionUnit?: string;
-  weight?: number;
-  weightUnit?: string;
-  description?: string;
-  purchaseLink?: string;
-  realPrice?: number;
-  purchasedByNarbox?: boolean;
-  arrivalDate?: string;
-  comments?: string;
-  clientId?: string;
-}
-
-export interface UpdatePackageResponse {
-  updatePackage: {
-    package: {
-      id: string;
-      barcode: string;
-      courier: string | null;
-      otherCourier: string | null;
-      length: number | null;
-      width: number | null;
-      height: number | null;
-      dimensionUnit: string | null;
-      weight: number | null;
-      weightUnit: string | null;
-      description: string | null;
-      purchaseLink: string | null;
-      realPrice: number | null;
-      servicePrice: number | null;
-      purchasedByNarbox: boolean;
-      transportationCost: number | null;
-      serviceFee: number | null;
-      arrivalDate: string | null;
-      comments: string | null;
-      client: {
-        id: string;
-        fullName: string;
-        email: string;
-      } | null;
-      createdAt: string;
-      updatedAt: string;
-    };
-  };
-}
+export type CreatePackageResponse = ResultOf<typeof CREATE_PACKAGE>;
+export type CreatePackageVariables = VariablesOf<typeof CREATE_PACKAGE>;
+export type UpdatePackageResponse = ResultOf<typeof UPDATE_PACKAGE>;
+export type UpdatePackageVariables = VariablesOf<typeof UPDATE_PACKAGE>;
+export type DeletePackageResponse = ResultOf<typeof DELETE_PACKAGE>;
+export type DeletePackageVariables = VariablesOf<typeof DELETE_PACKAGE>;

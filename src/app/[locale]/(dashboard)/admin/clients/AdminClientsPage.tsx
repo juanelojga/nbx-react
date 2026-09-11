@@ -16,6 +16,7 @@ import {
   type GetAllClientsVariables,
 } from "@/graphql/queries/clients";
 import { useAdminListPage } from "@/hooks/useAdminListPage";
+import { toListConnection } from "@/lib/graphql/toListConnection";
 
 import { ClientDialogs } from "./components/ClientDialogs";
 import { ClientRow } from "./components/ClientRow";
@@ -42,7 +43,7 @@ const buildVariables = (state: {
 });
 
 const selectConnection = (data: GetAllClientsResponse | undefined) =>
-  data?.allClients;
+  toListConnection(data?.allClients);
 
 export function AdminClientsPage() {
   const t = useTranslations("adminClients");

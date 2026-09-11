@@ -81,7 +81,13 @@ describe("useClientDialogs", () => {
     const { result } = renderHook(() => useClientDialogs());
     const clientWithNullNames = {
       ...mockClient,
-      user: { ...mockClient.user, firstName: null, lastName: null },
+      user: {
+        id: "user-1",
+        isSuperuser: false,
+        email: "john@example.com",
+        firstName: null,
+        lastName: null,
+      },
     };
 
     act(() => {

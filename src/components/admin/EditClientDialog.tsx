@@ -82,7 +82,7 @@ export function EditClientDialog({
     onCompleted: async (data) => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
-          fullName: data.updateClient.client.fullName,
+          fullName: data.updateClient?.client?.fullName ?? "",
         }),
       });
       handleClose();

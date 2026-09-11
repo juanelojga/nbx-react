@@ -101,7 +101,7 @@ export function UpdatePackageDialog({
     onCompleted: async (result) => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
-          barcode: result.updatePackage.package.barcode,
+          barcode: result.updatePackage?.package?.barcode ?? "",
         }),
       });
       handleClose();

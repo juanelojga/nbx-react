@@ -72,7 +72,7 @@ export function AddPackageDialog({
     onCompleted: async (data) => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
-          barcode: data.createPackage.package.barcode,
+          barcode: data.createPackage?.package?.barcode ?? "",
         }),
       });
       handleClose();

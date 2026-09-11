@@ -9,6 +9,8 @@ import {
 } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import { print, visit, type DocumentNode } from "graphql";
+
+import { addTypenames } from "@/test/addTypenames";
 import type { FormattedExecutionResult } from "graphql";
 
 interface MockedResponse {
@@ -84,8 +86,18 @@ class CompatMockLink extends ApolloLink {
         if (mock.error) {
           observer.error(mock.error);
         } else {
+          const result =
+            typeof mock.result === "function" ? mock.result() : mock.result;
           observer.next(
-            typeof mock.result === "function" ? mock.result() : mock.result
+            result?.data
+              ? {
+                  ...result,
+                  data: addTypenames(
+                    operation.query,
+                    JSON.parse(JSON.stringify(result.data)) as unknown
+                  ),
+                }
+              : result
           );
           observer.complete();
         }

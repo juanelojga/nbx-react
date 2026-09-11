@@ -1,0 +1,308 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type ClientConnection {
+  hasNext: Boolean
+  hasPrevious: Boolean
+  page: Int
+  pageSize: Int
+  results: [ClientType]
+  totalCount: Int
+}
+
+type ClientType {
+  buildingNumber: String
+  city: String
+  createdAt: DateTime!
+  email: String!
+  extraEmail1: String
+  extraEmail2: String
+  fullName: String
+  id: ID!
+  identificationNumber: String
+  mainStreet: String
+  mobilePhoneNumber: String
+  phoneNumber: String
+  secondaryStreet: String
+  state: String
+  updatedAt: DateTime!
+  user: MeType
+}
+
+type ConsolidateConnection {
+  hasNext: Boolean
+  hasPrevious: Boolean
+  page: Int
+  pageSize: Int
+  results: [ConsolidateType]
+  totalCount: Int
+}
+
+type ConsolidateType {
+  client: ClientType!
+  comment: String
+  createdAt: DateTime!
+  deliveryDate: Date
+  description: String!
+  extraAttributes: JSONString!
+  id: ID!
+  packages: [PackageType!]!
+  status: PackagehandlingConsolidateStatusChoices!
+  totalCost: Float
+  updatedAt: DateTime!
+}
+
+type CreateClient {
+  client: ClientType
+}
+
+type CreateConsolidate {
+  consolidate: ConsolidateType
+}
+
+type CreatePackage {
+  package: PackageType
+}
+
+type CustomRevokeToken {
+  revoked: Boolean
+}
+
+"""Dashboard statistics type."""
+type DashboardStatsType {
+  consolidationsAwaitingPayment: Int
+  consolidationsInTransit: Int
+  consolidationsPending: Int
+  consolidationsProcessing: Int
+  packagesDelivered: Int
+  packagesInTransit: Int
+  packagesPending: Int
+  recentPackages: Int
+  totalClients: Int
+  totalConsolidations: Int
+  totalPackages: Int
+  totalRealPrice: Float
+  totalServicePrice: Float
+}
+
+"""Main dashboard type containing stats and recent items."""
+type DashboardType {
+  recentConsolidations(limit: Int = 5): [ConsolidateType]
+  recentPackages(limit: Int = 5): [PackageType]
+  stats: DashboardStatsType
+}
+
+"""
+The `Date` scalar type represents a Date
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar Date
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+"""The `Decimal` scalar type represents a python Decimal."""
+scalar Decimal
+
+type DeleteClient {
+  message: String
+  ok: Boolean
+}
+
+type DeleteConsolidate {
+  success: Boolean
+}
+
+type DeletePackage {
+  success: Boolean
+}
+
+type EmailAuth {
+  payload: GenericScalar
+  refreshExpiresIn: Int
+  refreshToken: String
+  token: String
+}
+
+type ForgotPassword {
+  ok: Boolean
+}
+
+"""
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
+"""
+scalar GenericScalar
+
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString
+
+type MeType {
+  email: String!
+  firstName: String
+  id: ID!
+  """
+  Designates that this user has all permissions without explicitly assigning them.
+  """
+  isSuperuser: Boolean!
+  lastName: String
+}
+
+type Mutation {
+  createClient(buildingNumber: String, city: String, email: String!, extraEmail1: String, extraEmail2: String, firstName: String!, identificationNumber: String, lastName: String!, mainStreet: String, mobilePhoneNumber: String, phoneNumber: String, secondaryStreet: String, state: String): CreateClient
+  createConsolidate(comment: String, deliveryDate: Date, description: String!, extraAttributes: JSONString, packageIds: [ID]!, sendEmail: Boolean = false, status: String!): CreateConsolidate
+  createPackage(arrivalDate: Date, barcode: String!, clientId: ID!, comments: String, courier: String!, description: String, dimensionUnit: String, height: Float, length: Float, otherCourier: String, purchaseLink: String, purchasedByNarbox: Boolean = false, realPrice: Float, weight: Float!, weightUnit: String, width: Float): CreatePackage
+  deleteClient(deleteUser: Boolean = false, id: ID!): DeleteClient
+  deleteConsolidate(id: ID!): DeleteConsolidate
+  deletePackage(id: ID!): DeletePackage
+  emailAuth(email: String!, password: String!): EmailAuth
+  forgotPassword(email: String!): ForgotPassword
+  refreshToken(token: String): Refresh
+  """
+  Refresh JWT access token using a refresh token string.
+  This mutation accepts the refresh token string directly and returns a new access token.
+  Optionally rotates the refresh token for enhanced security.
+  """
+  refreshWithToken(refreshToken: String!): RefreshWithToken
+  resetPassword(password: String!, token: String!, uidb64: String!): ResetPassword
+  revokeToken: CustomRevokeToken
+  """Obtain JSON Web Token mutation"""
+  tokenAuth(email: String!, password: String!): ObtainJSONWebToken
+  updateClient(buildingNumber: String, city: String, extraEmail1: String, extraEmail2: String, firstName: String, id: ID!, identificationNumber: String, lastName: String, mainStreet: String, mobilePhoneNumber: String, phoneNumber: String, secondaryStreet: String, state: String): UpdateClient
+  updateConsolidate(comment: String, deliveryDate: Date, description: String, id: ID!, packageIds: [ID], status: String): UpdateConsolidate
+  updatePackage(arrivalDate: Date, clientId: ID, comments: String, courier: String, description: String, dimensionUnit: String, height: Float, id: ID!, length: Float, otherCourier: String, purchaseLink: String, purchasedByNarbox: Boolean, realPrice: Float, weight: Float, weightUnit: String, width: Float): UpdatePackage
+  updatePricingConfig(serviceFeePercentage: Float, transportationRatePerLb: Float): UpdatePricingConfig
+  verifyToken(token: String): Verify
+}
+
+"""Obtain JSON Web Token mutation"""
+type ObtainJSONWebToken {
+  payload: GenericScalar!
+  refreshExpiresIn: Int!
+  token: String!
+}
+
+type PackageConnection {
+  hasNext: Boolean
+  hasPrevious: Boolean
+  page: Int
+  pageSize: Int
+  results: [PackageType]
+  totalCount: Int
+}
+
+type PackageType {
+  arrivalDate: Date
+  barcode: String!
+  client: ClientType!
+  comments: String
+  courier: String!
+  createdAt: DateTime!
+  description: String
+  dimensionUnit: String
+  height: Float
+  id: ID!
+  length: Float
+  otherCourier: String
+  purchaseLink: String
+  purchasedByNarbox: Boolean!
+  realPrice: Float
+  serviceFee: Float
+  servicePrice: Float
+  transportationCost: Float
+  updatedAt: DateTime!
+  weight: Float!
+  weightUnit: String
+  width: Float
+}
+
+"""An enumeration."""
+enum PackagehandlingConsolidateStatusChoices {
+  """Awaiting Payment"""
+  AWAITING_PAYMENT
+  """Cancelled"""
+  CANCELLED
+  """Delivered"""
+  DELIVERED
+  """In Transit"""
+  IN_TRANSIT
+  """Pending"""
+  PENDING
+  """Processing"""
+  PROCESSING
+}
+
+type PricingConfigType {
+  """Service fee as a decimal (0.10 = 10%)"""
+  serviceFeePercentage: Decimal!
+  """Transportation cost per pound in USD"""
+  transportationRatePerLb: Decimal!
+  updatedAt: DateTime!
+}
+
+type Query {
+  allClients(orderBy: String, page: Int, pageSize: Int, search: String): ClientConnection
+  allConsolidates(createdAfter: Date, createdBefore: Date, orderBy: String, page: Int, pageSize: Int, search: String, status: String): ConsolidateConnection
+  allPackages(clientId: ID, notInConsolidate: Boolean = true, orderBy: String, page: Int, pageSize: Int, search: String): PackageConnection
+  client(id: ID!): ClientType
+  consolidateById(id: ID): ConsolidateType
+  dashboard: DashboardType
+  me: MeType
+  package(id: ID!): PackageType
+  pricingConfig: PricingConfigType
+}
+
+type Refresh {
+  payload: GenericScalar!
+  refreshExpiresIn: Int!
+  token: String!
+}
+
+"""
+Refresh JWT access token using a refresh token string.
+This mutation accepts the refresh token string directly and returns a new access token.
+Optionally rotates the refresh token for enhanced security.
+"""
+type RefreshWithToken {
+  payload: GenericScalar
+  refreshExpiresIn: Int
+  refreshToken: String
+  token: String
+}
+
+type ResetPassword {
+  ok: Boolean
+}
+
+type UpdateClient {
+  client: ClientType
+}
+
+type UpdateConsolidate {
+  consolidate: ConsolidateType
+}
+
+type UpdatePackage {
+  package: PackageType
+}
+
+type UpdatePricingConfig {
+  pricingConfig: PricingConfigType
+}
+
+type Verify {
+  payload: GenericScalar!
+}

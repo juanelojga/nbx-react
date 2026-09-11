@@ -574,8 +574,8 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
   },
 
   // Packages
-  ResolveAllPackages: (vars) => {
-    const clientId = String(vars.client_id);
+  GetAllPackages: (vars) => {
+    const clientId = String(vars.clientId);
     const search = ((vars.search as string) ?? "").toLowerCase();
     let results = store.packages.filter((p) => p.clientId === clientId);
     if (search) {
@@ -586,7 +586,7 @@ export const resolvers: Record<string, (vars: Vars) => unknown> = {
       );
     }
     const page = (vars.page as number) ?? 1;
-    const pageSize = (vars.page_size as number) ?? 10;
+    const pageSize = (vars.pageSize as number) ?? 10;
     const paged = results.slice((page - 1) * pageSize, page * pageSize);
     return {
       allPackages: {

@@ -112,7 +112,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         const { token, refreshToken, refreshExpiresIn } = data.emailAuth;
-        saveTokens(token, refreshToken, refreshExpiresIn);
+        if (!token || !refreshToken) {
+          throw new Error("Invalid response from server");
+        }
+        saveTokens(token, refreshToken, refreshExpiresIn ?? undefined);
 
         const { data: currentUserData } = await getCurrentUser();
         if (!currentUserData?.me) {

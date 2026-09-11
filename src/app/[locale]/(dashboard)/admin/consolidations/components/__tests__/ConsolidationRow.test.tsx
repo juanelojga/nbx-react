@@ -59,7 +59,7 @@ const mockConsolidation: ConsolidateType = {
   status: "pending",
   deliveryDate: "2024-06-15",
   comment: null,
-  extraAttributes: null,
+  extraAttributes: "{}",
   client: {
     id: "client-1",
     fullName: "John Doe",

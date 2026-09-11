@@ -11,11 +11,12 @@ import { BaseTable } from "@/components/data-display/base-table";
 import { Button } from "@/components/ui/button";
 import {
   type PackageType,
-  RESOLVE_ALL_PACKAGES,
-  type ResolveAllPackagesResponse,
-  type ResolveAllPackagesVariables,
+  GET_ALL_PACKAGES,
+  type GetAllPackagesResponse,
+  type GetAllPackagesVariables,
 } from "@/graphql/queries/packages";
 import { useAdminListPage } from "@/hooks/useAdminListPage";
+import { toListConnection } from "@/lib/graphql/toListConnection";
 
 import { PackageDialogs } from "./components/PackageDialogs";
 import { PackageRow } from "./components/PackageRow";
@@ -34,28 +35,28 @@ const buildVariables = (state: {
   pageSize: number;
   orderBy: string;
   search: string;
-}): ResolveAllPackagesVariables => ({
+}): GetAllPackagesVariables => ({
   page: state.page,
-  page_size: state.pageSize,
-  order_by: state.orderBy,
+  pageSize: state.pageSize,
+  orderBy: state.orderBy,
   notInConsolidate: true,
   ...(state.search ? { search: state.search } : {}),
 });
 
-const selectConnection = (data: ResolveAllPackagesResponse | undefined) =>
-  data?.allPackages;
+const selectConnection = (data: GetAllPackagesResponse | undefined) =>
+  toListConnection(data?.allPackages);
 
 export function AdminPackagesManagementPage() {
   const t = useTranslations("adminPackagesManagement");
   const dialogs = usePackageDialogs();
 
   const list = useAdminListPage<
-    ResolveAllPackagesResponse,
-    ResolveAllPackagesVariables,
+    GetAllPackagesResponse,
+    GetAllPackagesVariables,
     PackageType,
     SortField
   >({
-    query: RESOLVE_ALL_PACKAGES,
+    query: GET_ALL_PACKAGES,
     sortFields: SORT_FIELDS,
     defaultSort: DEFAULT_SORT,
     buildVariables,

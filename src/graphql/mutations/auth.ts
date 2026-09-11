@@ -1,63 +1,28 @@
-import { gql } from "@apollo/client";
+import type { ResultOf, VariablesOf } from "@graphql-typed-document-node/core";
 
-/**
- * Login mutation
- * Uses emailAuth as per backend GraphQL schema
- */
-export const LOGIN_MUTATION = gql`
+import { graphql } from "@/graphql/generated";
+
+/** Password login; the backend rotates refresh tokens on every refresh. */
+export const LOGIN_MUTATION = graphql(/* GraphQL */ `
   mutation Login($email: String!, $password: String!) {
     emailAuth(email: $email, password: $password) {
       token
       refreshToken
       refreshExpiresIn
-      payload
     }
   }
-`;
+`);
 
-/**
- * Refresh token mutation
- * Uses refreshWithToken as per backend GraphQL schema
- */
-export const REFRESH_TOKEN_MUTATION = gql`
+export const REFRESH_TOKEN_MUTATION = graphql(/* GraphQL */ `
   mutation RefreshToken($refreshToken: String!) {
     refreshWithToken(refreshToken: $refreshToken) {
       token
       refreshToken
       refreshExpiresIn
-      payload
     }
   }
-`;
+`);
 
-/**
- * Logout mutation (if backend supports session invalidation)
- */
-/**
- * TypeScript types for mutation responses
- */
-export interface LoginResponse {
-  emailAuth: {
-    token: string;
-    refreshToken: string;
-    refreshExpiresIn: number;
-    payload: {
-      email: string;
-      exp: number;
-      origIat: number;
-    };
-  };
-}
-
-export interface RefreshTokenResponse {
-  refreshWithToken: {
-    token: string;
-    refreshToken: string;
-    refreshExpiresIn: number;
-    payload: {
-      email: string;
-      exp: number;
-      origIat: number;
-    };
-  };
-}
+export type LoginResponse = ResultOf<typeof LOGIN_MUTATION>;
+export type LoginVariables = VariablesOf<typeof LOGIN_MUTATION>;
+export type RefreshTokenResponse = ResultOf<typeof REFRESH_TOKEN_MUTATION>;

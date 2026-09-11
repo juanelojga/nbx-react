@@ -18,7 +18,8 @@ pnpm start                  # Start production server
 pnpm run lint               # ESLint check
 pnpm run lint:fix           # ESLint auto-fix
 pnpm run format             # Prettier format all files
-pnpm run type-check         # TypeScript type checking (tsc --noEmit)
+pnpm run type-check         # next typegen + tsc --noEmit
+pnpm codegen                # Regenerate src/graphql/generated from schema.graphql
 
 # Testing
 pnpm test                   # Run all unit tests (Jest)
@@ -83,14 +84,31 @@ All data tables **must** use `src/components/data-display/base-table.tsx` (`Base
 
 ### GraphQL Pattern
 
+Documents are typed with GraphQL Code Generator (`client-preset`). The schema lives in `schema.graphql` (committed) and generated code in `src/graphql/generated/` (committed, never edited by hand).
+
 ```typescript
 // src/graphql/queries/domain.ts
-export const GET_ITEMS = gql`query GetItems { ... }`;
-export interface GetItemsResponse {
-  items: Item[];
-}
-// Usage: const { data } = useQuery<GetItemsResponse>(GET_ITEMS);
+import type { ResultOf, VariablesOf } from "@graphql-typed-document-node/core";
+import { graphql } from "@/graphql/generated";
+
+export const GET_ITEMS = graphql(/* GraphQL */ `
+  query GetItems($page: Int) {
+    items(page: $page) {
+      results {
+        ...ItemSummary
+      }
+    }
+  }
+`);
+export type GetItemsResponse = ResultOf<typeof GET_ITEMS>;
+export type GetItemsVariables = VariablesOf<typeof GET_ITEMS>;
+// Usage: const { data } = useQuery(GET_ITEMS, { variables }); // fully typed
 ```
+
+- Shared selections live in `src/graphql/fragments/` (`ClientSummary`, `ClientDetail`, `PackageListItem`, `PackageDetail`, `ConsolidationListItem`).
+- After editing any document run `pnpm codegen` (CI runs `pnpm codegen:check`). Lists from Graphene are nullable; use `compact()` / `toListConnection()` from `src/lib/graphql/`.
+- When the backend schema changes, refresh `schema.graphql` from a running backend: `NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:8000/graphql pnpm codegen:schema` (or `python nbxdjango/manage.py graphql_schema --out ../nbx-react/schema.graphql` in the nbx-django repo).
+- Every operation name must have a resolver in `e2e/fixtures/mockStore.ts` (enforced by `src/graphql/__tests__/documents.test.ts`).
 
 ## Environment Variables
 

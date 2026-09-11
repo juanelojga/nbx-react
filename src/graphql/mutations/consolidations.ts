@@ -1,12 +1,8 @@
-import { gql } from "@apollo/client";
-import { ConsolidationStatus } from "@/types/consolidation";
+import type { ResultOf, VariablesOf } from "@graphql-typed-document-node/core";
 
-/**
- * Create consolidation mutation
- * Creates a new consolidation grouping multiple packages
- * Access: Superuser only
- */
-export const CREATE_CONSOLIDATE = gql`
+import { graphql } from "@/graphql/generated";
+
+export const CREATE_CONSOLIDATE = graphql(/* GraphQL */ `
   mutation CreateConsolidate(
     $description: String!
     $status: String!
@@ -26,36 +22,13 @@ export const CREATE_CONSOLIDATE = gql`
       extraAttributes: $extraAttributes
     ) {
       consolidate {
-        id
-        description
-        status
-        deliveryDate
-        comment
-        extraAttributes
-        totalCost
-        client {
-          id
-          fullName
-          email
-        }
-        packages {
-          id
-          barcode
-          description
-        }
-        createdAt
-        updatedAt
+        ...ConsolidationListItem
       }
     }
   }
-`;
+`);
 
-/**
- * Update consolidation mutation
- * Updates an existing consolidation
- * Access: Superuser only
- */
-export const UPDATE_CONSOLIDATE = gql`
+export const UPDATE_CONSOLIDATE = graphql(/* GraphQL */ `
   mutation UpdateConsolidate(
     $id: ID!
     $description: String
@@ -73,129 +46,23 @@ export const UPDATE_CONSOLIDATE = gql`
       packageIds: $packageIds
     ) {
       consolidate {
-        id
-        description
-        status
-        deliveryDate
-        comment
-        extraAttributes
-        totalCost
-        client {
-          id
-          fullName
-          email
-        }
-        packages {
-          id
-          barcode
-          description
-        }
-        createdAt
-        updatedAt
+        ...ConsolidationListItem
       }
     }
   }
-`;
+`);
 
-/**
- * Delete consolidation mutation
- * Deletes a consolidation (packages remain)
- * Access: Superuser only
- */
-export const DELETE_CONSOLIDATE = gql`
+export const DELETE_CONSOLIDATE = graphql(/* GraphQL */ `
   mutation DeleteConsolidate($id: ID!) {
     deleteConsolidate(id: $id) {
       success
     }
   }
-`;
+`);
 
-/**
- * TypeScript types for create consolidation mutation
- */
-export interface CreateConsolidateVariables {
-  description: string;
-  status: ConsolidationStatus;
-  packageIds: string[];
-  deliveryDate?: string;
-  comment?: string;
-  sendEmail?: boolean;
-  extraAttributes?: string;
-}
-
-export interface CreateConsolidateResponse {
-  createConsolidate: {
-    consolidate: {
-      id: string;
-      description: string;
-      status: ConsolidationStatus;
-      deliveryDate: string | null;
-      comment: string | null;
-      extraAttributes: string | null;
-      totalCost: number | null;
-      client: {
-        id: string;
-        fullName: string;
-        email: string;
-      };
-      packages: {
-        id: string;
-        barcode: string;
-        description: string | null;
-      }[];
-      createdAt: string;
-      updatedAt: string;
-    };
-  };
-}
-
-/**
- * TypeScript types for update consolidation mutation
- */
-export interface UpdateConsolidateVariables {
-  id: string;
-  description?: string;
-  status?: ConsolidationStatus;
-  deliveryDate?: string;
-  comment?: string;
-  packageIds?: string[];
-}
-
-export interface UpdateConsolidateResponse {
-  updateConsolidate: {
-    consolidate: {
-      id: string;
-      description: string;
-      status: ConsolidationStatus;
-      deliveryDate: string | null;
-      comment: string | null;
-      extraAttributes: string | null;
-      totalCost: number | null;
-      client: {
-        id: string;
-        fullName: string;
-        email: string;
-      };
-      packages: {
-        id: string;
-        barcode: string;
-        description: string | null;
-      }[];
-      createdAt: string;
-      updatedAt: string;
-    };
-  };
-}
-
-/**
- * TypeScript types for delete consolidation mutation
- */
-export interface DeleteConsolidateVariables {
-  id: string;
-}
-
-export interface DeleteConsolidateResponse {
-  deleteConsolidate: {
-    success: boolean;
-  };
-}
+export type CreateConsolidateResponse = ResultOf<typeof CREATE_CONSOLIDATE>;
+export type CreateConsolidateVariables = VariablesOf<typeof CREATE_CONSOLIDATE>;
+export type UpdateConsolidateResponse = ResultOf<typeof UPDATE_CONSOLIDATE>;
+export type UpdateConsolidateVariables = VariablesOf<typeof UPDATE_CONSOLIDATE>;
+export type DeleteConsolidateResponse = ResultOf<typeof DELETE_CONSOLIDATE>;
+export type DeleteConsolidateVariables = VariablesOf<typeof DELETE_CONSOLIDATE>;

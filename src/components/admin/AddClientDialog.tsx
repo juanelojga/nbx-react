@@ -57,7 +57,7 @@ export function AddClientDialog({
     onCompleted: async (data) => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
-          fullName: data.createClient.client.fullName,
+          fullName: data.createClient?.client?.fullName ?? "",
         }),
       });
       handleClose();

@@ -21,6 +21,7 @@ import {
 } from "@/graphql/mutations/consolidations";
 import { ClientType } from "@/graphql/queries/clients";
 import { Package } from "../types";
+import type { ConsolidateType } from "@/graphql/queries/consolidations";
 import { ExtraAttributesEditor } from "@/components/admin/ExtraAttributesEditor";
 import { serializeExtraAttributes } from "@/lib/consolidations/serializeExtraAttributes";
 import { createConsolidationFormSchema } from "@/lib/validation/consolidationFormSchema";
@@ -32,9 +33,7 @@ interface ConsolidationFormProps {
   selectedPackages: Set<string>;
   packages: Package[];
   onBack: () => void;
-  onSuccess: (
-    consolidation: CreateConsolidateResponse["createConsolidate"]["consolidate"]
-  ) => void;
+  onSuccess: (consolidation: ConsolidateType) => void;
 }
 
 type ConsolidationFormData = {
@@ -85,11 +84,11 @@ export function ConsolidationForm({
     onCompleted: (data) => {
       toast.success(t("successTitle"), {
         description: t("successDescription", {
-          fullName: selectedClient.fullName,
+          fullName: selectedClient.fullName ?? "",
         }),
       });
-      // Call success callback with consolidation data
-      onSuccess(data.createConsolidate.consolidate);
+      const consolidate = data.createConsolidate?.consolidate;
+      if (consolidate) onSuccess(consolidate);
     },
     onError: (error) => {
       toast.error(t("errorTitle"), {

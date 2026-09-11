@@ -1,5 +1,8 @@
 import { test as base, type BrowserContext } from "@playwright/test";
 import { resolvers } from "./mockStore";
+import { parse } from "graphql";
+
+import { addTypenames } from "../../src/test/addTypenames";
 
 interface GraphQLRequest {
   operationName?: string;
@@ -49,7 +52,9 @@ async function attachMockBackend(context: BrowserContext) {
       }
       try {
         const data = resolver(req.variables ?? {});
-        return { data };
+        return {
+          data: req.query ? addTypenames(parse(req.query), data) : data,
+        };
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Mock resolver error";

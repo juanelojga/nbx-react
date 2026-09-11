@@ -3,12 +3,14 @@
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useQuery } from "@apollo/client/react";
+
+import { compact } from "@/lib/graphql/compact";
 import { useTranslations } from "next-intl";
 import { ClientType } from "@/graphql/queries/clients";
 import {
-  RESOLVE_ALL_PACKAGES,
-  ResolveAllPackagesResponse,
-  ResolveAllPackagesVariables,
+  GET_ALL_PACKAGES,
+  GetAllPackagesResponse,
+  GetAllPackagesVariables,
 } from "@/graphql/queries/packages";
 import { ConsolidateType } from "@/graphql/queries/consolidations";
 import type { Package } from "../types";
@@ -65,10 +67,10 @@ export function useConsolidationWizard(): UseConsolidationWizardReturn {
 
   const queryVariables = useMemo(
     () => ({
-      client_id: selectedClient ? parseInt(selectedClient.id) : 0,
+      clientId: selectedClient ? selectedClient.id : "0",
       page: 1,
-      page_size: 20,
-      order_by: "-created_at",
+      pageSize: 20,
+      orderBy: "-created_at",
       search: "",
       notInConsolidate: true,
     }),
@@ -76,15 +78,15 @@ export function useConsolidationWizard(): UseConsolidationWizardReturn {
   );
 
   const { data, loading, error, refetch } = useQuery<
-    ResolveAllPackagesResponse,
-    ResolveAllPackagesVariables
-  >(RESOLVE_ALL_PACKAGES, {
+    GetAllPackagesResponse,
+    GetAllPackagesVariables
+  >(GET_ALL_PACKAGES, {
     variables: queryVariables,
     skip: currentStep !== 2 || !selectedClient,
     fetchPolicy: "network-only",
   });
 
-  const packages = data?.allPackages.results || [];
+  const packages = compact(data?.allPackages?.results);
   const hasError = !!error;
 
   const handleClientSelect = useCallback((client: ClientType | null) => {

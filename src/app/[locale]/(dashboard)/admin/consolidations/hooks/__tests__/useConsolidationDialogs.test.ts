@@ -8,7 +8,8 @@ const mockConsolidation: ConsolidateType = {
   status: "pending",
   deliveryDate: "2024-06-15",
   comment: null,
-  extraAttributes: null,
+  extraAttributes: "{}",
+  totalCost: null,
   client: {
     id: "client-1",
     fullName: "John Doe",
@@ -68,7 +69,6 @@ describe("useConsolidationDialogs", () => {
       id: "cons-1",
       description: "Test consolidation",
       client: {
-        id: "client-1",
         fullName: "John Doe",
         email: "john@example.com",
       },

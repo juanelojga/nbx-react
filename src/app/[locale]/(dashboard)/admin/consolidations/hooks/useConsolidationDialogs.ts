@@ -47,7 +47,10 @@ export function useConsolidationDialogs(): UseConsolidationDialogsReturn {
       setConsolidationToDelete({
         id: consolidation.id,
         description: consolidation.description,
-        client: consolidation.client,
+        client: {
+          fullName: consolidation.client.fullName ?? "",
+          email: consolidation.client.email,
+        },
         packagesCount: consolidation.packages.length,
       });
       setIsDeleteDialogOpen(true);

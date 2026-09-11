@@ -16,6 +16,7 @@ import {
   type GetAllConsolidatesVariables,
 } from "@/graphql/queries/consolidations";
 import { useAdminListPage } from "@/hooks/useAdminListPage";
+import { toListConnection } from "@/lib/graphql/toListConnection";
 import {
   type DateRangeError,
   validateDateRange,
@@ -59,7 +60,7 @@ const buildVariables = (
 });
 
 const selectConnection = (data: GetAllConsolidatesResponse | undefined) =>
-  data?.allConsolidates;
+  toListConnection(data?.allConsolidates);
 
 export function AdminConsolidationsPage() {
   const t = useTranslations("adminConsolidations");

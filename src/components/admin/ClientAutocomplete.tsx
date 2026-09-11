@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
+
+import { compact } from "@/lib/graphql/compact";
 import { useTranslations } from "next-intl";
 import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -62,7 +64,7 @@ export function ClientAutocomplete({
     skip: !open || !hasMinChars,
   });
 
-  const clients = data?.allClients.results || [];
+  const clients = compact(data?.allClients?.results);
 
   const handleSelect = (client: ClientType) => {
     onClientSelect(client);

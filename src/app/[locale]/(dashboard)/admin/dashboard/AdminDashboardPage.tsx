@@ -3,6 +3,8 @@
 import { useCallback } from "react";
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
+
+import { compact } from "@/lib/graphql/compact";
 import { PageHeader } from "@/components/data-display/page-header";
 import {
   Card,
@@ -52,8 +54,8 @@ export function AdminDashboardPage() {
   }, [refetch]);
 
   const stats = data?.dashboard?.stats;
-  const recentPackages = data?.dashboard?.recentPackages ?? [];
-  const recentConsolidations = data?.dashboard?.recentConsolidations ?? [];
+  const recentPackages = compact(data?.dashboard?.recentPackages);
+  const recentConsolidations = compact(data?.dashboard?.recentConsolidations);
 
   return (
     <div className="space-y-8 animate-fade-in">

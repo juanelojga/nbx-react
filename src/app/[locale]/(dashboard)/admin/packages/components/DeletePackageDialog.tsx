@@ -34,7 +34,7 @@ export function DeletePackageDialog({
     DeletePackageVariables
   >(DELETE_PACKAGE, {
     onCompleted: async (data) => {
-      if (data.deletePackage.success) {
+      if (data.deletePackage?.success) {
         toast.success(t("successTitle"), {
           description: t("successDescription", {
             barcode: package_?.barcode || "",
